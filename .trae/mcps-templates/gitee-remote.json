@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "gitee": {
+      "url": "https://api.gitee.com/mcp",
+      "headers": {
+        "Authorization": "Bearer b3cce290f52126016bdf44b65cdf552b"
+      }
+    }
+  }
+}
