@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:gitee": "VITE_ROUTER_MODE=hash VITE_OUT_DIR=docs vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit"

@@ -1,4 +1,4 @@
-import { BrowserRouter, HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "@/clients/admin-web/components/layout/AppLayout";
 import Home from "@/clients/admin-web/pages/Home";
 import ProductModels from "@/clients/admin-web/pages/ProductModels";
@@ -24,7 +24,6 @@ import WebsiteApp from "@/clients/website/App";
 import BookingApp from "@/clients/booking/App";
 
 export default function App() {
-  const Router = import.meta.env.VITE_ROUTER_MODE === "hash" ? HashRouter : BrowserRouter;
   return (
     <Router>
       <Routes>
