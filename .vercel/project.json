@@ -1,1 +1,16 @@
-{"projectId":"prj_J39ytLaCn6DsFuBmWaqp0MrTAU5C","orgId":"team_EKqI1tyErn0uMYgyCmnIv5SN","projectName":"trae_kgc0varp","neverMindDeployCard":true}
+{
+  "projectId": "prj_E9Pq54i25mbXHPuk1beJgLQ3wJbf",
+  "orgId": "team_EKqI1tyErn0uMYgyCmnIv5SN",
+  "projectName": "yf-wms-web-code-20260528",
+  "settings": {
+    "createdAt": 1780025410685,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

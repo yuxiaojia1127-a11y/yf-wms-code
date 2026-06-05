@@ -1,0 +1,189 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: WMS
+      - generic [ref=e7]: easy大马云仓
+    - generic [ref=e8]:
+      - generic [ref=e9]: ⌕
+      - textbox "搜索菜单" [ref=e10]
+    - navigation [ref=e11]:
+      - button "工作台" [ref=e13] [cursor=pointer]:
+        - generic [ref=e14]:
+          - img [ref=e16]
+          - generic [ref=e19]: 工作台
+      - button "驾驶舱2" [ref=e21] [cursor=pointer]:
+        - generic [ref=e22]:
+          - img [ref=e24]
+          - generic [ref=e27]: 驾驶舱2
+      - button "仓储管理 ⌃" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]:
+          - img [ref=e32]
+          - generic [ref=e37]: 仓储管理
+        - generic [ref=e38]: ⌃
+      - button "商品管理 ⌃" [ref=e40] [cursor=pointer]:
+        - generic [ref=e41]:
+          - img [ref=e43]
+          - generic [ref=e46]: 商品管理
+        - generic [ref=e47]: ⌃
+      - button "基础资料 ⌃" [ref=e49] [cursor=pointer]:
+        - generic [ref=e50]:
+          - img [ref=e52]
+          - generic [ref=e58]: 基础资料
+        - generic [ref=e59]: ⌃
+      - button "库存中心 ⌃" [ref=e61] [cursor=pointer]:
+        - generic [ref=e62]:
+          - img [ref=e64]
+          - generic [ref=e67]: 库存中心
+        - generic [ref=e68]: ⌃
+      - button "仓内作业 ⌃" [ref=e70] [cursor=pointer]:
+        - generic [ref=e71]:
+          - img [ref=e73]
+          - generic [ref=e77]: 仓内作业
+        - generic [ref=e78]: ⌃
+      - button "履约中心 ⌃" [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]:
+          - img [ref=e83]
+          - generic [ref=e87]: 履约中心
+        - generic [ref=e88]: ⌃
+      - button "售后中心 ⌃" [ref=e90] [cursor=pointer]:
+        - generic [ref=e91]:
+          - img [ref=e93]
+          - generic [ref=e98]: 售后中心
+        - generic [ref=e99]: ⌃
+      - button "异常中心 ⌃" [ref=e101] [cursor=pointer]:
+        - generic [ref=e102]:
+          - img [ref=e104]
+          - generic [ref=e108]: 异常中心
+        - generic [ref=e109]: ⌃
+      - button "结算中心 ⌃" [ref=e111] [cursor=pointer]:
+        - generic [ref=e112]:
+          - img [ref=e114]
+          - generic [ref=e117]: 结算中心
+        - generic [ref=e118]: ⌃
+      - button "回调中心 ⌃" [ref=e120] [cursor=pointer]:
+        - generic [ref=e121]:
+          - img [ref=e123]
+          - generic [ref=e129]: 回调中心
+        - generic [ref=e130]: ⌃
+  - main [ref=e131]:
+    - generic [ref=e132]:
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - text: 首页 › 工作台 ›
+          - strong [ref=e135]: 工作台
+        - generic [ref=e136]:
+          - generic [ref=e137]: ⌕
+          - textbox "搜索订单号、SKU、批次、预扣单" [ref=e138]
+      - generic [ref=e139]:
+        - generic [ref=e140] [cursor=pointer]:
+          - generic [ref=e141]: 仓库
+          - combobox "仓库 ▾" [ref=e142]:
+            - option "全部仓库" [selected]
+            - option "1号仓库"
+            - option "2号仓库"
+          - text: ▾
+        - generic [ref=e143] [cursor=pointer]:
+          - generic [ref=e144]: 渠道
+          - combobox "渠道 ▾" [ref=e145]:
+            - option "全部渠道" [selected]
+            - option "吉隆坡门店"
+            - option "槟城门店"
+          - text: ▾
+        - generic [ref=e146]:
+          - generic [ref=e147]: 管
+          - strong [ref=e148]: 仓库管理员
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - generic [ref=e151]:
+          - heading "工作台" [level=2] [ref=e153]
+          - strong [ref=e155]: 更新时间
+        - generic [ref=e156]:
+          - article [ref=e157]:
+            - generic [ref=e158]:
+              - generic [ref=e159]: 库存预警
+              - img [ref=e161]
+            - generic [ref=e164]: "28"
+            - generic [ref=e165]: 6 条临期预警 · 2 条冻结待处理
+          - article [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: 待入库
+              - img [ref=e170]
+            - generic [ref=e172]: "42"
+            - generic [ref=e173]: 12 单采购入库 · 8 单调拨入库
+          - article [ref=e174]:
+            - generic [ref=e175]:
+              - generic [ref=e176]: 待出库
+              - img [ref=e178]
+            - generic [ref=e180]: "19"
+            - generic [ref=e181]: 履约优先级高任务 5 单
+          - article [ref=e182]:
+            - generic [ref=e183]:
+              - generic [ref=e184]: 盘点差异
+              - img [ref=e186]
+            - generic [ref=e189]: "7"
+            - generic [ref=e190]: 3 条待复核 · 1 条高风险差异
+      - generic [ref=e191]:
+        - generic [ref=e192]:
+          - generic [ref=e193]:
+            - heading "待办任务" [level=3] [ref=e195]
+            - button "导出" [ref=e196] [cursor=pointer]
+          - table [ref=e198]:
+            - rowgroup [ref=e199]:
+              - row "类型 单号 仓库 状态 等待时间 操作" [ref=e200]:
+                - columnheader "类型" [ref=e201]
+                - columnheader "单号" [ref=e202]
+                - columnheader "仓库" [ref=e203]
+                - columnheader "状态" [ref=e204]
+                - columnheader "等待时间" [ref=e205]
+                - columnheader "操作" [ref=e206]
+            - rowgroup [ref=e207]:
+              - row "采购入库 PO-8831 1号仓库 待收货 42 分钟 查看 →" [ref=e208]:
+                - cell "采购入库" [ref=e209]
+                - cell "PO-8831" [ref=e210]
+                - cell "1号仓库" [ref=e211]
+                - cell "待收货" [ref=e212]:
+                  - generic [ref=e213]: 待收货
+                - cell "42 分钟" [ref=e214]
+                - cell "查看 →" [ref=e215]:
+                  - button "查看 →" [ref=e216] [cursor=pointer]
+              - row "销售出库 ORD-883920 2号仓库 待拣货 12 分钟 查看 →" [ref=e217]:
+                - cell "销售出库" [ref=e218]
+                - cell "ORD-883920" [ref=e219]
+                - cell "2号仓库" [ref=e220]
+                - cell "待拣货" [ref=e221]:
+                  - generic [ref=e222]: 待拣货
+                - cell "12 分钟" [ref=e223]
+                - cell "查看 →" [ref=e224]:
+                  - button "查看 →" [ref=e225] [cursor=pointer]
+              - row "渠道调拨 TR-240424-018 1号仓库 待出库 1 小时 查看 →" [ref=e226]:
+                - cell "渠道调拨" [ref=e227]
+                - cell "TR-240424-018" [ref=e228]
+                - cell "1号仓库" [ref=e229]
+                - cell "待出库" [ref=e230]:
+                  - generic [ref=e231]: 待出库
+                - cell "1 小时" [ref=e232]
+                - cell "查看 →" [ref=e233]:
+                  - button "查看 →" [ref=e234] [cursor=pointer]
+              - row "盘点复核 PD-240518-006 2号仓库 差异待复核 15 分钟 查看 →" [ref=e235]:
+                - cell "盘点复核" [ref=e236]
+                - cell "PD-240518-006" [ref=e237]
+                - cell "2号仓库" [ref=e238]
+                - cell "差异待复核" [ref=e239]:
+                  - generic [ref=e240]: 差异待复核
+                - cell "15 分钟" [ref=e241]
+                - cell "查看 →" [ref=e242]:
+                  - button "查看 →" [ref=e243] [cursor=pointer]
+        - generic [ref=e244]:
+          - heading "库存健康" [level=3] [ref=e247]
+          - generic [ref=e248]:
+            - generic [ref=e250]:
+              - generic [ref=e251]: 可售库存
+              - strong [ref=e252]: 88%
+            - generic [ref=e256]:
+              - generic [ref=e257]: 锁定库存
+              - strong [ref=e258]: 12%
+            - generic [ref=e262]:
+              - generic [ref=e263]: 盘点差异库存
+              - strong [ref=e264]: 7%
+          - generic [ref=e267]: 鲜奶 1L 有 3 天到期批次，建议优先处理出库冻结；盘点管理中有 1 条高风险差异待复核。
+    - generic [ref=e268]: WMS-WEB 端高保真原型 v1.8

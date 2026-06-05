@@ -1,0 +1,30 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "易付全球" [level=4] [ref=e5]
+    - generic [ref=e8]:
+      - textbox "请输入登录账号" [ref=e9]: admin
+      - generic [ref=e11]: 
+    - generic [ref=e14]:
+      - textbox "请输入登录密码" [ref=e15]: "123456"
+      - generic [ref=e17]: 
+      - generic [ref=e19] [cursor=pointer]: 
+    - generic [ref=e21] [cursor=pointer]:
+      - generic [ref=e22]:
+        - checkbox "记住密码" [checked]
+      - generic [ref=e24]: 记住密码
+    - button "登录" [active] [ref=e26] [cursor=pointer]
+    - generic [ref=e27]:
+      - generic [ref=e28] [cursor=pointer]: 
+      - generic [ref=e29] [cursor=pointer]: 
+      - generic [ref=e30] [cursor=pointer]: 
+  - generic [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: 安全驗證
+      - button "×" [ref=e36] [cursor=pointer]:
+        - generic [ref=e37]: ×
+    - generic [ref=e38]:
+      - generic [ref=e39]: 拖動下方滑塊完成拼圖
+      - generic:
+        - img [ref=e47] [cursor=pointer]
+        - img [ref=e50] [cursor=pointer]
+  - generic [ref=e31]: Copyright © 2021 EasiFul. All rights reserved.

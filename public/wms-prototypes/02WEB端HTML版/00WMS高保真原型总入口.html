@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WMS高保真原型总入口 v1.1</title>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --panel: #ffffff;
+      --line: #e5ebf3;
+      --text: #1f2329;
+      --subtext: #646a73;
+      --primary: #00ab95;
+      --primary-soft: #e6f7f4;
+      --success: #00ab95;
+      --shadow: 0 18px 40px rgba(31, 35, 41, 0.08);
+      --card-shadow: 0 12px 28px rgba(31, 35, 41, 0.06);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #f8fbff 0%, #eef3f9 40%, #e8edf5 100%);
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+    }
+
+    .hero {
+      padding: 34px 36px;
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 250, 255, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -60px;
+      width: 320px;
+      height: 320px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(0, 171, 149, 0.16) 0%, rgba(0, 171, 149, 0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 18px 0 0;
+      font-size: 34px;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-desc {
+      margin: 14px 0 0;
+      max-width: 760px;
+      color: var(--subtext);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      color: var(--subtext);
+      font-size: 13px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .section-title {
+      margin: 34px 0 14px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 340px;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.94);
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.35) 100%);
+      pointer-events: none;
+    }
+
+    .card.web {
+      background:
+        linear-gradient(135deg, #f8fbff 0%, #ffffff 52%, #f5f8ff 100%);
+    }
+
+    .card.interactive {
+      background:
+        linear-gradient(135deg, #f7fff9 0%, #ffffff 52%, #f3fff8 100%);
+    }
+
+    .card.app {
+      background:
+        linear-gradient(135deg, #f7fbff 0%, #ffffff 52%, #f3f7ff 100%);
+    }
+
+    .card-head,
+    .card-body,
+    .card-footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    .icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(0, 171, 149, 0.18);
+    }
+
+    .web .icon {
+      background: linear-gradient(135deg, #00ab95, #48c8ba);
+    }
+
+    .interactive .icon {
+      background: linear-gradient(135deg, #00ab95, #5fd1c4);
+    }
+
+    .app .icon {
+      background: linear-gradient(135deg, #00ab95, #5fd1c4);
+    }
+
+    .label-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(0, 171, 149, 0.1);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .card-title {
+      margin-top: 16px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .card-desc {
+      margin-top: 10px;
+      color: var(--subtext);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .spec-list {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .spec-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--subtext);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .spec-list li::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      margin-top: 7px;
+      border-radius: 999px;
+      background: var(--primary);
+      flex: 0 0 auto;
+    }
+
+    .card-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 124px;
+      height: 44px;
+      padding: 0 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 14px 24px rgba(0, 171, 149, 0.24);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 20px rgba(31, 35, 41, 0.04);
+    }
+
+    .tips {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      box-shadow: var(--card-shadow);
+    }
+
+    .tips h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .tips ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--subtext);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1120px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-badge">WMS 高保真原型总入口</div>
+      <h1>统一进入 2 套 WMS 原型方案预览</h1>
+      <p class="hero-desc">
+        当前入口页用于统一访问两套已经分目录整理的 WMS 高保真原型方案。你可以从这里直接进入 WEB HTML 版和 APP HTML 版，并通过本地 HTTP 方式稳定预览，避免 file 打开和跨目录访问受限。
+      </p>
+      <div class="meta-row">
+        <div class="meta-chip">版本：v1.1</div>
+        <div class="meta-chip">入口文件：总入口 / WEB / APP</div>
+        <div class="meta-chip">用途：评审 / 对比 / 联动预览 / 目录收口</div>
+      </div>
+    </section>
+
+    <h2 class="section-title">高保真原型入口</h2>
+
+    <section class="grid">
+      <article class="card web">
+        <div class="card-head">
+          <div class="icon">◫</div>
+          <div class="label-row">
+            <span class="label">方案一</span>
+            <span class="label">WEB端</span>
+            <span class="label">后台管理</span>
+            <span class="label">HTTP预览</span>
+          </div>
+          <div class="card-title">WMS-WEB端高保真原型</div>
+          <div class="card-desc">
+            面向开放平台运维、仓库管理员、仓内主管、物流调度、售后和调拨等后台管理角色，当前页面通过本地 HTTP 预览路径打开，便于稳定访问目录内页面资源。
+          </div>
+        </div>
+        <div class="card-body">
+          <ul class="spec-list">
+            <li>包含侧边导航、后台框架、模块级页面切换与管理视图。</li>
+            <li>适合查看 WEB 端整体信息架构、列表页与详情页表达方式。</li>
+            <li>当前方案目录：`原型方案/02WEB端HTML版`。</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-primary" href="http://localhost:5173/public/prototype/web/index.html" target="_blank" rel="noopener noreferrer">打开 WEB 原型</a>
+          <a class="btn btn-secondary" href="http://localhost:5173/public/prototype/web/index.html" target="_blank" rel="noopener noreferrer">查看 WEB 目录</a>
+        </div>
+      </article>
+
+      <article class="card app">
+        <div class="card-head">
+          <div class="icon">▣</div>
+          <div class="label-row">
+            <span class="label">方案二</span>
+            <span class="label">APP端</span>
+            <span class="label">仓内执行</span>
+            <span class="label">HTTP预览</span>
+          </div>
+          <div class="card-title">WMS-APP端高保真原型</div>
+          <div class="card-desc">
+            面向仓内作业员、仓库管理员，当前已落地 `APP-003 工作台首页` 与 `APP-022 我的` 高保真页面，`v1.1` 已收口为双角色权限模型，并支持通过本地 HTTP 路径直接预览。
+          </div>
+        </div>
+        <div class="card-body">
+          <ul class="spec-list">
+            <li>包含工作台首页与“我的”页面，支持底部导航切换、语言切换与退出登录演示。</li>
+            <li>适合直接评审 APP 端首页与账号权限页的视觉层级、信息密度和交互组织方式。</li>
+            <li>当前方案目录：`原型方案/03APP端HTML版`。</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-primary" href="http://127.0.0.1:5173/prototype/app/index.html" target="_blank" rel="noopener noreferrer">打开 APP 原型</a>
+          <a class="btn btn-secondary" href="../03APP端HTML版/" target="_blank" rel="noopener noreferrer">查看 APP 目录</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="tips">
+      <h3>使用方式</h3>
+      <ul>
+        <li>当前入口仅保留 WEB 与 APP 两套 HTML 高保真版，并统一通过本地 HTTP 方式预览。</li>
+        <li>从本页可分别点击按钮，在不同浏览器标签页中打开 WEB 与 APP 页面或对应目录。</li>
+        <li>建议从 `原型方案` 目录启动本地静态服务后访问本页，以便跨目录跳转正常可用。</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
