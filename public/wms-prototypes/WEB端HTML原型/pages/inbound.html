@@ -5208,7 +5208,7 @@ const menuData = [
       { key: 'storage', icon: 'warehouse', name: '仓储管理', meta: '仓库 / 库区 / 货位 / 人员', items: [ { key: 'warehouse', name: '仓库管理', page: 'WMS-WEB-W01' }, { key: 'zone', name: '库区管理', page: 'WMS-WEB-W02' }, { key: 'location', name: '货位管理', page: 'WMS-WEB-W03' }, { key: 'warehouse-staff', name: '仓库人员管理', page: 'WMS-WEB-W04' } ] },
       { key: 'product-manage', icon: 'inventory', name: '商品管理', meta: '我的商品', items: [ { key: 'my-product', name: '我的商品', page: 'WMS-WEB-006-MY' } ] },
       { key: 'owner-data', icon: 'owner', name: '基础资料', meta: '销售渠道管理', items: [ { key: 'shop', name: '销售渠道管理', page: 'WMS-WEB-004-SHOP' } ] },
-      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' } ] },
+      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
       { key: 'warehouse-job', icon: 'operation', name: '仓内作业', meta: '入库 / 出库 / 调拨 / 盘点 / 仓内作业跟踪', items: [ { key: 'inbound', name: '入库管理', page: 'WMS-WEB-010' }, { key: 'outbound', name: '出库管理', page: 'WMS-WEB-016' }, { key: 'transfer', name: '调拨管理', page: 'WMS-WEB-028' }, { key: 'stocktake', name: '盘点管理', page: 'WMS-WEB-STOCKTAKE' }, { key: 'warehouse-operation-track-list', name: '仓内作业跟踪', page: 'WMS-WEB-030A' } ] },
       { key: 'fulfillment', icon: 'fulfillment', name: '履约中心', meta: '履约链路跟踪', items: [ { key: 'fulfillment-link-track-list', name: '履约链路跟踪', page: 'WMS-WEB-020A' } ] },
       { key: 'after-sale', icon: 'service', name: '售后中心', meta: '退货管理', items: [ { key: 'return', name: '退货管理', page: 'WMS-WEB-026' } ] },
@@ -12422,6 +12422,13 @@ const menuData = [
         canvas.innerHTML = renderFunnelListPage(item.key);
       } else if (item.key === 'inventory-risk-list') {
         canvas.innerHTML = renderInventoryRiskListPage();
+      } else if (item.key === 'stock-flow') {
+        const iframe = document.createElement('iframe');
+        iframe.src = './stock-flow.html';
+        iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+        canvas.style.cssText = 'padding:0;height:calc(100vh - 56px);overflow:hidden;';
+        canvas.innerHTML = '';
+        canvas.appendChild(iframe);
       } else if (item.key === 'shop') {
         canvas.innerHTML = renderStorePage();
       } else if (item.key === 'inbound') {

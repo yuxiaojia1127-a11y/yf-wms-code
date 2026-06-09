@@ -351,7 +351,7 @@ select.filter-ctrl {
 .table-wrap { overflow: hidden; border-radius: 18px; border: 1px solid rgba(29,29,31,0.05); background: rgba(250,250,252,0.9); }
 .table-wrap.scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { padding: 14px 16px; text-align: left; color: var(--muted); background: rgba(29,29,31,0.03); border-bottom: 1px solid rgba(29,29,31,0.05); font-weight: 600; white-space: nowrap; }
+thead th { padding: 14px 16px; text-align: left; color: var(--muted); background: rgba(245,245,247,0.98); border-bottom: 1px solid rgba(29,29,31,0.05); font-weight: 600; white-space: nowrap; }
 tbody td { padding: 15px 16px; border-bottom: 1px solid rgba(29,29,31,0.05); color: var(--subtext); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr { transition: background .12s ease; }
@@ -366,14 +366,15 @@ tbody tr:hover { background: rgba(0,171,149,0.025); }
 .status-pill {
   display: inline-flex;
   align-items: center;
-  height: 24px;
-  padding: 0 10px;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
-  background: rgba(29,29,31,0.06);
-  color: var(--subtext);
+  background: rgba(29,29,31,0.05);
+  color: var(--text);
 }
 .status-pill.success { background: rgba(0,171,149,0.12); color: var(--accent); }
 .status-pill.warning { background: rgba(199,124,17,0.12); color: var(--warn); }
@@ -411,7 +412,7 @@ tbody tr:hover { background: rgba(0,171,149,0.025); }
 .page-btns { display: inline-flex; align-items: center; gap: 6px; }
 .page-btn {
   min-width: 28px; height: 28px;
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid rgba(29,29,31,0.08);
   background: rgba(255,255,255,0.9);
   color: var(--subtext);

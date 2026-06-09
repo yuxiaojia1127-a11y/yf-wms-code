@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>WMS-WEB-014 出入库流水</title>
+<style>
+/* ── 变量（与 inbound.html 完全一致）─────────── */
+:root {
+  --bg: #f5f5f7;
+  --surface: rgba(255,255,255,0.82);
+  --surface-solid: #ffffff;
+  --line: rgba(29,29,31,0.08);
+  --text: #1d1d1f;
+  --subtext: rgba(29,29,31,0.72);
+  --muted: rgba(29,29,31,0.48);
+  --accent: #00ab95;
+  --accent-soft: rgba(0,171,149,0.10);
+  --warn: #c77c11;
+  --danger: #d92d20;
+  --sidebar-width: 248px;
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
+  --shadow: 0 22px 54px rgba(0,0,0,0.055);
+  --shadow-soft: 0 8px 24px rgba(0,0,0,0.035);
+  --font-heading: "SF Pro Display",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --font-body: "SF Pro Text",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;min-height:100%;font-family:var(--font-body);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+button,input,select,textarea{font:inherit;}
+a{text-decoration:none;color:inherit;}
+
+/* ── content-page 模式（iframe 内使用）── */
+body.content-page{background:var(--bg);}
+body.content-page::before{
+  content:"";position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(circle at top left,rgba(255,255,255,0.95),transparent 36%),
+    radial-gradient(circle at top right,rgba(0,171,149,0.10),transparent 26%),
+    linear-gradient(180deg,#fafafc 0%,#f5f5f7 100%);
+}
+body.content-page .canvas{padding:20px 20px 48px;}
+body.content-page .footer-note{text-align:center;padding:14px;color:rgba(29,29,31,0.22);font-size:11px;}
+
+/* ── canvas ── */
+.canvas{padding:20px;display:grid;gap:20px;width:100%;max-width:none;}
+
+/* ── list-surface（精确复制 inbound.html）── */
+.list-surface {
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(255,255,255,0.94);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ── surface-head ── */
+.surface-head {
+  padding: 18px 22px 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(29,29,31,0.06);
+  background: rgba(255,255,255,0.92);
+}
+.surface-title-wrap{display:grid;gap:6px;}
+.surface-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 26px;
+  line-height: 1.14;
+  letter-spacing: -0.045em;
+  font-weight: 650;
+  color: var(--text);
+}
+.surface-subtitle{color:var(--muted);font-size:13px;line-height:1.7;}
+.surface-head-actions{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;}
+
+/* ── surface-controls（筛选区）── */
+.surface-controls {
+  padding: 16px 22px 18px;
+  display: grid;
+  gap: 14px;
+  background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(29,29,31,0.06);
+}
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr)) auto;
+  gap: 12px;
+  align-items: center;
+}
+.filters-row.is-quarter{grid-template-columns:repeat(4,minmax(0,1fr));}
+.filters-row.is-four{grid-template-columns:repeat(4,minmax(0,1fr)) auto;}
+.filters-actions{display:inline-flex;gap:12px;justify-content:flex-start;align-items:center;white-space:nowrap;}
+.filter-ctrl {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(29,29,31,0.08);
+  background: rgba(255,255,255,0.94);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  width: 100%;
+}
+select.filter-ctrl{
+  appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,rgba(29,29,31,0.45) 50%),linear-gradient(135deg,rgba(29,29,31,0.45) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 17px,calc(100% - 11px) 17px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px;
+}
+.filter-ctrl:hover{border-color:rgba(29,29,31,0.14);background:#fff;}
+.filter-ctrl:focus{border-color:rgba(0,171,149,0.62);box-shadow:0 0 0 1px rgba(0,171,149,0.22);background:#fff;}
+.date-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.date-pair .filter-ctrl{width:100%;}
+
+/* ── stats mini-cards ── */
+.stats-area{display:grid;gap:6px;margin-top:-4px;}
+.stats-collapse{height:0;overflow:hidden;transition:height 220ms ease;will-change:height;}
+.stats-toggle-wrap{display:flex;justify-content:center;padding-top:2px;}
+.stats-toggle{
+  height:18px;padding:0 10px;gap:6px;border-radius:999px;
+  border:1px solid rgba(29,29,31,0.10);background:rgba(255,255,255,0.92);
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 6px 12px rgba(0,0,0,0.04);
+}
+.stats-label{font-size:11px;font-weight:650;color:rgba(29,29,31,0.55);line-height:1;white-space:nowrap;}
+.stats-chevron{
+  width:8px;height:8px;
+  border-right:2px solid rgba(29,29,31,0.62);border-bottom:2px solid rgba(29,29,31,0.62);
+  transform:rotate(45deg);transition:transform 220ms ease;
+}
+.stats-toggle[aria-expanded="true"] .stats-chevron{transform:rotate(-135deg);}
+.mini-grid{display:grid;gap:14px;}
+.mini-grid.is-four{grid-template-columns:repeat(4,minmax(0,1fr));}
+.mini-card{
+  padding:22px;border-radius:24px;
+  background:linear-gradient(180deg,#ffffff 0%,#fcfcfd 100%);
+  border:1px solid rgba(29,29,31,0.05);box-shadow:0 12px 28px rgba(0,0,0,0.03);
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.mini-card::before,.metric::before{
+  content:"";position:absolute;left:0;top:0;width:100%;height:3px;
+  background:linear-gradient(90deg,rgba(0,171,149,0.55),rgba(0,171,149,0));
+}
+.mini-card.warn::before{background:linear-gradient(90deg,rgba(199,124,17,0.55),rgba(199,124,17,0));}
+.mini-card.compact{padding:16px 16px 14px;border-radius:20px;}
+.mini-top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--subtext);font-size:13px;}
+.metric-icon,.mini-icon{
+  width:34px;height:34px;border-radius:12px;background:rgba(29,29,31,0.05);
+  color:rgba(29,29,31,0.56);display:inline-flex;align-items:center;justify-content:center;font-size:15px;
+}
+.mini-icon{width:30px;height:30px;border-radius:10px;}
+.mini-value{margin-top:18px;font-family:var(--font-heading);font-size:42px;line-height:0.96;letter-spacing:-0.06em;font-weight:600;font-variant-numeric:tabular-nums;}
+.mini-note{margin-top:8px;color:var(--muted);font-size:12px;}
+.mini-card.compact .mini-value{margin-top:12px;font-size:24px;}
+.mini-card.compact .mini-note{margin-top:8px;font-size:12px;}
+
+/* ── 按钮（精确复制 inbound.html）── */
+.accent-btn{
+  height:40px;border-radius:999px;border:1px solid rgba(0,171,149,0.40);
+  background:var(--accent);color:#fff;display:inline-flex;align-items:center;
+  justify-content:center;gap:8px;padding:0 16px;font-size:13px;font-weight:650;
+  letter-spacing:-0.01em;cursor:pointer;box-shadow:0 10px 22px rgba(0,171,149,0.18);
+}
+.accent-btn:hover{filter:brightness(0.97);}
+.neutral-btn{
+  height:40px;border-radius:999px;border:1px solid rgba(29,29,31,0.12);
+  background:rgba(255,255,255,0.94);color:rgba(29,29,31,0.82);display:inline-flex;
+  align-items:center;justify-content:center;gap:8px;padding:0 14px;font-size:13px;
+  font-weight:650;letter-spacing:-0.01em;cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.neutral-btn:hover{background:#fff;border-color:rgba(29,29,31,0.16);}
+
+/* ── surface-table（精确复制 inbound.html）── */
+.surface-table{padding:16px 22px 18px;display:grid;gap:12px;background:rgba(255,255,255,0.92);}
+.toolbar-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.toolbar-left,.toolbar-right{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.count-label{font-size:13px;color:var(--muted);}
+.count-label strong{color:var(--text);font-weight:700;}
+.table-wrap{overflow-x:auto;border-radius:16px;border:1px solid rgba(29,29,31,0.05);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:14px 16px;text-align:left;color:var(--muted);background:rgba(245,245,247,0.98);border-bottom:1px solid rgba(29,29,31,0.05);font-weight:600;white-space:nowrap;}
+tbody td{padding:14px 16px;border-bottom:1px solid rgba(29,29,31,0.05);color:var(--subtext);vertical-align:middle;background:rgba(255,255,255,0.98);}
+tbody tr:last-child td{border-bottom:0;}
+tbody tr{transition:background .12s ease;}
+tbody tr:hover td{background:rgba(0,171,149,0.035);}
+/* 首列、尾列固定 */
+thead th:first-child,tbody td:first-child{position:sticky;left:0;z-index:2;background:rgba(245,245,247,0.98);}
+tbody td:first-child{background:rgba(255,255,255,0.98);}
+tbody tr:hover td:first-child{background:rgba(0,171,149,0.035);}
+thead th:last-child,tbody td:last-child{position:sticky;right:0;z-index:2;background:rgba(245,245,247,0.98);}
+tbody td:last-child{background:rgba(255,255,255,0.98);}
+tbody tr:hover td:last-child{background:rgba(0,171,149,0.035);}
+/* 首列右侧分隔线、尾列左侧分隔线 */
+thead th:first-child,tbody td:first-child{border-right:1px solid rgba(29,29,31,0.07);}
+thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07);}
+.td-center{text-align:center;}
+.td-right{text-align:right;}
+.td-muted{color:var(--muted);font-size:12px;}
+.table-link{color:var(--accent);font-weight:500;cursor:pointer;font-size:13px;}
+.table-link:hover{text-decoration:underline;}
+
+/* ── 流水状态标签（遵循 ib-status 规范）── */
+.flow-tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;}
+.flow-tag.in{background:rgba(0,171,149,0.10);color:var(--accent);}
+.flow-tag.out{background:rgba(217,45,32,0.10);color:var(--danger);}
+.flow-tag.adj{background:rgba(29,78,216,0.10);color:#1d4ed8;}
+.flow-tag.stocktake{background:rgba(124,58,237,0.10);color:#7c3aed;}
+.flow-tag.freeze{background:rgba(199,124,17,0.12);color:var(--warn);}
+.flow-tag.unfreeze{background:rgba(8,145,178,0.10);color:#0891b2;}
+.flow-tag.lock{background:rgba(29,29,31,0.07);color:var(--subtext);}
+.flow-tag.unlock{background:rgba(29,29,31,0.04);color:var(--muted);}
+
+/* ── 变动数量颜色 ── */
+.qty-pos{color:#00875a;font-weight:700;}
+.qty-neg{color:var(--danger);font-weight:700;}
+.qty-zero{color:var(--muted);}
+
+/* ── 分页（精确复制 inbound.html）── */
+.pagination-bar{margin-top:10px;padding-top:10px;border-top:1px solid rgba(29,29,31,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;}
+.page-btns{display:inline-flex;align-items:center;gap:6px;}
+.page-btn{min-width:28px;height:28px;border-radius:999px;border:1px solid rgba(29,29,31,0.08);background:rgba(255,255,255,0.96);color:var(--subtext);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;}
+.page-btn.active{background:rgba(0,171,149,0.1);color:var(--accent);border-color:rgba(0,171,149,0.18);}
+
+/* ── 详情抽屉 ── */
+.drawer-mask{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,0.28);backdrop-filter:blur(4px);display:none;}
+.drawer-mask.show{display:block;}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:480px;z-index:51;background:#fff;box-shadow:-12px 0 48px rgba(0,0,0,0.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(0.32,0.72,0,1);}
+.drawer.show{transform:translateX(0);}
+.drawer-head{flex-shrink:0;padding:18px 22px 14px;border-bottom:1px solid rgba(29,29,31,0.08);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:rgba(255,255,255,0.92);}
+.drawer-title{margin:0;font-family:var(--font-heading);font-size:18px;font-weight:650;letter-spacing:-0.025em;color:var(--text);}
+.drawer-subtitle{margin:4px 0 0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.drawer-close{width:40px;height:40px;border-radius:999px;border:1px solid rgba(29,29,31,0.08);background:rgba(255,255,255,0.86);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:rgba(29,29,31,0.6);flex-shrink:0;transition:background .18s,color .18s;}
+.drawer-close:hover{background:rgba(29,29,31,0.06);}
+.drawer-body{flex:1;overflow-y:auto;padding:0 22px 20px;}
+.drawer-foot{flex-shrink:0;padding:14px 22px;border-top:1px solid rgba(29,29,31,0.08);background:rgba(255,255,255,0.92);}
+.drawer-section{padding:16px 0;border-bottom:1px solid rgba(29,29,31,0.06);}
+.drawer-section:last-child{border-bottom:0;}
+.drawer-section-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:12px;}
+.drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;}
+.drawer-field{display:grid;gap:3px;}
+.drawer-field-label{font-size:11px;color:var(--muted);}
+.drawer-field-value{font-size:13px;color:var(--text);font-weight:500;word-break:break-all;}
+.drawer-field-value.link{color:var(--accent);cursor:pointer;}
+.drawer-field-value.link:hover{text-decoration:underline;}
+.balance-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.balance-side{border-radius:14px;padding:12px 14px;background:rgba(29,29,31,0.025);border:1px solid rgba(29,29,31,0.06);}
+.balance-side-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;}
+.balance-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.balance-row:last-child{margin-bottom:0;}
+.balance-row-label{font-size:12px;color:var(--muted);}
+.balance-row-val{font-size:13px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+.balance-row-val.up{color:#00875a;}
+.balance-row-val.down{color:var(--danger);}
+
+/* ── SKU 单元格 ── */
+.sku-cell{display:grid;gap:2px;}
+.sku-name{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;}
+.sku-code{font-size:11px;color:var(--muted);}
+.category-cell{font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ── 级联选择器面板 ── */
+.cascade-wrap{position:relative;}
+.cascade-panel{display:none;position:absolute;top:44px;left:0;z-index:30;background:#fff;border:1px solid rgba(29,29,31,0.10);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.10);padding:4px 0;min-width:220px;}
+.cascade-item{padding:7px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text);}
+.cascade-item:hover{background:rgba(0,171,149,0.07);}
+.cascade-item.active{background:rgba(0,171,149,0.10);color:var(--accent);}
+.cascade-divider{height:1px;background:rgba(29,29,31,0.07);margin:4px 0;}
+
+/* ── 需求抽屉：覆盖基础 drawer 的 display:none / transform 隐藏 ── */
+.drawer-mask.requirement-mask{display:block;}
+.drawer.requirement-drawer{transform:translateX(0);position:absolute;}
+/* ── 需求文档入口按钮 ── */
+.requirement-anchor-btn{height:40px;border-radius:var(--radius-pill);border:1px solid rgba(29,29,31,0.10);background:rgba(255,255,255,0.96);color:rgba(29,29,31,0.86);display:inline-flex;align-items:center;gap:8px;padding:0 16px;font-size:13px;font-weight:650;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 10px 20px rgba(0,0,0,0.04);transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease;}
+.requirement-anchor-btn:hover{background:#fff;border-color:rgba(29,29,31,0.16);transform:translateY(-1px);box-shadow:0 14px 28px rgba(0,0,0,0.06);}
+/* ── 需求文档抽屉 ── */
+.drawer.requirement-drawer{width:fit-content;min-width:min(680px,100vw);max-width:80vw;border-left-color:rgba(29,29,31,0.10);background:rgba(250,250,252,0.98);}
+.drawer-mask.requirement-mask{z-index:39;backdrop-filter:blur(8px);}
+.drawer-head.requirement-head{align-items:flex-start;background:rgba(250,250,252,0.98);}
+.drawer-body.requirement-body{background:rgba(250,250,252,0.98);overflow:auto;padding:18px 22px 22px;display:grid;gap:16px;}
+.drawer-foot.req-drawer-foot{border-top:1px solid rgba(29,29,31,0.06);padding:18px 24px 20px;display:flex;align-items:center;justify-content:flex-end;gap:16px;background:linear-gradient(180deg,rgba(252,252,253,0.90),rgba(248,248,250,0.96));}
+.requirement-status{display:inline-flex;align-items:center;justify-content:center;min-width:96px;height:32px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:-0.01em;background:rgba(29,29,31,0.05);color:var(--muted);}
+.requirement-status.saved{background:rgba(0,171,149,0.10);color:var(--accent);}
+.requirement-status.error{background:rgba(217,45,32,0.08);color:var(--danger);}
+.req-footnote{font-size:11px;color:var(--muted);max-width:460px;line-height:1.6;margin-right:auto;}
+.req-md-shell{display:grid;gap:12px;}
+.req-md-meta{display:grid;gap:4px;}
+.req-md-path{font-size:12px;color:var(--muted);font-family:monospace;}
+.req-md-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
+.req-md-article{font-size:14px;color:var(--text);line-height:1.75;}
+.req-md-article h1,.req-md-article h2,.req-md-article h3,.req-md-article h4{font-family:var(--font-heading);font-weight:650;letter-spacing:-0.03em;margin:24px 0 10px;}
+.req-md-article h1{font-size:26px;margin-bottom:16px;}
+.req-md-article h2{font-size:20px;border-bottom:1px solid rgba(29,29,31,0.07);padding-bottom:8px;}
+.req-md-article h3{font-size:16px;}
+.req-md-article h4{font-size:14px;}
+.req-md-article p{margin:0 0 12px;}
+.req-md-article ul,.req-md-article ol{margin:0 0 12px;padding-left:22px;}
+.req-md-article li+li{margin-top:4px;}
+.req-md-article code{background:rgba(29,29,31,0.06);border-radius:5px;padding:2px 6px;font-size:12px;font-family:monospace;}
+.req-md-article pre{background:rgba(29,29,31,0.04);border-radius:12px;padding:16px 18px;overflow-x:auto;font-size:12px;font-family:monospace;line-height:1.6;margin:0 0 12px;}
+.req-md-article table{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 14px;}
+.req-md-article th,.req-md-article td{padding:8px 12px;border:1px solid rgba(29,29,31,0.08);text-align:left;}
+.req-md-article th{background:rgba(29,29,31,0.03);font-weight:650;}
+.ghost-btn{height:38px;border-radius:999px;border:1px solid rgba(29,29,31,0.10);background:rgba(255,255,255,0.92);color:var(--subtext);padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
+.ghost-btn:hover{background:#fff;border-color:rgba(29,29,31,0.18);}
+.primary-btn{height:38px;border-radius:999px;border:1px solid rgba(0,171,149,0.40);background:var(--accent);color:#fff;padding:0 18px;font-size:13px;font-weight:650;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 8px 18px rgba(0,171,149,0.18);transition:filter .15s;}
+.primary-btn:hover{filter:brightness(0.97);}
+/* ── 响应式 ── */
+@media(max-width:1100px){
+  .mini-grid.is-four{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .filters-row,.filters-row.is-four{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .filters-actions{grid-column:1/-1;}
+  .drawer{width:min(480px,100vw);}
+}
+@media(max-width:720px){
+  .canvas{padding:14px 14px 40px;gap:14px;}
+  .mini-grid.is-four{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .filters-row,.filters-row.is-quarter{grid-template-columns:1fr;}
+  table{min-width:900px;}
+}
+@media(max-width:480px){
+  .mini-grid.is-four{grid-template-columns:1fr;}
+  .drawer{width:100vw;}
+}
+</style>
+</head>
+<body class="content-page" data-page="stock-flow">
+<div class="canvas">
+<section class="list-surface">
+
+  <!-- surface-head：页面标题 -->
+  <div class="surface-head">
+    <div class="surface-title-wrap">
+      <h1 class="surface-title">出入库流水</h1>
+      <div class="surface-subtitle">管理库存每次变动的流水明细及余额快照，支持按仓库、商品、分类、来源单等多维度查询。</div>
+    </div>
+    <div class="surface-head-actions">
+      <button class="requirement-anchor-btn" onclick="openRequirementDrawer()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        简易需求文档
+      </button>
+      <button class="neutral-btn" onclick="doExport()">⬇ 导出</button>
+    </div>
+  </div>
+
+  <!-- surface-controls：查询条件 + 数据总览 -->
+  <div class="surface-controls">
+
+    <!-- Row 1：仓库 / SKU / 商品名称 / 商品分类 -->
+    <div class="filters-row is-quarter">
+      <select class="filter-ctrl" id="f-warehouse">
+        <option value="">全部仓库</option>
+        <option value="wh1">1号仓库</option>
+        <option value="wh2">2号仓库</option>
+        <option value="wh3">华南仓</option>
+      </select>
+      <input type="text" class="filter-ctrl" id="f-sku" placeholder="请输入商品 SKU 编码"/>
+      <input type="text" class="filter-ctrl" id="f-name" placeholder="请输入商品名称"/>
+      <!-- 级联商品分类 -->
+      <div class="cascade-wrap">
+        <div class="filter-ctrl cascade-trigger" id="cascade-trigger" onclick="toggleCascade(event)"
+          style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;">
+          <span id="cascade-label" style="color:rgba(29,29,31,0.38);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">请选择商品分类</span>
+          <span style="font-size:10px;color:rgba(29,29,31,0.38);flex-shrink:0;margin-left:6px;">▼</span>
+        </div>
+        <div class="cascade-panel" id="cascade-panel">
+          <div id="casc-l1"></div>
+          <div id="casc-l2" style="display:none;"><div class="cascade-divider"></div></div>
+          <div id="casc-l3" style="display:none;"><div class="cascade-divider"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2：流水类型 / 业务类型 / 来源单号 / 日期范围 / 按钮 -->
+    <div class="filters-row is-four">
+      <select class="filter-ctrl" id="f-type">
+        <option value="">全部流水类型</option>
+        <option value="in">入库</option>
+        <option value="out">出库</option>
+        <option value="adj">调整</option>
+        <option value="stocktake">盘点</option>
+        <option value="freeze">冻结</option>
+        <option value="unfreeze">解冻</option>
+        <option value="lock">锁定</option>
+        <option value="unlock">解锁</option>
+      </select>
+      <select class="filter-ctrl" id="f-biz">
+        <option value="">全部业务类型</option>
+        <option value="采购入库">采购入库</option>
+        <option value="退货入库">退货入库</option>
+        <option value="调拨入库">调拨入库</option>
+        <option value="销售出库">销售出库</option>
+        <option value="调拨出库">调拨出库</option>
+        <option value="报损出库">报损出库</option>
+        <option value="库存调整">库存调整</option>
+        <option value="盘点">盘点</option>
+      </select>
+      <input type="text" class="filter-ctrl" id="f-ref" placeholder="请输入来源单号"/>
+      <div class="date-pair">
+        <input type="date" class="filter-ctrl" id="f-date-start"/>
+        <input type="date" class="filter-ctrl" id="f-date-end"/>
+      </div>
+      <div class="filters-actions">
+        <button class="accent-btn" onclick="doSearch()">查询</button>
+        <button class="neutral-btn" onclick="doReset()">重置</button>
+      </div>
+    </div>
+
+    <!-- 数据总览（可折叠 mini-cards）-->
+    <div class="stats-area">
+      <div class="stats-collapse" id="statsCollapse">
+        <div class="mini-grid is-four" style="padding-bottom:4px;">
+          <article class="mini-card compact" onclick="filterCard('all')" style="cursor:pointer;">
+            <div class="mini-top"><span>全部流水</span><span class="mini-icon">≡</span></div>
+            <div class="mini-value" id="m-total">—</div>
+            <div class="mini-note">近7天</div>
+          </article>
+          <article class="mini-card compact" onclick="filterCard('in')" style="cursor:pointer;">
+            <div class="mini-top"><span>入库流水</span><span class="mini-icon">↑</span></div>
+            <div class="mini-value" id="m-in">—</div>
+            <div class="mini-note">次数</div>
+          </article>
+          <article class="mini-card compact warn" onclick="filterCard('out')" style="cursor:pointer;">
+            <div class="mini-top"><span>出库流水</span><span class="mini-icon">↓</span></div>
+            <div class="mini-value" id="m-out">—</div>
+            <div class="mini-note">次数</div>
+          </article>
+          <article class="mini-card compact" onclick="filterCard('other')" style="cursor:pointer;">
+            <div class="mini-top"><span>其他流水</span><span class="mini-icon">⊕</span></div>
+            <div class="mini-value" id="m-other">—</div>
+            <div class="mini-note">调整/盘点/冻结/锁定</div>
+          </article>
+        </div>
+      </div>
+      <div class="stats-toggle-wrap">
+        <button class="stats-toggle" id="statsToggle" aria-expanded="false" onclick="toggleStats()" type="button">
+          <span class="stats-label">数据总览</span>
+          <span class="stats-chevron"></span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /surface-controls -->
+
+  <!-- surface-table：工具栏 + 表格 + 分页 -->
+  <div class="surface-table">
+    <div class="toolbar-row">
+      <div class="toolbar-left">
+        <span class="count-label">共 <strong id="total-count">0</strong> 条流水记录</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>流水号</th>
+            <th>发生时间</th>
+            <th>仓库</th>
+            <th>商品信息</th>
+            <th>商品分类</th>
+            <th>流水类型</th>
+            <th>业务类型</th>
+            <th>来源单号</th>
+            <th class="td-right">变动数量</th>
+            <th class="td-right">变动前余额</th>
+            <th class="td-right">变动后余额</th>
+            <th>操作人</th>
+            <th class="td-center">操作</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="13" style="text-align:center;padding:40px;color:var(--muted);">正在加载数据…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-bar">
+      <span id="page-info" style="color:var(--muted);font-size:12px;">第 1 页，共 1 页</span>
+      <div class="page-btns" id="page-btns"></div>
+    </div>
+  </div>
+
+</section>
+<div class="footer-note">WMS-WEB-014 · 出入库流水 · 数据仅供原型演示</div>
+</div>
+
+<!-- 详情抽屉 -->
+<div class="drawer-mask" id="drawer-mask" onclick="closeDrawer()"></div>
+<div class="drawer" id="detail-drawer">
+  <div class="drawer-head">
+    <div>
+      <h3 class="drawer-title">流水详情</h3>
+      <div class="drawer-subtitle"><span id="drawer-flow-no">—</span></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">
+      <div class="drawer-section-label">流水基础信息</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><span class="drawer-field-label">流水号</span><span class="drawer-field-value" id="d-no">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">发生时间</span><span class="drawer-field-value" id="d-time">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">仓库</span><span class="drawer-field-value" id="d-warehouse">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">库区</span><span class="drawer-field-value" id="d-zone">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">货位</span><span class="drawer-field-value" id="d-loc">—</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">商品信息</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><span class="drawer-field-label">商品名称</span><span class="drawer-field-value" id="d-sku-name">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">SKU 编码</span><span class="drawer-field-value" id="d-sku-code">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">规格</span><span class="drawer-field-value" id="d-spec">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">单位</span><span class="drawer-field-value" id="d-unit">—</span></div>
+        <div class="drawer-field" style="grid-column:1/-1"><span class="drawer-field-label">所属分类</span><span class="drawer-field-value" id="d-category">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">批次号</span><span class="drawer-field-value" id="d-batch">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">条码</span><span class="drawer-field-value" id="d-barcode">—</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">变动信息</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><span class="drawer-field-label">流水类型</span><span class="drawer-field-value" id="d-flow-type">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">业务类型</span><span class="drawer-field-value" id="d-biz-type">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">变动方向</span><span class="drawer-field-value" id="d-direction">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">变动数量</span><span class="drawer-field-value" id="d-qty">—</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">余额快照</div>
+      <div class="balance-compare">
+        <div class="balance-side">
+          <div class="balance-side-label">变动前</div>
+          <div class="balance-row"><span class="balance-row-label">实物库存</span><span class="balance-row-val" id="d-b0-phy">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">锁定库存</span><span class="balance-row-val" id="d-b0-lock">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">冻结库存</span><span class="balance-row-val" id="d-b0-freeze">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">可用库存</span><span class="balance-row-val" id="d-b0-avail">—</span></div>
+        </div>
+        <div class="balance-side">
+          <div class="balance-side-label">变动后</div>
+          <div class="balance-row"><span class="balance-row-label">实物库存</span><span class="balance-row-val" id="d-b1-phy">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">锁定库存</span><span class="balance-row-val" id="d-b1-lock">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">冻结库存</span><span class="balance-row-val" id="d-b1-freeze">—</span></div>
+          <div class="balance-row"><span class="balance-row-label">可用库存</span><span class="balance-row-val" id="d-b1-avail">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">来源信息</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><span class="drawer-field-label">来源单号</span><span class="drawer-field-value link" id="d-ref-no">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">来源单类型</span><span class="drawer-field-value" id="d-ref-type">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">关联订单号</span><span class="drawer-field-value" id="d-order-no">—</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">操作信息</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><span class="drawer-field-label">操作人</span><span class="drawer-field-value" id="d-operator">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">操作时间</span><span class="drawer-field-value" id="d-op-time">—</span></div>
+        <div class="drawer-field" style="grid-column:1/-1"><span class="drawer-field-label">备注</span><span class="drawer-field-value" id="d-remark">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="neutral-btn" style="width:100%" onclick="closeDrawer()">关闭</button>
+  </div>
+</div>
+<div id="req-drawer-root"></div>
+
+<script>
+/* ===== 需求文档 Drawer ===== */
+const REQ_EXTERNAL_SRC = '../assets/requirements/stock-flow.md';
+let reqDrawerOpen = false;
+let reqState = { status: 'idle', content: '', error: '' };
+
+function escHtml(v){ return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function fmtInline(text){ return escHtml(text||'').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>'); }
+function renderMdTable(lines){
+  if(lines.length<2) return '';
+  const pr=l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+  const hd=pr(lines[0]), rows=lines.slice(2).map(pr);
+  return `<table><thead><tr>${hd.map(c=>`<th>${fmtInline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${hd.map((_,i)=>`<td>${fmtInline(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function renderMd(markdown){
+  const src=String(markdown||'').replace(/\r\n/g,'\n').trim();
+  if(!src) return '<div class="req-md-empty">文档暂无内容</div>';
+  const lines=src.split('\n'), html=[]; let i=0;
+  while(i<lines.length){
+    const raw=lines[i], line=raw.trim();
+    if(!line){i++;continue;}
+    if(line.startsWith('```')){
+      const code=[];i++;
+      while(i<lines.length&&!lines[i].trim().startsWith('```')){code.push(lines[i]);i++;}
+      if(i<lines.length)i++;
+      html.push(`<pre><code>${escHtml(code.join('\n'))}</code></pre>`);continue;
+    }
+    if(/^#{1,4}\s+/.test(line)){const lv=line.match(/^#+/)[0].length;html.push(`<h${lv}>${fmtInline(line.replace(/^#{1,4}\s+/,''))}</h${lv}>`);i++;continue;}
+    const isTblHdr=line.includes('|')&&i+1<lines.length&&/^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]);
+    if(isTblHdr){const tbl=[raw,lines[i+1]];i+=2;while(i<lines.length&&lines[i].trim()&&lines[i].includes('|')){tbl.push(lines[i]);i++;}html.push(renderMdTable(tbl));continue;}
+    if(/^[-*]\s+/.test(line)){const items=[];while(i<lines.length&&/^[-*]\s+/.test(lines[i].trim())){items.push(lines[i].trim().replace(/^[-*]\s+/,''));i++;}html.push(`<ul>${items.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ul>`);continue;}
+    if(/^\d+\.\s+/.test(line)){const items=[];while(i<lines.length&&/^\d+\.\s+/.test(lines[i].trim())){items.push(lines[i].trim().replace(/^\d+\.\s+/,''));i++;}html.push(`<ol>${items.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ol>`);continue;}
+    const para=[line];i++;
+    while(i<lines.length){const nx=lines[i].trim();if(!nx||/^#{1,4}\s+/.test(nx)||/^[-*]\s+/.test(nx)||/^\d+\.\s+/.test(nx))break;if((nx.includes('|')&&i+1<lines.length&&/^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]))||nx.startsWith('```'))break;para.push(nx);i++;}
+    html.push(`<p>${fmtInline(para.join('<br/>'))}</p>`);
+  }
+  return `<div class="req-md-article">${html.join('')}</div>`;
+}
+function renderReqDrawer(){
+  const root=document.getElementById('req-drawer-root'); if(!root)return;
+  if(!reqDrawerOpen){root.innerHTML='';return;}
+  const stTxt={idle:'待读取',loading:'读取中',loaded:'已读取外部 md',error:'读取失败'}[reqState.status]||'待读取';
+  const stCls=reqState.status==='loaded'?'saved':reqState.status==='error'?'error':'';
+  const body=reqState.status==='error'
+    ?`<div class="req-md-empty">读取失败：${escHtml(reqState.error)}</div>`
+    :(!reqState.content||reqState.status==='loading')
+      ?'<div class="req-md-empty">正在读取简易需求文档，请稍候…</div>'
+      :renderMd(reqState.content);
+  root.innerHTML=`
+    <div class="drawer-mask requirement-mask" id="req-mask">
+      <aside class="drawer requirement-drawer">
+        <div class="drawer-head requirement-head">
+          <div>
+            <h2 class="drawer-title">简易需求文档</h2>
+            <div class="drawer-subtitle">当前绑定功能：出入库流水。直接读取外部 md 文件，确保原型内与源文件保持一致。</div>
+          </div>
+          <div class="surface-head-actions">
+            <span class="requirement-status ${stCls}">${stTxt}</span>
+            <button class="drawer-close" id="req-close-btn" aria-label="关闭">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="drawer-body requirement-body">
+          <div class="req-md-shell">
+            <div class="req-md-meta"><div class="req-md-path">读取路径：${escHtml(REQ_EXTERNAL_SRC)}</div></div>
+            ${body}
+          </div>
+        </div>
+        <div class="drawer-foot req-drawer-foot">
+          <div class="req-footnote">内容来自外部 md 静态资源。请确认本地原型服务器已启动（http://127.0.0.1:8091），或 assets/requirements 目录已随原型发布。</div>
+          <button class="ghost-btn" id="req-close-btn2">关闭</button>
+          <button class="primary-btn" id="req-reload-btn">重新读取</button>
+        </div>
+      </aside>
+    </div>`;
+  document.getElementById('req-mask').addEventListener('click',e=>{if(e.target===document.getElementById('req-mask'))closeRequirementDrawer();});
+  document.getElementById('req-close-btn').addEventListener('click',closeRequirementDrawer);
+  document.getElementById('req-close-btn2').addEventListener('click',closeRequirementDrawer);
+  document.getElementById('req-reload-btn').addEventListener('click',()=>loadReqDoc(true));
+}
+async function loadReqDoc(force=false){
+  if(!force&&reqState.status==='loaded'&&reqState.content){renderReqDrawer();return;}
+  reqState={status:'loading',content:'',error:''};renderReqDrawer();
+  try{
+    await fetch('/__sync_requirement_docs__',{method:'POST',headers:{'Content-Type':'application/json'}}).catch(()=>{});
+    const res=await fetch(REQ_EXTERNAL_SRC+'?v='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error(`读取失败（HTTP ${res.status}）`);
+    reqState={status:'loaded',content:await res.text(),error:''};
+  }catch(err){reqState={status:'error',content:'',error:err.message||'未知错误'};}
+  renderReqDrawer();
+}
+function openRequirementDrawer(){reqDrawerOpen=true;renderReqDrawer();loadReqDoc();}
+function closeRequirementDrawer(){reqDrawerOpen=false;renderReqDrawer();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&reqDrawerOpen)closeRequirementDrawer();});
+
+/* ===== 级联分类数据 ===== */
+const CATS = [
+  {id:'c1',name:'日化',ch:[
+    {id:'c11',name:'洗护',ch:[{id:'c111',name:'洗衣液'},{id:'c112',name:'洗发水'},{id:'c113',name:'沐浴露'}]},
+    {id:'c12',name:'清洁',ch:[{id:'c121',name:'洗洁精'},{id:'c122',name:'消毒液'}]},
+    {id:'c13',name:'护肤',ch:[{id:'c131',name:'面霜'},{id:'c132',name:'精华'}]}]},
+  {id:'c2',name:'食品',ch:[
+    {id:'c21',name:'零食',ch:[{id:'c211',name:'饼干'},{id:'c212',name:'糖果'},{id:'c213',name:'坚果'}]},
+    {id:'c22',name:'饮料',ch:[{id:'c221',name:'碳酸饮料'},{id:'c222',name:'茶饮'}]},
+    {id:'c23',name:'冲调',ch:[{id:'c231',name:'咖啡'},{id:'c232',name:'奶粉'}]}]},
+  {id:'c3',name:'家居',ch:[
+    {id:'c31',name:'厨具',ch:[{id:'c311',name:'锅具'},{id:'c312',name:'刀具'}]},
+    {id:'c32',name:'床品',ch:[{id:'c321',name:'被芯'},{id:'c322',name:'枕头'}]}]}
+];
+let cascSel={l1:null,l2:null,l3:null},cascVal='';
+
+function buildL(elId, items, level, parentPath){
+  const el=document.getElementById(elId); el.innerHTML='';
+  items.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='cascade-item'+(cascSel['l'+level]===c.id?' active':'');
+    d.innerHTML=`<span>${c.name}</span>${c.ch?'<span style="font-size:10px;color:rgba(29,29,31,0.38);">▶</span>':''}`;
+    d.onclick=(e)=>{ e.stopPropagation(); selectCasc(c, level, parentPath); };
+    el.appendChild(d);
+  });
+}
+function selectCasc(c, level, parentPath){
+  const path = parentPath ? parentPath+' > '+c.name : c.name;
+  cascSel['l'+level]=c.id;
+  if(level===1){cascSel.l2=null;cascSel.l3=null;}
+  if(level===2){cascSel.l3=null;}
+  if(c.ch && c.ch.length){
+    buildL('casc-l'+(level+1), c.ch, level+1, path);
+    document.getElementById('casc-l'+(level+1)).style.display='block';
+    if(level<2) document.getElementById('casc-l3').style.display='none';
+    buildL('casc-l'+level, level===1?CATS:(CATS.find(x=>x.id===cascSel.l1)?.ch||[]), level, parentPath);
+  } else {
+    document.getElementById('casc-l2').style.display = level>=2 ? 'block' : 'none';
+    document.getElementById('casc-l3').style.display = level>=3 ? 'block' : 'none';
+    setCascVal(path, c.id);
+    document.getElementById('cascade-panel').style.display='none';
+  }
+}
+function setCascVal(label, id){
+  const lbl=document.getElementById('cascade-label');
+  lbl.textContent=label; lbl.style.color='var(--text)';
+  cascVal=id;
+}
+function toggleCascade(e){
+  e.stopPropagation();
+  const panel=document.getElementById('cascade-panel');
+  if(panel.style.display==='none'||!panel.style.display){
+    buildL('casc-l1',CATS,1,'');
+    document.getElementById('casc-l2').style.display='none';
+    document.getElementById('casc-l3').style.display='none';
+    panel.style.display='block';
+  } else { panel.style.display='none'; }
+}
+document.addEventListener('click',()=>{ const p=document.getElementById('cascade-panel'); if(p) p.style.display='none'; });
+
+/* ===== stats toggle ===== */
+function toggleStats(){
+  const col=document.getElementById('statsCollapse');
+  const btn=document.getElementById('statsToggle');
+  const expanded=btn.getAttribute('aria-expanded')==='true';
+  if(!expanded){
+    col.style.height=col.scrollHeight+'px';
+    btn.setAttribute('aria-expanded','true');
+  } else {
+    col.style.height='0';
+    btn.setAttribute('aria-expanded','false');
+  }
+}
+
+/* ===== 模拟数据 ===== */
+const FLOW_TYPES=[
+  {key:'in',label:'入库',cls:'in'},{key:'out',label:'出库',cls:'out'},
+  {key:'adj',label:'调整',cls:'adj'},{key:'stocktake',label:'盘点',cls:'stocktake'},
+  {key:'freeze',label:'冻结',cls:'freeze'},{key:'unfreeze',label:'解冻',cls:'unfreeze'},
+  {key:'lock',label:'锁定',cls:'lock'},{key:'unlock',label:'解锁',cls:'unlock'},
+];
+const BIZ_MAP={in:['采购入库','退货入库','调拨入库'],out:['销售出库','调拨出库','报损出库'],adj:['库存调整'],stocktake:['盘点'],freeze:['冻结操作'],unfreeze:['解冻操作'],lock:['订单锁定'],unlock:['订单解锁']};
+const SKUS=[
+  {name:'洗衣液 2L',code:'DETERGENT-2L',spec:'2L/瓶',unit:'瓶',barcode:'6901234567890',cat:'日化 > 洗护 > 洗衣液',catId:'c111'},
+  {name:'洗发水 400ml',code:'SHAMPOO-400ML',spec:'400ml/瓶',unit:'瓶',barcode:'6901234567891',cat:'日化 > 洗护 > 洗发水',catId:'c112'},
+  {name:'可口可乐 330ml',code:'COKE-330ML',spec:'330ml/罐',unit:'罐',barcode:'6902083886448',cat:'食品 > 饮料 > 碳酸饮料',catId:'c221'},
+  {name:'奥利奥饼干 97g',code:'OREO-97G',spec:'97g/包',unit:'包',barcode:'6902265916978',cat:'食品 > 零食 > 饼干',catId:'c211'},
+  {name:'不锈钢炒锅 32cm',code:'PAN-SS-32',spec:'32cm',unit:'个',barcode:'6901111222333',cat:'家居 > 厨具 > 锅具',catId:'c311'},
+  {name:'护肤精华 30ml',code:'SERUM-30ML',spec:'30ml/支',unit:'支',barcode:'6901234500001',cat:'日化 > 护肤 > 精华',catId:'c132'},
+];
+const WHS=['1号仓库','2号仓库','华南仓'];
+const OPS=['张三','李四','王五','系统','赵六'];
+const ZONES=['A区','B区','C区'];
+const LOCS=['A-01-01','A-02-03','B-01-02','C-02-01'];
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[rnd(0,a.length-1)];}
+function pad2(n){return String(n).padStart(2,'0');}
+function fmtT(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());}
+
+function genRow(i,daysAgo){
+  const ft=pick(FLOW_TYPES), sku=pick(SKUS), wh=pick(WHS);
+  const biz=pick(BIZ_MAP[ft.key]);
+  const dir=(ft.key==='in'||ft.key==='adj'||ft.key==='unfreeze'||ft.key==='unlock')?1:-1;
+  const qty=dir*rnd(1,200);
+  const bp=rnd(100,2000), ap=Math.max(0,bp+(ft.key==='freeze'||ft.key==='unfreeze'||ft.key==='lock'||ft.key==='unlock'?0:qty));
+  const bl=rnd(0,80), al=ft.key==='lock'?bl+Math.abs(qty):ft.key==='unlock'?Math.max(0,bl-Math.abs(qty)):bl;
+  const bf=rnd(0,60), af=ft.key==='freeze'?bf+Math.abs(qty):ft.key==='unfreeze'?Math.max(0,bf-Math.abs(qty)):bf;
+  const d=new Date(); d.setDate(d.getDate()-daysAgo); d.setHours(rnd(7,22),rnd(0,59),rnd(0,59));
+  const pfx={in:'IN',out:'OUT',adj:'ADJ',stocktake:'ST',freeze:'FZ',unfreeze:'UFZ',lock:'LK',unlock:'ULK'};
+  const nd=d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate());
+  return{
+    no:'FL-'+nd+'-'+String(i+1).padStart(6,'0'), time:fmtT(d), warehouse:wh, sku, ft, biz,
+    refNo:pfx[ft.key]+'-'+nd+'-'+String(rnd(1,999)).padStart(4,'0'), refType:biz,
+    batch:rnd(0,3)>0?'BN-'+nd+'-'+pad2(rnd(1,20)):'-',
+    qty, bp, ap, bl, al, bf, af,
+    ba:Math.max(0,bp-bl-bf), aa:Math.max(0,ap-al-af),
+    op:pick(OPS), zone:pick(ZONES), loc:pick(LOCS),
+    orderNo:(ft.key==='out'||ft.key==='lock')?'ORD-'+nd+'-'+String(rnd(1,9999)).padStart(5,'0'):'-',
+    remark:rnd(0,5)===0?'客户急单':rnd(0,5)===1?'批量操作':'-',
+  };
+}
+const RAW=[];
+for(let i=0;i<120;i++) RAW.push(genRow(i,rnd(0,6)));
+RAW.sort((a,b)=>b.time.localeCompare(a.time));
+
+/* ===== 筛选 & 渲染 ===== */
+let filtered=[], currentPage=1, pageSize=20;
+
+function applyFilter(){
+  const wh=document.getElementById('f-warehouse').value;
+  const sku=document.getElementById('f-sku').value.trim().toLowerCase();
+  const nm=document.getElementById('f-name').value.trim().toLowerCase();
+  const tp=document.getElementById('f-type').value;
+  const bz=document.getElementById('f-biz').value;
+  const ref=document.getElementById('f-ref').value.trim().toLowerCase();
+  const ds=document.getElementById('f-date-start').value;
+  const de=document.getElementById('f-date-end').value;
+  filtered=RAW.filter(r=>{
+    if(wh&&!r.warehouse.includes(wh==='wh1'?'1号':wh==='wh2'?'2号':'华南')) return false;
+    if(sku&&!r.sku.code.toLowerCase().includes(sku)) return false;
+    if(nm&&!r.sku.name.toLowerCase().includes(nm)) return false;
+    if(cascVal&&r.sku.catId!==cascVal) return false;
+    if(tp&&r.ft.key!==tp) return false;
+    if(bz&&r.biz!==bz) return false;
+    if(ref&&!r.refNo.toLowerCase().includes(ref)) return false;
+    if(ds&&r.time.slice(0,10)<ds) return false;
+    if(de&&r.time.slice(0,10)>de) return false;
+    return true;
+  });
+  currentPage=1;
+}
+
+function renderMetrics(){
+  const all=RAW.length;
+  document.getElementById('m-total').textContent=all;
+  document.getElementById('m-in').textContent=RAW.filter(r=>r.ft.key==='in').length;
+  document.getElementById('m-out').textContent=RAW.filter(r=>r.ft.key==='out').length;
+  document.getElementById('m-other').textContent=RAW.filter(r=>r.ft.key!=='in'&&r.ft.key!=='out').length;
+}
+
+function renderTable(){
+  const tbody=document.getElementById('table-body');
+  const total=filtered.length;
+  document.getElementById('total-count').textContent=total;
+  const tp=Math.max(1,Math.ceil(total/pageSize));
+  if(currentPage>tp) currentPage=tp;
+  document.getElementById('page-info').textContent=`第 ${currentPage} 页，共 ${tp} 页`;
+  if(!total){
+    tbody.innerHTML='<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--muted);">暂无数据，请调整查询条件</td></tr>';
+    document.getElementById('page-btns').innerHTML=''; return;
+  }
+  const s=(currentPage-1)*pageSize, rows=filtered.slice(s,s+pageSize);
+  tbody.innerHTML=rows.map((r,idx)=>{
+    const qcls=r.qty>0?'qty-pos':r.qty<0?'qty-neg':'qty-zero';
+    const qs=r.qty>0?'+'+r.qty:String(r.qty);
+    return `<tr>
+      <td><a class="table-link" onclick="openDrawer(${s+idx})">${r.no}</a></td>
+      <td style="white-space:nowrap;font-size:12px;">${r.time}</td>
+      <td>${r.warehouse}</td>
+      <td><div class="sku-cell"><span class="sku-name">${r.sku.name}</span><span class="sku-code">${r.sku.code}</span></div></td>
+      <td><span class="category-cell" title="${r.sku.cat}">${r.sku.cat}</span></td>
+      <td><span class="flow-tag ${r.ft.cls}">${r.ft.label}</span></td>
+      <td>${r.biz}</td>
+      <td><a class="table-link">${r.refNo}</a></td>
+      <td class="td-right"><span class="${qcls}">${qs}</span></td>
+      <td class="td-right">${r.bp}</td>
+      <td class="td-right">${r.ap}</td>
+      <td>${r.op}</td>
+      <td class="td-center"><a class="table-link" onclick="openDrawer(${s+idx})">查看详情</a></td>
+    </tr>`;
+  }).join('');
+  renderPaging(total, tp);
+}
+
+function renderPaging(total, tp){
+  const el=document.getElementById('page-btns');
+  if(tp<=1){el.innerHTML='';return;}
+  let h=`<button class="page-btn" onclick="goPage(1)">«</button><button class="page-btn" onclick="goPage(${Math.max(1,currentPage-1)})">‹</button>`;
+  const pages=[];
+  if(tp<=5){for(let i=1;i<=tp;i++) pages.push(i);}
+  else if(currentPage<=3){pages.push(1,2,3,4,'…',tp);}
+  else if(currentPage>=tp-2){for(let i=tp-4;i<=tp;i++) pages.push(i); pages.unshift(1,'…');}
+  else{pages.push(1,'…',currentPage-1,currentPage,currentPage+1,'…',tp);}
+  pages.forEach(p=>{
+    if(p==='…'){h+=`<span class="page-btn" style="border:0;background:transparent;">…</span>`;}
+    else{h+=`<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;}
+  });
+  h+=`<button class="page-btn" onclick="goPage(${Math.min(tp,currentPage+1)})">›</button><button class="page-btn" onclick="goPage(${tp})">»</button>`;
+  el.innerHTML=h;
+}
+function goPage(p){currentPage=p;renderTable();}
+
+/* ===== 抽屉 ===== */
+function openDrawer(idx){
+  const r=filtered[idx]; if(!r) return;
+  document.getElementById('drawer-flow-no').textContent=r.no;
+  document.getElementById('d-no').textContent=r.no;
+  document.getElementById('d-time').textContent=r.time;
+  document.getElementById('d-warehouse').textContent=r.warehouse;
+  document.getElementById('d-zone').textContent=r.zone;
+  document.getElementById('d-loc').textContent=r.loc;
+  document.getElementById('d-sku-name').textContent=r.sku.name;
+  document.getElementById('d-sku-code').textContent=r.sku.code;
+  document.getElementById('d-spec').textContent=r.sku.spec;
+  document.getElementById('d-unit').textContent=r.sku.unit;
+  document.getElementById('d-category').textContent=r.sku.cat;
+  document.getElementById('d-batch').textContent=r.batch;
+  document.getElementById('d-barcode').textContent=r.sku.barcode;
+  document.getElementById('d-flow-type').innerHTML=`<span class="flow-tag ${r.ft.cls}">${r.ft.label}</span>`;
+  document.getElementById('d-biz-type').textContent=r.biz;
+  document.getElementById('d-direction').textContent=r.qty>0?'增加（+）':r.qty<0?'减少（-）':'无变化';
+  const qcls=r.qty>0?'qty-pos':r.qty<0?'qty-neg':'';
+  document.getElementById('d-qty').innerHTML=`<span class="${qcls}">${r.qty>0?'+'+r.qty:r.qty}</span>`;
+  function setB(id,val,diff){const el=document.getElementById(id);el.textContent=val;el.className='balance-row-val'+(diff>0?' up':diff<0?' down':'');}
+  setB('d-b0-phy',r.bp,0); setB('d-b1-phy',r.ap,r.ap-r.bp);
+  setB('d-b0-lock',r.bl,0); setB('d-b1-lock',r.al,r.al-r.bl);
+  setB('d-b0-freeze',r.bf,0); setB('d-b1-freeze',r.af,r.af-r.bf);
+  setB('d-b0-avail',r.ba,0); setB('d-b1-avail',r.aa,r.aa-r.ba);
+  document.getElementById('d-ref-no').textContent=r.refNo;
+  document.getElementById('d-ref-type').textContent=r.refType;
+  document.getElementById('d-order-no').textContent=r.orderNo;
+  document.getElementById('d-operator').textContent=r.op;
+  document.getElementById('d-op-time').textContent=r.time;
+  document.getElementById('d-remark').textContent=r.remark;
+  document.getElementById('drawer-mask').classList.add('show');
+  document.getElementById('detail-drawer').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('drawer-mask').classList.remove('show');
+  document.getElementById('detail-drawer').classList.remove('show');
+}
+
+/* ===== 操作 ===== */
+function doSearch(){applyFilter();renderTable();}
+function doReset(){
+  ['f-warehouse','f-type','f-biz'].forEach(id=>document.getElementById(id).value='');
+  ['f-sku','f-name','f-ref','f-date-start','f-date-end'].forEach(id=>document.getElementById(id).value='');
+  const lbl=document.getElementById('cascade-label');
+  lbl.textContent='请选择商品分类'; lbl.style.color='rgba(29,29,31,0.38)';
+  cascVal=''; cascSel={l1:null,l2:null,l3:null};
+  applyFilter(); renderTable();
+}
+function doExport(){
+  if(!filtered.length){alert('当前无数据');return;}
+  alert(`导出 ${Math.min(filtered.length,10000)} 条流水记录（原型演示）`);
+}
+function filterCard(type){
+  document.getElementById('f-type').value=type==='all'||type==='other'?'':type;
+  applyFilter();
+  if(type==='other') filtered=RAW.filter(r=>r.ft.key!=='in'&&r.ft.key!=='out');
+  currentPage=1; renderTable();
+}
+
+/* ===== 初始化 ===== */
+function initDates(){
+  const now=new Date(), s=new Date(now); s.setDate(s.getDate()-6);
+  document.getElementById('f-date-start').value=s.toISOString().slice(0,10);
+  document.getElementById('f-date-end').value=now.toISOString().slice(0,10);
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  initDates(); renderMetrics(); applyFilter(); renderTable();
+  try{window.parent.postMessage({type:'wms-content-ready',pageKey:'stock-flow'},'*');}catch(e){}
+});
+</script>
+</body>
+</html>
