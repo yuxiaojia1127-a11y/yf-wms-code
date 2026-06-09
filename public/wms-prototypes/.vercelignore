@@ -1,0 +1,7 @@
+_docs
+_drafts
+.vercel
+.env*
+.DS_Store
+**/.DS_Store
+prototype_live_server.py

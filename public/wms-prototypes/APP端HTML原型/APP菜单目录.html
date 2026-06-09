@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>APP菜单目录</title>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --panel: rgba(255, 255, 255, 0.94);
+      --line: #e5ebf3;
+      --text: #1f2329;
+      --subtext: #646a73;
+      --muted: #8a9099;
+      --primary: #00ab95;
+      --primary-soft: #e6f7f4;
+      --secondary: #2a69ff;
+      --shadow: 0 18px 40px rgba(31, 35, 41, 0.08);
+      --card-shadow: 0 12px 28px rgba(31, 35, 41, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #f8fbff 0%, #eef3f9 40%, #e8edf5 100%);
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+    }
+
+    .hero {
+      padding: 32px 34px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(247,250,255,0.96));
+      border: 1px solid rgba(255,255,255,0.95);
+      box-shadow: var(--shadow);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 18px 0 0;
+      font-size: 32px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .desc {
+      margin: 12px 0 0;
+      max-width: 760px;
+      color: var(--subtext);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 124px;
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 14px 24px rgba(0, 171, 149, 0.24);
+    }
+
+    .btn-secondary {
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 20px rgba(31, 35, 41, 0.04);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .summary-card {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid var(--line);
+      box-shadow: var(--card-shadow);
+    }
+
+    .summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .section-title {
+      margin: 34px 0 14px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .module {
+      min-height: 178px;
+      padding: 20px;
+      border-radius: 22px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.95);
+      box-shadow: var(--card-shadow);
+    }
+
+    .module-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .module-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .module-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .count {
+      flex: 0 0 auto;
+      min-width: 34px;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .menu-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border-radius: 14px;
+      color: var(--text);
+      background: rgba(248, 251, 255, 0.74);
+      border: 1px solid rgba(229, 235, 243, 0.86);
+      text-decoration: none;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .menu-link:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0, 171, 149, 0.28);
+      background: #fff;
+    }
+
+    .menu-name {
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0;
+      line-height: 1.35;
+    }
+
+    .menu-page {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .empty {
+      padding: 18px;
+      border-radius: 18px;
+      color: var(--subtext);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+    }
+
+    @media (max-width: 980px) {
+      .summary,
+      .menu-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <span class="badge">APP 原型菜单目录</span>
+      <h1>点击菜单标题，单独访问对应 APP 页面</h1>
+      <p class="desc">
+        这里收口 APP 端原型的主页面和业务功能入口。每个标题都会打开拆分后的独立页面，方便单页评审、复制链接和逐个功能点查看。
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="./WMS-APP端原型.html" target="_blank" rel="noopener noreferrer">打开 APP 主框架</a>
+        <a class="btn btn-secondary" href="../WMS原型总入口.html">返回总入口</a>
+      </div>
+      <div class="summary">
+        <div class="summary-card"><span>页面分组</span><strong id="moduleCount">-</strong></div>
+        <div class="summary-card"><span>独立页面</span><strong id="pageCount">-</strong></div>
+        <div class="summary-card"><span>默认状态</span><strong>中文 / 仓库A</strong></div>
+      </div>
+    </section>
+
+    <h2 class="section-title">APP 菜单标题</h2>
+    <section class="menu-grid" id="menuGrid">
+      <div class="empty">菜单目录加载中...</div>
+    </section>
+  </div>
+
+  <script src="./assets/wms-app-data.js"></script>
+  <script>
+    (function () {
+      var data = window.WMSAppData || {};
+      var menuDefs = data.menuDefs || [];
+      var locale = (data.localeMap && data.localeMap.zh) || {};
+      var moduleNames = {
+        base: '基础页面',
+        outbound: '接单揽货',
+        packingReview: '打包复核',
+        shipping: '发货',
+        inbound: '入库',
+        inventory: '其他'
+      };
+      var moduleDesc = {
+        base: '工作台、我的等 APP 主页面',
+        outbound: '接单、待揽货与出库相关入口',
+        packingReview: '打包后的复核确认入口',
+        shipping: '待发货、配送状态与履约跟踪入口',
+        inbound: '采购、退货、调拨收货与上架入口',
+        inventory: '库存查询、盘点和出入库记录入口'
+      };
+      var basePages = [
+        { id: 'workbench', module: 'base', label: '工作台', code: 'APP-003', href: './pages/workbench.html' },
+        { id: 'mine', module: 'base', label: '我的', code: 'APP-022', href: './pages/mine.html' }
+      ];
+      var virtualPages = [
+        { id: 'create_inbound', module: 'inbound', label: '新建入库单', code: 'IB-NEW', href: './pages/feature.html?menu=create_inbound' }
+      ];
+
+      function getLabel(item) {
+        return (locale.metrics && locale.metrics[item.id]) ||
+          (locale.shortcuts && locale.shortcuts[item.id]) ||
+          item.label ||
+          item.id;
+      }
+
+      function getHref(item) {
+        if (item.href) return item.href;
+        return './pages/feature.html?menu=' + encodeURIComponent(item.id);
+      }
+
+      function renderGroup(moduleId, items) {
+        return [
+          '<article class="module">',
+          '<div class="module-head">',
+          '<div>',
+          '<h3 class="module-title">' + moduleNames[moduleId] + '</h3>',
+          '<div class="module-meta">' + moduleDesc[moduleId] + '</div>',
+          '</div>',
+          '<span class="count">' + items.length + '</span>',
+          '</div>',
+          '<div class="menu-list">',
+          items.map(function (item) {
+            return '<a class="menu-link" href="' + getHref(item) + '" target="_blank" rel="noopener noreferrer">' +
+              '<span class="menu-name">' + getLabel(item) + '</span>' +
+              '<span class="menu-page">' + (item.code || 'APP') + '</span>' +
+              '</a>';
+          }).join(''),
+          '</div>',
+          '</article>'
+        ].join('');
+      }
+
+      var grouped = {};
+      basePages.concat(menuDefs, virtualPages).forEach(function (item) {
+        var moduleId = item.module || 'base';
+        if (!grouped[moduleId]) grouped[moduleId] = [];
+        grouped[moduleId].push(item);
+      });
+
+      var order = ['base', 'outbound', 'packingReview', 'shipping', 'inbound', 'inventory'];
+      var html = order.filter(function (moduleId) {
+        return grouped[moduleId] && grouped[moduleId].length;
+      }).map(function (moduleId) {
+        return renderGroup(moduleId, grouped[moduleId]);
+      }).join('');
+
+      document.getElementById('menuGrid').innerHTML = html || '<div class="empty">暂无 APP 菜单。</div>';
+      document.getElementById('moduleCount').textContent = order.filter(function (moduleId) {
+        return grouped[moduleId] && grouped[moduleId].length;
+      }).length;
+      document.getElementById('pageCount').textContent = basePages.length + menuDefs.length + virtualPages.length;
+    })();
+  </script>
+</body>
+</html>

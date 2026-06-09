@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WMS_APP端高保真原型 v1.1</title>
+  <link rel="stylesheet" href="./assets/wms-app.css">
+</head>
+<body>
+  <div class="workspace">
+    <aside class="control-panel">
+      <h1 class="panel-title">APP-003 / APP-022 v1.1</h1>
+      <p class="panel-subtitle">在 v1.1 中整合工作台与“我的”页面，收口为“仓库作业员 / 仓库管理员”两类角色，并明确仓库管理员默认拥有全部仓库权限。</p>
+
+      <div class="section">
+        <div class="section-label">角色</div>
+        <div class="chip-row" id="roleGroup">
+          <button class="chip active" data-role="operator">仓库作业员</button>
+          <button class="chip" data-role="manager">仓库管理员</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">菜单权限方案</div>
+        <div class="chip-row" id="profileGroup">
+          <button class="chip secondary active" data-profile="standard">标准作业</button>
+          <button class="chip secondary" data-profile="outbound">出库优先</button>
+          <button class="chip secondary" data-profile="inbound">入库优先</button>
+          <button class="chip secondary" data-profile="full">全功能</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">作业仓库权限</div>
+        <div class="chip-row" id="warehouseGroup">
+          <button class="chip" data-warehouse="all">全部</button>
+          <button class="chip active" data-warehouse="whA">仓库A</button>
+          <button class="chip" data-warehouse="whB">仓库B</button>
+          <button class="chip" data-warehouse="whC">长名称仓</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">首页场景</div>
+        <div class="chip-row" id="sceneGroup">
+          <button class="chip active" data-scene="peak">高峰作业</button>
+          <button class="chip" data-scene="steady">平峰运行</button>
+          <button class="chip" data-scene="night">夜班巡仓</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">统计</div>
+        <div class="summary-stack">
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">授权仓库数</div>
+              <div class="mini-stat-value" id="panelWarehouseCount">1</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">可见菜单数</div>
+              <div class="mini-stat-value" id="panelMenuCount">17</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="preview">
+      <div class="phone">
+        <div class="screen" id="appScreen" data-locale="zh">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <span>5G</span>
+              <span>◔</span>
+              <span class="status-pill"></span>
+            </div>
+          </div>
+
+          <div class="login-overlay" id="loginOverlay">
+            <div class="login-overlay-top">
+              <div class="lang-switch locale-switch">
+                <button class="lang-btn active" type="button" data-locale="zh">中文</button>
+                <button class="lang-btn" type="button" data-locale="en">EN</button>
+              </div>
+            </div>
+            <div class="login-body">
+              <div class="login-brand">
+                <img class="login-brand-logo" src="./assets/logo.png" alt="easy大马生活 logo">
+              </div>
+              <div class="login-title" id="loginTitle">欢迎进入 easy 大马生活仓配端</div>
+              <div class="login-form">
+                <label class="login-field">
+                  <span class="login-field-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="8" r="3.5"></circle>
+                      <path d="M5.5 19a6.5 6.5 0 0113 0"></path>
+                    </svg>
+                  </span>
+                  <input class="login-input" id="loginAccount" type="text" placeholder="请输入账号">
+                  <span></span>
+                </label>
+                <label class="login-field">
+                  <span class="login-field-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="6.5" y="10" width="11" height="8.5" rx="2"></rect>
+                      <path d="M9 10V8.2a3 3 0 016 0V10"></path>
+                    </svg>
+                  </span>
+                  <input class="login-input" id="loginPassword" type="password" placeholder="请输入密码">
+                  <button class="password-toggle" id="passwordToggle" type="button" aria-label="toggle password">
+                    <span id="passwordToggleIcon">
+                      <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </span>
+                  </button>
+                </label>
+                <div class="login-error hidden" id="loginError">账号或密码不能为空</div>
+                <button class="login-submit" id="loginSubmit" type="button">登录</button>
+                <div class="login-helper" id="loginHelper">高保真原型默认登录，退出登录后需重新登录</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-shell iframe-shell is-hidden" id="appShell">
+            <div class="app-frame-wrap">
+              <iframe class="content-frame" id="contentFrame" title="WMS APP 页面内容" src="./pages/workbench.html"></iframe>
+            </div>
+
+            <nav class="bottom-nav">
+              <div class="nav-item active" data-tab="home" id="navHomeItem">
+                <span class="nav-icon-shell">
+                  <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 10.5L12 4l8 6.5"></path>
+                    <path d="M6.5 9.5V19h11V9.5"></path>
+                    <path d="M10 19v-5h4v5"></path>
+                  </svg>
+                </span>
+                <span id="navHome">工作台</span>
+              </div>
+              <div class="nav-item" data-tab="mine" id="navMineItem">
+                <span class="nav-icon-shell">
+                  <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.5"></circle>
+                    <path d="M5.5 19a6.5 6.5 0 0113 0"></path>
+                  </svg>
+                </span>
+                <span id="navMine">我的</span>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="./assets/wms-app-data.js"></script>
+  <script src="./assets/wms-app-shell.js"></script>
+</body>
+</html>

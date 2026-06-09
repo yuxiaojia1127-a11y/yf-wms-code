@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WMS APP 工作台</title>
+  <link rel="stylesheet" href="../assets/wms-app.css">
+</head>
+<body class="content-page" data-page="workbench" data-locale="zh">
+  <main class="content-page-shell">
+    <div class="header-band">
+      <div class="header-top">
+        <div class="warehouse-switch-wrap header-slot">
+          <button class="warehouse-switcher" id="warehouseToggle" type="button" aria-expanded="false">
+            <span class="warehouse-switch-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 10.5L12 4l8 6.5"></path>
+                <path d="M6.5 9.5V19h11V9.5"></path>
+                <path d="M10 19v-5h4v5"></path>
+              </svg>
+            </span>
+            <div class="warehouse-switch-text">
+              <div class="warehouse-switch-name" id="warehouseTitle">吉隆坡仓库</div>
+              <div class="warehouse-switch-extra" id="warehouseExtra">+1</div>
+            </div>
+            <span class="warehouse-switch-caret">⌄</span>
+          </button>
+          <div class="warehouse-dropdown" id="warehouseDropdown">
+            <div class="warehouse-dropdown-head">
+              <div class="warehouse-dropdown-title" id="warehouseDropdownTitle">选择作业仓库</div>
+            </div>
+            <div class="warehouse-option-list" id="warehouseOptionList"></div>
+            <div class="warehouse-dropdown-actions">
+              <button class="warehouse-action-btn secondary" type="button" data-warehouse-action="all" id="warehouseSelectAll">全选</button>
+              <button class="warehouse-action-btn primary" type="button" data-warehouse-action="done" id="warehouseDone">完成</button>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="lang-switch locale-switch">
+            <button class="lang-btn active" type="button" data-locale="zh">中文</button>
+            <button class="lang-btn" type="button" data-locale="en">EN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="profile-panel">
+      <div class="user-panel">
+        <div class="avatar-shell" id="avatarText">张</div>
+        <div class="user-meta">
+          <div class="user-name" id="userName">张三</div>
+          <div class="user-role-line" id="roleName">仓库作业员</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module-list" id="moduleList"></section>
+  </main>
+
+  <script src="../assets/wms-app-data.js"></script>
+  <script src="../assets/wms-app-page.js"></script>
+</body>
+</html>

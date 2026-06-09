@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WEB端原型</title>
+  <link rel="stylesheet" href="./assets/wms-web-prototype.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">WMS</div>
+        <div><div class="brand-title">easy大马云仓</div></div>
+      </div>
+      <div class="menu-search">
+        <span>⌕</span>
+        <input id="menuSearchInput" placeholder="搜索菜单" />
+      </div>
+      <nav class="nav" id="nav"></nav>
+    </aside>
+    <main class="main">
+      <header class="header">
+        <div class="header-left">
+          <div class="breadcrumb"><span class="breadcrumb-home">首页</span> › <span id="breadcrumbModule">驾驶舱</span> › <strong id="breadcrumbPage">总览驾驶舱</strong></div>
+          <div class="search">
+            <span>⌕</span>
+            <input placeholder="搜索订单号、SKU、批次、预扣单" />
+          </div>
+        </div>
+        <div class="header-right">
+          <label class="select-chip">
+            <span>仓库</span>
+            <select id="warehouseSelect">
+              <option value="全部仓库" selected>全部仓库</option>
+              <option value="1号仓库">1号仓库</option>
+              <option value="2号仓库">2号仓库</option>
+            </select>
+          </label>
+          <label class="select-chip" id="storeSelectWrap">
+            <span>渠道</span>
+            <select id="storeSelect">
+              <option value="全部渠道" selected>全部渠道</option>
+              <option value="吉隆坡门店">吉隆坡门店</option>
+              <option value="槟城门店">槟城门店</option>
+            </select>
+          </label>
+          <select id="ownerSelect" hidden><option value="easy大马云" selected>easy大马云</option></select>
+          <div class="user-chip"><span class="avatar">管</span><strong>仓库管理员</strong></div>
+        </div>
+      </header>
+      <div class="iframe-wrap">
+        <iframe id="contentFrame" class="content-frame" src="about:blank" title="WMS 页面内容"></iframe>
+      </div>
+    </main>
+  </div>
+  <script src="./assets/wms-shell.js"></script>
+</body>
+</html>

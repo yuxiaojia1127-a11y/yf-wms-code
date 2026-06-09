@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WMS-WEB-OUT01 出库管理 · 出库单列表</title>
+  <style>
+:root {
+  --bg: #f5f5f7;
+  --surface: rgba(255,255,255,0.82);
+  --surface-solid: #ffffff;
+  --line: rgba(29,29,31,0.08);
+  --text: #1d1d1f;
+  --subtext: rgba(29,29,31,0.72);
+  --muted: rgba(29,29,31,0.48);
+  --accent: #00ab95;
+  --accent-soft: rgba(0,171,149,0.10);
+  --warn: #c77c11;
+  --danger: #d92d20;
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
+  --shadow: 0 22px 54px rgba(0,0,0,0.055);
+  --shadow-soft: 0 8px 24px rgba(0,0,0,0.035);
+  --font-heading: "SF Pro Display", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-body: "SF Pro Text", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.95), transparent 36%),
+    radial-gradient(circle at top right, rgba(0,171,149,0.10), transparent 26%),
+    linear-gradient(180deg, #fafafc 0%, #f5f5f7 100%);
+}
+button, input, select, textarea { font: inherit; }
+a { text-decoration: none; color: inherit; }
+
+/* canvas */
+.canvas {
+  padding: 20px 20px 48px;
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* list-surface — 与入库管理相同的整页卡片容器 */
+.list-surface {
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(255,255,255,0.94);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* surface-head */
+.surface-head {
+  padding: 18px 22px 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(29,29,31,0.06);
+  background: rgba(255,255,255,0.92);
+}
+.surface-title-wrap { display: grid; gap: 6px; }
+.surface-title { margin: 0; font-family: var(--font-heading); font-size: 26px; line-height: 1.14; letter-spacing: -0.045em; font-weight: 650; }
+.surface-subtitle { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.surface-head-actions { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.requirement-anchor-btn {
+  height: 40px; border-radius: var(--radius-pill);
+  border: 1px solid rgba(29,29,31,0.10); background: rgba(255,255,255,0.96);
+  color: rgba(29,29,31,0.86);
+  display: inline-flex; align-items: center; gap: 8px; padding: 0 16px;
+  font-size: 13px; font-weight: 650; letter-spacing: -0.01em; cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.04);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+}
+.requirement-anchor-btn:hover { background: #fff; border-color: rgba(29,29,31,0.16); transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,0.06); }
+
+/* requirement drawer */
+.drawer-mask { position: fixed; inset: 0; z-index: 40; background: rgba(15,23,42,0.28); backdrop-filter: blur(8px); }
+.drawer-mask.hidden { display: none !important; }
+.drawer { position: absolute; top: 0; right: 0; width: min(760px,100vw); height: 100%; background: rgba(255,255,255,0.96); border-left: 1px solid rgba(29,29,31,0.08); box-shadow: -24px 0 48px rgba(0,0,0,0.08); display: grid; grid-template-rows: auto 1fr auto; }
+.drawer-head, .drawer-foot { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(29,29,31,0.06); }
+.drawer-head { background: rgba(255,255,255,0.96); }
+.drawer-foot { border-top: 1px solid rgba(29,29,31,0.06); border-bottom: 0; justify-content: flex-end; background: linear-gradient(180deg,rgba(252,252,253,0.90),rgba(248,248,250,0.96)); padding: 18px 24px 20px; }
+.drawer-title { margin: 0; font-family: var(--font-heading); font-size: 24px; font-weight: 600; letter-spacing: -0.04em; }
+.drawer-subtitle { margin-top: 6px; color: var(--muted); font-size: 13px; }
+.drawer-body { overflow: auto; padding: 18px 22px 22px; display: grid; gap: 16px; background: rgba(255,255,255,0.96); }
+.drawer-close { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(29,29,31,0.08); background: rgba(255,255,255,0.86); cursor: pointer; color: rgba(29,29,31,0.6); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(0,0,0,0.04); transition: background .18s, color .18s, transform .18s, box-shadow .18s; }
+.drawer-close:hover { background: #fff; color: var(--text); transform: translateY(-1px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); }
+.drawer-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+.drawer.requirement-drawer { width: fit-content; min-width: min(680px,100vw); max-width: 80vw; border-left-color: rgba(29,29,31,0.10); background: rgba(250,250,252,0.98); }
+.drawer-mask.requirement-mask { z-index: 39; }
+.drawer-head.requirement-head { align-items: flex-start; background: rgba(250,250,252,0.98); }
+.drawer-body.requirement-body { background: rgba(250,250,252,0.98); gap: 18px; }
+.requirement-status { display: inline-flex; align-items: center; justify-content: center; min-width: 96px; height: 32px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: -0.01em; background: rgba(29,29,31,0.05); color: var(--muted); }
+.requirement-status.saved { background: rgba(0,171,149,0.10); color: var(--accent); }
+.requirement-status.error { background: rgba(217,45,32,0.08); color: var(--danger); }
+.req-drawer-foot { gap: 16px; align-items: center; }
+.req-footnote { font-size: 11px; color: var(--muted); max-width: 460px; line-height: 1.6; margin-right: auto; }
+.req-md-shell { display: grid; gap: 12px; }
+.req-md-meta { display: grid; gap: 4px; }
+.req-md-path { font-size: 12px; color: var(--muted); font-family: monospace; }
+.req-md-state { font-size: 12px; color: var(--muted); }
+.req-md-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+.req-md-article { font-size: 14px; color: var(--text); line-height: 1.75; }
+.req-md-article h1, .req-md-article h2, .req-md-article h3, .req-md-article h4 { font-family: var(--font-heading); font-weight: 650; letter-spacing: -0.03em; margin: 24px 0 10px; }
+.req-md-article h1 { font-size: 26px; margin-bottom: 16px; }
+.req-md-article h2 { font-size: 20px; border-bottom: 1px solid rgba(29,29,31,0.07); padding-bottom: 8px; }
+.req-md-article h3 { font-size: 16px; }
+.req-md-article h4 { font-size: 14px; }
+.req-md-article p { margin: 0 0 12px; }
+.req-md-article ul, .req-md-article ol { margin: 0 0 12px; padding-left: 22px; }
+.req-md-article li + li { margin-top: 4px; }
+.req-md-article code { background: rgba(29,29,31,0.06); border-radius: 5px; padding: 2px 6px; font-size: 12px; font-family: monospace; }
+.req-md-article pre { background: rgba(29,29,31,0.04); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-size: 12px; font-family: monospace; line-height: 1.6; margin: 0 0 12px; }
+.req-md-article table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0 0 14px; }
+.req-md-article th, .req-md-article td { padding: 8px 12px; border: 1px solid rgba(29,29,31,0.08); text-align: left; }
+.req-md-article th { background: rgba(29,29,31,0.03); font-weight: 650; }
+.ghost-btn { height: 38px; border-radius: 999px; border: 1px solid rgba(29,29,31,0.10); background: rgba(255,255,255,0.92); color: var(--subtext); padding: 0 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all .15s; }
+.ghost-btn:hover { background: #fff; border-color: rgba(29,29,31,0.18); }
+.primary-btn { height: 38px; border-radius: 999px; border: 1px solid rgba(0,171,149,0.40); background: var(--accent); color: #fff; padding: 0 18px; font-size: 13px; font-weight: 650; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 8px 18px rgba(0,171,149,0.18); transition: filter .15s; }
+.primary-btn:hover { filter: brightness(0.97); }
+
+/* surface-controls */
+.surface-controls {
+  padding: 16px 22px 18px;
+  display: grid;
+  gap: 14px;
+  background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(29,29,31,0.06);
+}
+
+/* surface-table */
+.surface-table {
+  padding: 16px 22px 18px;
+  display: grid;
+  gap: 12px;
+  background: rgba(255,255,255,0.92);
+}
+
+/* stats area — 可折叠数据总览 */
+.stats-area { display: grid; gap: 6px; margin-top: -2px; }
+.stats-collapse { height: 0; overflow: hidden; transition: height 220ms ease; will-change: height; }
+.stats-toggle-wrap { display: flex; justify-content: center; padding-top: 2px; }
+.stats-toggle {
+  height: 18px; padding: 0 10px; gap: 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(29,29,31,0.10); background: rgba(255,255,255,0.92);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.04);
+}
+.stats-label { font-size: 11px; font-weight: 650; color: rgba(29,29,31,0.55); line-height: 1; white-space: nowrap; }
+.stats-chevron {
+  width: 8px; height: 8px;
+  border-right: 2px solid rgba(29,29,31,0.62); border-bottom: 2px solid rgba(29,29,31,0.62);
+  transform: rotate(45deg); transition: transform 220ms ease;
+}
+.stats-toggle[aria-expanded="true"] .stats-chevron { transform: rotate(-135deg); }
+
+/* mini-grid / mini-card — 数据总览卡片 */
+.mini-grid { display: grid; gap: 16px; }
+.mini-grid.is-four { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.mini-card {
+  padding: 22px; border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  border: 1px solid rgba(29,29,31,0.05); box-shadow: 0 12px 28px rgba(0,0,0,0.03);
+  position: relative; overflow: hidden;
+}
+.mini-card::before {
+  content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 3px;
+  background: linear-gradient(90deg, rgba(0,171,149,0.55), rgba(0,171,149,0));
+}
+.mini-card.warn::before { background: linear-gradient(90deg, rgba(199,124,17,0.70), rgba(199,124,17,0)); }
+.mini-card.compact { padding: 16px 16px 14px; border-radius: 20px; }
+.mini-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--subtext); font-size: 13px; }
+.mini-icon { width: 34px; height: 34px; border-radius: 12px; background: rgba(29,29,31,0.05); color: rgba(29,29,31,0.56); display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+.mini-value { margin-top: 14px; font-family: var(--font-heading); font-size: 28px; line-height: 1; letter-spacing: -0.05em; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mini-note { margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+/* tool-search + icon-mini */
+.tool-search { position: relative; }
+.tool-search input {
+  width: 200px; height: 36px; border-radius: var(--radius-pill);
+  border: 1px solid rgba(29,29,31,0.10); background: rgba(255,255,255,0.94);
+  padding: 0 34px 0 12px; font-size: 12px; color: var(--text); outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.tool-search input:focus { border-color: rgba(0,171,149,0.62); box-shadow: 0 0 0 1px rgba(0,171,149,0.22); background: #fff; }
+.tool-search span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(29,29,31,0.52); font-size: 13px; pointer-events: none; }
+.icon-mini {
+  width: 36px; height: 36px; border-radius: var(--radius-pill);
+  border: 1px solid rgba(29,29,31,0.10); background: rgba(255,255,255,0.94);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: rgba(29,29,31,0.70); cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+.icon-mini:hover { background: #fff; border-color: rgba(29,29,31,0.14); }
+
+/* buttons */
+.accent-btn {
+  height: 40px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(0,171,149,0.40);
+  background: var(--accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 10px 22px rgba(0,171,149,0.18);
+}
+.accent-btn:hover { filter: brightness(0.97); }
+.accent-btn:active { transform: translateY(0.5px); }
+.neutral-btn {
+  height: 40px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(29,29,31,0.12);
+  background: rgba(255,255,255,0.94);
+  color: rgba(29,29,31,0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s ease, border-color .18s ease;
+}
+.neutral-btn:hover { background: #fff; border-color: rgba(29,29,31,0.16); }
+
+/* metrics */
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+.metric {
+  padding: 22px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  border: 1px solid rgba(29,29,31,0.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.metric:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(0,0,0,0.05); border-color: rgba(0,171,149,0.16); }
+.metric::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, rgba(0,171,149,0.55), rgba(0,171,149,0));
+}
+.metric.warn::before { background: linear-gradient(90deg, rgba(199,124,17,0.70), rgba(199,124,17,0)); }
+.metric-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--subtext); font-size: 13px; }
+.metric-icon { width: 34px; height: 34px; border-radius: 12px; background: rgba(29,29,31,0.05); color: rgba(29,29,31,0.56); display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+.metric-value { margin-top: 18px; font-family: var(--font-heading); font-size: 42px; line-height: 0.96; letter-spacing: -0.06em; font-weight: 600; font-variant-numeric: tabular-nums; }
+.metric-note { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+/* section card */
+.section-card {
+  padding: 26px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.90);
+  border: 1px solid rgba(255,255,255,0.92);
+  box-shadow: var(--shadow-soft);
+}
+.section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.section-title { margin: 0; font-family: var(--font-heading); font-size: 20px; font-weight: 600; letter-spacing: -0.03em; }
+
+/* filters */
+.filters-block { display: grid; gap: 12px; }
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr)) auto;
+  gap: 12px;
+  align-items: center;
+}
+.filters-row.is-quarter {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
+.filters-row.is-four {
+  grid-template-columns: repeat(4, minmax(0,1fr)) auto;
+}
+.filters-actions {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+.filter-ctrl {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(29,29,31,0.08);
+  background: rgba(255,255,255,0.94);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+select.filter-ctrl {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(29,29,31,0.45) 50%), linear-gradient(135deg, rgba(29,29,31,0.45) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 30px;
+}
+.filter-ctrl:hover { border-color: rgba(29,29,31,0.14); background: #fff; }
+.filter-ctrl:focus { border-color: rgba(0,171,149,0.62); box-shadow: 0 0 0 1px rgba(0,171,149,0.22); background: #fff; }
+.date-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.date-pair .filter-ctrl { width: 100%; }
+
+/* toolbar */
+.toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+.toolbar-left, .toolbar-right { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* table */
+.table-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.table-toolbar-left, .table-toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.count-label { font-size: 13px; color: var(--muted); }
+.count-label strong { color: var(--text); font-weight: 700; }
+.table-wrap { overflow: hidden; border-radius: 18px; border: 1px solid rgba(29,29,31,0.05); background: rgba(250,250,252,0.9); }
+.table-wrap.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { padding: 14px 16px; text-align: left; color: var(--muted); background: rgba(29,29,31,0.03); border-bottom: 1px solid rgba(29,29,31,0.05); font-weight: 600; white-space: nowrap; }
+tbody td { padding: 15px 16px; border-bottom: 1px solid rgba(29,29,31,0.05); color: var(--subtext); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background .12s ease; }
+tbody tr:hover { background: rgba(0,171,149,0.025); }
+.td-link { color: var(--accent); font-weight: 700; cursor: pointer; font-size: 13px; }
+.td-link:hover { text-decoration: underline; }
+.td-muted { color: var(--muted); font-size: 12px; }
+.td-center { text-align: center; }
+.td-right { text-align: right; }
+
+/* status pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: rgba(29,29,31,0.06);
+  color: var(--subtext);
+}
+.status-pill.success { background: rgba(0,171,149,0.12); color: var(--accent); }
+.status-pill.warning { background: rgba(199,124,17,0.12); color: var(--warn); }
+.status-pill.danger { background: rgba(217,45,32,0.12); color: var(--danger); }
+.status-pill.info { background: rgba(37,99,235,0.10); color: #1d4ed8; }
+
+/* gen tag */
+.gen-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--subtext); }
+.gen-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.gen-dot.app { background: #6366f1; }
+.gen-dot.web { background: var(--accent); }
+
+/* row actions */
+.row-actions { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; justify-content: flex-end; }
+.row-action-btn { border: 0; background: transparent; padding: 0; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--subtext); }
+.row-action-btn.primary { color: var(--accent); }
+.row-action-btn.danger { color: var(--danger); }
+.row-action-btn:hover { opacity: 0.7; }
+.row-action-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+.link-btn { border: 0; background: transparent; color: var(--accent); font-weight: 600; cursor: pointer; padding: 0; font-size: 13px; }
+.link-btn:hover { opacity: 0.75; }
+
+/* pagination */
+.pagination-bar {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(29,29,31,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.page-info { font-size: 12px; color: var(--muted); }
+.page-btns { display: inline-flex; align-items: center; gap: 6px; }
+.page-btn {
+  min-width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(29,29,31,0.08);
+  background: rgba(255,255,255,0.9);
+  color: var(--subtext);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.page-btn.active { background: rgba(0,171,149,0.10); color: var(--accent); border-color: rgba(0,171,149,0.18); }
+
+/* modal */
+.modal-mask {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(15,23,42,0.30);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+}
+.modal-mask.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 24px;
+  box-shadow: 0 32px 72px rgba(0,0,0,0.14);
+  width: min(420px, 90vw); padding: 28px; display: grid; gap: 16px;
+}
+.modal-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
+.modal-body { font-size: 14px; color: var(--subtext); line-height: 1.75; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 10px; }
+.modal-btn-danger {
+  height: 36px; border-radius: var(--radius-pill);
+  border: 1px solid var(--danger); background: var(--danger); color: #fff;
+  display: inline-flex; align-items: center; padding: 0 16px;
+  font-size: 13px; font-weight: 650; cursor: pointer;
+}
+.modal-btn-danger:hover { background: #b91c1c; }
+
+/* footer */
+.footer-note { text-align: center; padding: 14px; color: rgba(29,29,31,0.22); font-size: 11px; }
+
+/* responsive */
+@media (max-width: 1100px) {
+  .mini-grid.is-four { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .filters-row.is-quarter,
+  .filters-row.is-four { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .filters-actions { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .canvas { padding: 14px 14px 40px; gap: 14px; }
+  .surface-head { padding: 14px 16px 12px; flex-direction: column; align-items: flex-start; }
+  .surface-controls, .surface-table { padding: 14px 16px 16px; }
+  .surface-title { font-size: 22px; }
+  .mini-grid.is-four { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .filters-row.is-quarter,
+  .filters-row.is-four { grid-template-columns: 1fr; }
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 860px; }
+  .toolbar-row { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .mini-grid.is-four { grid-template-columns: 1fr; }
+  .accent-btn, .neutral-btn { flex: 1; justify-content: center; }
+  .tool-search input { width: 140px; }
+}
+  </style>
+</head>
+<body data-page="outbound">
+<div class="canvas">
+<section class="list-surface">
+
+  <!-- ① surface-head：页面标题 + 描述 + 需求文档入口 -->
+  <div class="surface-head">
+    <div class="surface-title-wrap">
+      <h1 class="surface-title">出库单管理</h1>
+      <div class="surface-subtitle">管理出库单的创建、查询与状态跟踪，支持销售出库、调拨出库、报损出库等多类型，提交后自动更新库存并生成出库流水。</div>
+    </div>
+    <div class="surface-head-actions">
+      <button class="requirement-anchor-btn" onclick="openRequirementDrawer()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        简易需求文档
+      </button>
+    </div>
+  </div>
+
+  <!-- ② surface-controls：查询条件 + 可折叠数据总览 -->
+  <div class="surface-controls">
+
+    <!-- 查询条件 Row 1 -->
+    <div class="filters-row is-quarter">
+      <select class="filter-ctrl" id="f-type">
+        <option value="">全部出库类型</option>
+        <option>销售出库</option>
+        <option>调拨出库</option>
+        <option>报损出库</option>
+        <option>其他出库</option>
+      </select>
+      <select class="filter-ctrl" id="f-status">
+        <option value="">全部出库状态</option>
+        <option>草稿</option>
+        <option>提交中</option>
+        <option>已完成</option>
+        <option>已取消</option>
+        <option>出库失败</option>
+      </select>
+      <select class="filter-ctrl" id="f-wh">
+        <option value="">全部仓库</option>
+        <option>1号仓库</option>
+        <option>2号仓库</option>
+        <option>3号仓库</option>
+      </select>
+      <input class="filter-ctrl" id="f-no" placeholder="清输入出库单号 / 来源单号" />
+    </div>
+
+    <!-- 查询条件 Row 2 -->
+    <div class="filters-row is-four">
+      <select class="filter-ctrl" id="f-gen">
+        <option value="">全部生成方式</option>
+        <option value="APP">APP 自动生成</option>
+        <option value="WEB">WEB 手动新建</option>
+      </select>
+      <input class="filter-ctrl" id="f-sku" placeholder="SKU 编码" />
+      <div class="date-pair">
+        <input class="filter-ctrl" type="date" id="f-from" title="出库时间起" />
+        <input class="filter-ctrl" type="date" id="f-to" title="出库时间止" />
+      </div>
+      <div></div><!-- 占位 -->
+      <div class="filters-actions">
+        <button class="accent-btn" onclick="doSearch()">查询</button>
+        <button class="neutral-btn" onclick="resetFilter()">重置</button>
+      </div>
+    </div>
+
+    <!-- 数据总览（可折叠） -->
+    <div class="stats-area">
+      <div class="stats-collapse" id="statsCollapse">
+        <div class="mini-grid is-four" style="padding-bottom:4px;">
+          <article class="mini-card compact" onclick="filterByStatus('')" style="cursor:pointer;" title="点击查看全部">
+            <div class="mini-top"><span>今日出库单数</span><span class="mini-icon">📦</span></div>
+            <div class="mini-value">128</div>
+            <div class="mini-note">已完成 · 较昨日 ↑ 12 单</div>
+          </article>
+          <article class="mini-card compact" onclick="filterByStatus('')" style="cursor:pointer;" title="点击查看全部">
+            <div class="mini-top"><span>今日出库件数</span><span class="mini-icon">📊</span></div>
+            <div class="mini-value">3,240</div>
+            <div class="mini-note">所有已完成出库单合计</div>
+          </article>
+          <article class="mini-card compact warn" onclick="filterByStatus('草稿')" style="cursor:pointer;" title="点击筛选草稿">
+            <div class="mini-top"><span>草稿数</span><span class="mini-icon">📝</span></div>
+            <div class="mini-value">5</div>
+            <div class="mini-note">点击查看待提交草稿</div>
+          </article>
+          <article class="mini-card compact" onclick="filterByStatus('')" style="cursor:pointer;" title="点击查看全部">
+            <div class="mini-top"><span>本月出库单数</span><span class="mini-icon">📅</span></div>
+            <div class="mini-value">2,891</div>
+            <div class="mini-note">本月已完成</div>
+          </article>
+        </div>
+      </div>
+      <div class="stats-toggle-wrap">
+        <button class="stats-toggle" id="statsToggle" aria-expanded="false" aria-label="展开/收起数据总览" type="button" onclick="toggleStats()">
+          <span class="stats-label">数据总览</span>
+          <span class="stats-chevron"></span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /surface-controls -->
+
+  <!-- ③ surface-table：操作工具栏 + 表格 -->
+  <div class="surface-table">
+
+    <!-- 工具栏：左侧操作按钮 + 右侧搜索/图标 -->
+    <div class="toolbar-row">
+      <div class="toolbar-left">
+        <a href="./outbound/outbound-create.html" class="accent-btn">＋ 新建出库单</a>
+        <button class="neutral-btn" onclick="exportList()">⬇ 导出</button>
+        <span class="count-label">共 <strong id="total-count">12</strong> 条记录</span>
+      </div>
+      <div class="toolbar-right">
+        <div class="tool-search">
+          <input type="text" placeholder="搜索出库单号 / SKU / 来源单" oninput="quickSearch(this.value)" />
+          <span>⌕</span>
+        </div>
+        <button class="icon-mini" type="button" aria-label="刷新" onclick="render(displayed)">⟳</button>
+        <button class="icon-mini" type="button" aria-label="列设置">☰</button>
+      </div>
+    </div>
+
+    <div class="table-wrap flat scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>出库单号</th>
+            <th>出库类型</th>
+            <th>生成方式</th>
+            <th>来源单号</th>
+            <th>仓库</th>
+            <th class="td-center">SKU 种类</th>
+            <th class="td-center">出库数量</th>
+            <th>出库状态</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+            <th class="td-right">操作</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <div class="page-info">第 1 页 / 共 1 页，每页 20 条</div>
+      <div class="page-btns">
+        <div class="page-btn">‹</div>
+        <div class="page-btn active">1</div>
+        <div class="page-btn">›</div>
+      </div>
+    </div>
+
+  </div><!-- /surface-table -->
+
+</section>
+</div><!-- /canvas -->
+
+<!-- 取消确认弹窗 -->
+<div class="modal-mask" id="modal-cancel">
+  <div class="modal">
+    <h3 class="modal-title">确认取消出库单？</h3>
+    <p class="modal-body">取消后该草稿出库单将标记为「已取消」，不参与任何库存操作，<strong>此操作不可撤销</strong>。</p>
+    <div class="modal-foot">
+      <button class="neutral-btn" onclick="closeModal()">再想想</button>
+      <button class="modal-btn-danger" onclick="confirmAction('cancel')">确认取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 重新提交确认弹窗 -->
+<div class="modal-mask" id="modal-retry">
+  <div class="modal">
+    <h3 class="modal-title">确认重新提交？</h3>
+    <p class="modal-body">系统将对该出库单重新执行库存扣减，请确认商品信息和可用库存充足后再操作。</p>
+    <div class="modal-foot">
+      <button class="neutral-btn" onclick="closeModal()">取消</button>
+      <button class="accent-btn" onclick="confirmAction('retry')">确认重新提交</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">WMS-WEB 出库管理原型 v1.0 · WMS-WEB-OUT01</div>
+
+<script>
+/* ─── 模拟数据 ─── */
+const RAW = [
+  {no:'OUT-20240601-000128',type:'销售出库',gen:'APP',src:'SO-2024060112345',wh:'1号仓库',skus:3,qty:24,status:'已完成',creator:'张三（发货员）',time:'2024-06-01 09:12'},
+  {no:'OUT-20240601-000127',type:'销售出库',gen:'APP',src:'SO-2024060112344',wh:'1号仓库',skus:5,qty:60,status:'已完成',creator:'李四（发货员）',time:'2024-06-01 08:55'},
+  {no:'OUT-20240601-000126',type:'调拨出库',gen:'WEB',src:'TR-2024060100023',wh:'2号仓库',skus:2,qty:100,status:'已完成',creator:'王五',time:'2024-06-01 08:40'},
+  {no:'OUT-20240601-000125',type:'报损出库',gen:'WEB',src:'',wh:'1号仓库',skus:1,qty:12,status:'已完成',creator:'赵六',time:'2024-06-01 08:30'},
+  {no:'OUT-20240601-000124',type:'其他出库',gen:'WEB',src:'',wh:'3号仓库',skus:4,qty:0,status:'草稿',creator:'王五',time:'2024-06-01 08:20'},
+  {no:'OUT-20240601-000123',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',skus:0,qty:0,status:'草稿',creator:'张三',time:'2024-06-01 08:10'},
+  {no:'OUT-20240601-000122',type:'销售出库',gen:'APP',src:'SO-2024060112340',wh:'2号仓库',skus:6,qty:72,status:'出库失败',creator:'系统',time:'2024-06-01 07:50'},
+  {no:'OUT-20240601-000121',type:'销售出库',gen:'APP',src:'SO-2024060112339',wh:'1号仓库',skus:2,qty:18,status:'提交中',creator:'系统',time:'2024-06-01 07:45'},
+  {no:'OUT-20240531-000320',type:'调拨出库',gen:'WEB',src:'TR-2024053100089',wh:'2号仓库',skus:3,qty:150,status:'已完成',creator:'李四',time:'2024-05-31 17:30'},
+  {no:'OUT-20240531-000319',type:'销售出库',gen:'APP',src:'SO-2024053112000',wh:'1号仓库',skus:8,qty:96,status:'已完成',creator:'张三（发货员）',time:'2024-05-31 16:58'},
+  {no:'OUT-20240531-000318',type:'报损出库',gen:'WEB',src:'',wh:'3号仓库',skus:1,qty:5,status:'已取消',creator:'赵六',time:'2024-05-31 15:20'},
+  {no:'OUT-20240531-000317',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',skus:3,qty:30,status:'已完成',creator:'王五',time:'2024-05-31 14:10'},
+];
+
+const STATUS_CLS = {草稿:'',提交中:'info',已完成:'success',已取消:'',出库失败:'danger'};
+const TYPE_CLS   = {销售出库:'success',调拨出库:'info',报损出库:'warning',其他出库:''};
+
+let displayed = [...RAW];
+let pendingNo  = null;
+
+function pill(text, variant) {
+  return `<span class="status-pill${variant?' '+variant:''}">${text}</span>`;
+}
+
+function genTag(g) {
+  return `<span class="gen-tag"><span class="gen-dot ${g==='APP'?'app':'web'}"></span>${g==='APP'?'APP 自动':'WEB 手动'}</span>`;
+}
+
+function rowOps(r) {
+  const view    = `<a class="row-action-btn primary" href="./outbound/outbound-detail.html?no=${encodeURIComponent(r.no)}">查看</a>`;
+  const edit    = r.status==='草稿' ? `<a class="row-action-btn" href="./outbound/outbound-create.html?no=${encodeURIComponent(r.no)}">编辑</a>` : '';
+  const cancel  = r.status==='草稿' ? `<button class="row-action-btn danger" onclick="openModal('cancel','${r.no}')">取消</button>` : '';
+  const retry   = r.status==='出库失败' ? `<button class="row-action-btn primary" onclick="openModal('retry','${r.no}')">重新提交</button>` : '';
+  const loading = r.status==='提交中' ? `<span class="row-action-btn disabled">处理中…</span>` : '';
+  return [view,edit,cancel,retry,loading].filter(Boolean).join('');
+}
+
+function render(data) {
+  document.getElementById('total-count').textContent = data.length;
+  const tbody = document.getElementById('table-body');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">未找到符合条件的出库单</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><a class="td-link" href="./outbound/outbound-detail.html?no=${encodeURIComponent(r.no)}">${r.no}</a></td>
+      <td>${pill(r.type, TYPE_CLS[r.type])}</td>
+      <td>${genTag(r.gen)}</td>
+      <td class="td-muted">${r.src||'—'}</td>
+      <td>${r.wh}</td>
+      <td class="td-center">${r.skus||'—'}</td>
+      <td class="td-center">${r.qty||'—'}</td>
+      <td>${pill(r.status, STATUS_CLS[r.status])}</td>
+      <td class="td-muted">${r.creator}</td>
+      <td class="td-muted">${r.time}</td>
+      <td class="td-right"><div class="row-actions">${rowOps(r)}</div></td>
+    </tr>`).join('');
+}
+
+function doSearch() {
+  const type   = document.getElementById('f-type').value;
+  const status = document.getElementById('f-status').value;
+  const gen    = document.getElementById('f-gen').value;
+  const wh     = document.getElementById('f-wh').value;
+  const no     = document.getElementById('f-no').value.trim();
+  const src    = document.getElementById('f-src').value.trim();
+  displayed = RAW.filter(r =>
+    (!type   || r.type===type) &&
+    (!status || r.status===status) &&
+    (!gen    || r.gen===gen) &&
+    (!wh     || r.wh===wh) &&
+    (!no     || r.no.includes(no)) &&
+    (!src    || r.src.includes(src))
+  );
+  render(displayed);
+}
+
+function resetFilter() {
+  ['f-type','f-status','f-gen','f-wh'].forEach(id=>document.getElementById(id).value='');
+  ['f-no','f-src','f-sku','f-from','f-to'].forEach(id=>document.getElementById(id).value='');
+  displayed=[...RAW]; render(displayed);
+}
+
+function filterByStatus(s) {
+  document.getElementById('f-status').value=s; doSearch();
+}
+
+function exportList() { alert('将当前查询结果导出为 Excel 文件\n（原型演示，不执行实际导出）'); }
+
+function openModal(type, no) {
+  pendingNo=no;
+  document.getElementById('modal-'+type).classList.add('show');
+}
+function closeModal() {
+  document.querySelectorAll('.modal-mask').forEach(m=>m.classList.remove('show'));
+  pendingNo=null;
+}
+function confirmAction(type) {
+  if (!pendingNo) return;
+  const newStatus = type==='cancel' ? '已取消' : '已完成';
+  RAW.forEach(r=>{ if(r.no===pendingNo) r.status=newStatus; });
+  displayed = displayed.map(r=>r.no===pendingNo?{...r,status:newStatus}:r);
+  closeModal();
+  render(displayed);
+}
+
+document.querySelectorAll('.modal-mask').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }));
+
+/* 数据总览折叠/展开 */
+function toggleStats() {
+  const btn = document.getElementById('statsToggle');
+  const collapse = document.getElementById('statsCollapse');
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  if (expanded) {
+    collapse.style.height = collapse.scrollHeight + 'px';
+    requestAnimationFrame(() => { collapse.style.height = '0'; });
+    btn.setAttribute('aria-expanded', 'false');
+  } else {
+    collapse.style.height = collapse.scrollHeight + 'px';
+    collapse.addEventListener('transitionend', function handler() {
+      collapse.style.height = 'auto';
+      collapse.removeEventListener('transitionend', handler);
+    });
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+/* 工具栏快速搜索 */
+function quickSearch(val) {
+  const q = val.trim().toLowerCase();
+  if (!q) { render(displayed); return; }
+  render(displayed.filter(r =>
+    r.no.toLowerCase().includes(q) ||
+    (r.src && r.src.toLowerCase().includes(q)) ||
+    r.wh.toLowerCase().includes(q)
+  ));
+}
+
+render(RAW);
+
+// 通知父级 shell 高亮菜单
+try { window.parent.postMessage({type:'wms-content-ready',pageKey:'outbound'},'*'); } catch(e) {}
+</script>
+
+<!-- ── 简易需求文档 Drawer ─────────────────────────────── -->
+<div id="req-drawer-root"></div>
+
+<script>
+/* ── 需求文档 Drawer（读取外部 md 文件）── */
+const REQ_EXTERNAL_SRC = '../assets/requirements/outbound.md';
+let reqDrawerOpen = false;
+let reqState = { status: 'idle', content: '', error: '' }; // idle | loading | loaded | error
+
+function escHtml(v) {
+  return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtInline(text) {
+  return escHtml(text||'').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+}
+function renderMdTable(lines) {
+  if (lines.length < 2) return '';
+  const parseRow = l => l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(2).map(parseRow);
+  return `<table><thead><tr>${headers.map(c=>`<th>${fmtInline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map((_,i)=>`<td>${fmtInline(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function renderMd(markdown) {
+  const src = String(markdown||'').replace(/\r\n/g,'\n').trim();
+  if (!src) return '<div class="req-md-empty">文档暂无内容</div>';
+  const lines = src.split('\n');
+  const html = [];
+  let i = 0;
+  while (i < lines.length) {
+    const raw = lines[i], line = raw.trim();
+    if (!line) { i++; continue; }
+    if (line.startsWith('```')) {
+      const code = []; i++;
+      while (i < lines.length && !lines[i].trim().startsWith('```')) { code.push(lines[i]); i++; }
+      if (i < lines.length) i++;
+      html.push(`<pre><code>${escHtml(code.join('\n'))}</code></pre>`);
+      continue;
+    }
+    if (/^#{1,4}\s+/.test(line)) {
+      const lvl = line.match(/^#+/)[0].length;
+      html.push(`<h${lvl}>${fmtInline(line.replace(/^#{1,4}\s+/,''))}</h${lvl}>`);
+      i++; continue;
+    }
+    const isTableHdr = line.includes('|') && i+1<lines.length && /^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]);
+    if (isTableHdr) {
+      const tbl = [raw, lines[i+1]]; i+=2;
+      while (i<lines.length && lines[i].trim() && lines[i].includes('|')) { tbl.push(lines[i]); i++; }
+      html.push(renderMdTable(tbl)); continue;
+    }
+    if (/^[-*]\s+/.test(line)) {
+      const items = [];
+      while (i<lines.length && /^[-*]\s+/.test(lines[i].trim())) { items.push(lines[i].trim().replace(/^[-*]\s+/,'')); i++; }
+      html.push(`<ul>${items.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ul>`); continue;
+    }
+    if (/^\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i<lines.length && /^\d+\.\s+/.test(lines[i].trim())) { items.push(lines[i].trim().replace(/^\d+\.\s+/,'')); i++; }
+      html.push(`<ol>${items.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ol>`); continue;
+    }
+    const para = [line]; i++;
+    while (i<lines.length) {
+      const next = lines[i].trim();
+      if (!next || /^#{1,4}\s+/.test(next) || /^[-*]\s+/.test(next) || /^\d+\.\s+/.test(next)) break;
+      if ((next.includes('|') && i+1<lines.length && /^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1])) || next.startsWith('```')) break;
+      para.push(next); i++;
+    }
+    html.push(`<p>${fmtInline(para.join('<br/>'))}</p>`);
+  }
+  return `<div class="req-md-article">${html.join('')}</div>`;
+}
+
+function renderReqDrawer() {
+  const root = document.getElementById('req-drawer-root');
+  if (!root) return;
+  if (!reqDrawerOpen) { root.innerHTML = ''; return; }
+  const stateText = { idle:'待读取', loading:'读取中', loaded:'已读取外部 md', error:'读取失败' }[reqState.status] || '待读取';
+  const statusCls = reqState.status==='loaded' ? 'saved' : reqState.status==='error' ? 'error' : '';
+  const contentHtml = reqState.status==='error'
+    ? `<div class="req-md-empty">读取失败：${escHtml(reqState.error)}</div>`
+    : (!reqState.content || reqState.status==='loading')
+      ? '<div class="req-md-empty">正在读取简易需求文档，请稍候…</div>'
+      : renderMd(reqState.content);
+  root.innerHTML = `
+    <div class="drawer-mask requirement-mask" id="req-mask">
+      <aside class="drawer requirement-drawer">
+        <div class="drawer-head requirement-head">
+          <div>
+            <h2 class="drawer-title">简易需求文档</h2>
+            <div class="drawer-subtitle">当前绑定功能：出库管理。直接读取外部 md 文件，确保原型内与源文件保持一致。</div>
+          </div>
+          <div class="surface-head-actions">
+            <span class="requirement-status ${statusCls}">${stateText}</span>
+            <button class="drawer-close" id="req-close-btn" aria-label="关闭">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="drawer-body requirement-body">
+          <div class="req-md-shell">
+            <div class="req-md-meta">
+              <div class="req-md-path">读取路径：${escHtml(REQ_EXTERNAL_SRC)}</div>
+            </div>
+            ${contentHtml}
+          </div>
+        </div>
+        <div class="drawer-foot req-drawer-foot">
+          <div class="req-footnote">内容来自外部 md 静态资源。请确认本地原型服务器已启动（http://127.0.0.1:8091），或 assets/requirements 目录已随原型发布。</div>
+          <div class="surface-head-actions">
+            <button class="ghost-btn" id="req-close-btn2">关闭</button>
+            <button class="primary-btn" id="req-reload-btn">重新读取</button>
+          </div>
+        </div>
+      </aside>
+    </div>`;
+  document.getElementById('req-mask').addEventListener('click', e => { if (e.target === document.getElementById('req-mask')) closeRequirementDrawer(); });
+  document.getElementById('req-close-btn').addEventListener('click', closeRequirementDrawer);
+  document.getElementById('req-close-btn2').addEventListener('click', closeRequirementDrawer);
+  document.getElementById('req-reload-btn').addEventListener('click', () => loadReqDoc(true));
+}
+
+async function loadReqDoc(force = false) {
+  if (!force && reqState.status === 'loaded' && reqState.content) { renderReqDrawer(); return; }
+  reqState = { status: 'loading', content: '', error: '' };
+  renderReqDrawer();
+  try {
+    // 先尝试同步（仅本地服务器环境有效，静态预览时会静默失败）
+    await fetch('/__sync_requirement_docs__', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
+    const res = await fetch(REQ_EXTERNAL_SRC + '?v=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(`读取失败（HTTP ${res.status}）`);
+    reqState = { status: 'loaded', content: await res.text(), error: '' };
+  } catch (err) {
+    reqState = { status: 'error', content: '', error: err.message || '未知错误' };
+  }
+  renderReqDrawer();
+}
+
+function openRequirementDrawer() {
+  reqDrawerOpen = true;
+  renderReqDrawer();
+  loadReqDoc();
+}
+function closeRequirementDrawer() {
+  reqDrawerOpen = false;
+  renderReqDrawer();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && reqDrawerOpen) closeRequirementDrawer(); });
+</script>
+</body>
+</html>

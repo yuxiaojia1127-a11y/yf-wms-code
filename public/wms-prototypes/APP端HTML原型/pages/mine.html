@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WMS APP 我的</title>
+  <link rel="stylesheet" href="../assets/wms-app.css">
+</head>
+<body class="content-page" data-page="mine" data-locale="zh">
+  <main class="content-page-shell is-mine">
+    <section class="mine-page">
+      <div class="mine-topbar">
+        <div class="mine-title" id="mineTitle">我的</div>
+        <div class="mine-top-actions">
+          <button class="icon-button" id="mineMessageButton" type="button" aria-label="message center">
+            <svg class="icon-svg lg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.5 7.5h11a2 2 0 012 2v6a2 2 0 01-2 2h-6l-4.5 3v-3H6.5a2 2 0 01-2-2v-6a2 2 0 012-2z"></path>
+              <path d="M8.5 11h7"></path>
+              <path d="M8.5 14h4.5"></path>
+            </svg>
+            <span class="badge" id="mineMessageBadge">99</span>
+          </button>
+        </div>
+      </div>
+
+      <section class="mine-profile-card">
+        <div class="mine-profile-hero">
+          <div class="mine-avatar"><span id="mineAvatarText">张</span></div>
+          <div class="mine-user-main">
+            <div class="mine-user-label" id="mineUserLabel">仓配账号</div>
+            <div class="mine-user-row">
+              <div class="mine-user-name" id="mineUserName">张三</div>
+              <div class="mine-user-code" id="mineUserCode">100122</div>
+            </div>
+            <div class="mine-user-role" id="mineUserRole">仓库作业员</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mine-info-card">
+        <div class="mine-info-row mine-language-row">
+          <div class="mine-info-main">
+            <span class="mine-info-icon language">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="7"></circle>
+                <path d="M5 12h14"></path>
+                <path d="M12 5a10 10 0 010 14"></path>
+                <path d="M12 5a10 10 0 000 14"></path>
+              </svg>
+            </span>
+            <span class="mine-info-label" id="mineLanguageLabel">语言</span>
+          </div>
+          <div class="lang-switch locale-switch mine-locale-switch" aria-label="language switch">
+            <button class="lang-btn active" type="button" data-locale="zh">中文</button>
+            <button class="lang-btn" type="button" data-locale="en">EN</button>
+          </div>
+        </div>
+
+        <div class="mine-info-row">
+          <div class="mine-info-main">
+            <span class="mine-info-icon country">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="7"></circle>
+                <path d="M5 12h14"></path>
+                <path d="M12 5a10 10 0 010 14"></path>
+                <path d="M12 5a10 10 0 000 14"></path>
+              </svg>
+            </span>
+            <span class="mine-info-label" id="mineCountryLabel">国家</span>
+          </div>
+          <div class="mine-info-value" id="mineCountryValue">马来西亚</div>
+        </div>
+
+        <div class="mine-info-row">
+          <div class="mine-info-main">
+            <span class="mine-info-icon warehouse">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9l8-4 8 4"></path>
+                <path d="M5.5 9.5V19h13V9.5"></path>
+                <path d="M9 13h6"></path>
+                <path d="M9 16h6"></path>
+              </svg>
+            </span>
+            <span class="mine-info-label" id="mineWarehouseLabel">负责仓库</span>
+          </div>
+          <div class="mine-info-value highlight" id="mineWarehouseCountText">共1个仓库</div>
+        </div>
+
+        <div class="mine-warehouse-block">
+          <div class="mine-warehouse-meta">
+            <div class="mine-warehouse-caption" id="mineWarehouseHint">按当前权限展示可作业仓库</div>
+            <div class="mine-info-value" id="mineWarehouseCodes">KL-001</div>
+          </div>
+          <div class="mine-warehouse-tags" id="mineWarehouseTags"></div>
+          <div class="mine-account-note">
+            <span>MY-WMS</span>
+            <span class="dot"></span>
+            <span id="mineAccountHint">仓配员工号 100122</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="mine-logout">
+        <button class="mine-logout-btn" id="logoutBtn" type="button">退出登录</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="../assets/wms-app-data.js"></script>
+  <script src="../assets/wms-app-page.js"></script>
+</body>
+</html>

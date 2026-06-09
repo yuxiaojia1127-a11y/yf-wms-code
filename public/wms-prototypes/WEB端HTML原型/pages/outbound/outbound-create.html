@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WMS-WEB-OUT02 出库管理 · 新建出库单</title>
+  <style>
+:root {
+  --bg:#f5f5f7;--line:rgba(29,29,31,0.08);--text:#1d1d1f;--subtext:rgba(29,29,31,0.72);
+  --muted:rgba(29,29,31,0.48);--accent:#00ab95;--accent-soft:rgba(0,171,149,0.10);
+  --warn:#c77c11;--danger:#d92d20;
+  --radius-lg:22px;--radius-md:18px;--radius-sm:12px;--radius-pill:999px;
+  --shadow-soft:0 8px 24px rgba(0,0,0,0.035);
+  --font-heading:"SF Pro Display",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --font-body:"SF Pro Text",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;min-height:100%;font-family:var(--font-body);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(circle at top left,rgba(255,255,255,.95),transparent 36%),
+             radial-gradient(circle at top right,rgba(0,171,149,.10),transparent 26%),
+             linear-gradient(180deg,#fafafc,#f5f5f7);}
+button,input,select,textarea{font:inherit;}
+a{text-decoration:none;color:inherit;}
+
+/* layout */
+.canvas{padding:24px 28px 120px;display:grid;gap:20px;max-width:1200px;}
+
+/* page head */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:4px;}
+.back-link:hover{color:var(--accent);}
+.page-title{margin:0;font-family:var(--font-heading);font-size:26px;font-weight:600;letter-spacing:-.04em;}
+.page-meta{margin:3px 0 0;font-size:12px;color:var(--muted);}
+
+/* cards */
+.card{background:rgba(255,255,255,.92);border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,.94);
+  box-shadow:var(--shadow-soft);padding:24px;}
+.card-title{margin:0 0 18px;font-family:var(--font-heading);font-size:16px;font-weight:700;letter-spacing:-.025em;
+  display:flex;align-items:center;gap:8px;}
+.card-title::before{content:"";width:3px;height:16px;border-radius:3px;background:var(--accent);}
+
+/* form grid */
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;}
+.form-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.field{display:grid;gap:6px;}
+.field.span-2{grid-column:span 2;}
+.field.span-3{grid-column:span 3;}
+.field label{font-size:12px;font-weight:650;color:var(--muted);letter-spacing:.01em;}
+.required{color:var(--danger);margin-left:2px;}
+.form-input,.form-select,.form-textarea{
+  height:40px;border-radius:12px;border:1px solid rgba(29,29,31,.08);
+  background:rgba(255,255,255,.96);padding:0 14px;font-size:13px;color:var(--text);
+  outline:none;width:100%;transition:border-color .15s,box-shadow .15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:rgba(0,171,149,.5);box-shadow:0 0 0 3px rgba(0,171,149,.08);background:#fff;}
+.form-input.error,.form-select.error{border-color:rgba(217,45,32,.5);box-shadow:0 0 0 3px rgba(217,45,32,.08);}
+.form-textarea{height:80px;padding:10px 14px;resize:vertical;}
+.field-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
+
+/* scan area */
+.scan-box{
+  border-radius:16px;border:2px dashed rgba(0,171,149,.35);background:rgba(0,171,149,.03);
+  padding:16px 18px;display:grid;gap:10px;}
+.scan-input-wrap{position:relative;display:flex;align-items:center;gap:10px;}
+.scan-icon{font-size:20px;flex-shrink:0;}
+.scan-input{
+  flex:1;height:46px;border-radius:14px;border:1.5px solid rgba(0,171,149,.4);
+  background:#fff;padding:0 16px;font-size:14px;color:var(--text);outline:none;
+  transition:border-color .15s,box-shadow .15s;}
+.scan-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(0,171,149,.10);}
+.scan-tip{font-size:12px;color:var(--muted);}
+.scan-result{font-size:13px;font-weight:600;line-height:1.6;min-height:20px;}
+.scan-result.ok{color:var(--accent);}
+.scan-result.err{color:var(--danger);}
+
+/* detail table */
+.detail-table-wrap{border-radius:14px;border:1px solid rgba(29,29,31,.06);overflow:auto;background:rgba(250,250,252,.9);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:9px 12px;background:rgba(29,29,31,.025);font-weight:650;color:var(--subtext);
+  font-size:11px;letter-spacing:.01em;text-align:left;border-bottom:1px solid rgba(29,29,31,.05);white-space:nowrap;}
+tbody td{padding:8px 10px;border-bottom:1px solid rgba(29,29,31,.04);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:0;}
+tbody tr:hover{background:rgba(0,171,149,.025);}
+.td-seq{color:var(--muted);font-size:12px;width:36px;text-align:center;}
+.td-auto{background:rgba(0,171,149,.04);color:var(--subtext);font-size:12px;border-radius:8px;
+  padding:6px 10px;white-space:nowrap;}
+.td-stock{color:var(--accent);font-size:12px;font-weight:700;}
+.td-stock.low{color:var(--warn);}
+
+/* table inputs */
+.tbl-input{height:34px;border-radius:10px;border:1px solid rgba(29,29,31,.08);
+  background:rgba(255,255,255,.96);padding:0 10px;font-size:13px;color:var(--text);
+  outline:none;width:100%;transition:border-color .15s;}
+.tbl-input:focus{border-color:rgba(0,171,149,.5);box-shadow:0 0 0 2px rgba(0,171,149,.08);}
+.tbl-input.error{border-color:rgba(217,45,32,.4);}
+.del-btn{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:8px;}
+.del-btn:hover{background:rgba(217,45,32,.08);color:var(--danger);}
+
+/* empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty-text{font-size:14px;line-height:1.7;}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;
+  font-size:11px;font-weight:700;}
+.badge-green{background:rgba(0,171,149,.12);color:var(--accent);}
+.badge-grey{background:rgba(29,29,31,.06);color:var(--subtext);}
+
+/* footer bar */
+.footer-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  background:rgba(255,255,255,.96);backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid rgba(29,29,31,.07);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  box-shadow:0 -12px 28px rgba(0,0,0,.05);}
+.footer-info{font-size:12px;color:var(--muted);}
+.footer-info strong{color:var(--text);font-weight:700;}
+.footer-actions{display:flex;align-items:center;gap:10px;}
+.btn{height:40px;border-radius:var(--radius-pill);border:1px solid var(--line);background:rgba(255,255,255,.92);
+  display:inline-flex;align-items:center;gap:7px;padding:0 18px;font-size:13px;font-weight:600;
+  color:var(--text);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06);}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 6px 16px rgba(0,171,149,.22);}
+.btn-primary:hover{background:#009983;}
+.btn-ghost{color:var(--subtext);}
+.btn-warn{background:var(--warn);color:#fff;border-color:var(--warn);}
+.btn-sm{height:34px;padding:0 14px;font-size:12px;}
+
+/* alert */
+.alert{padding:12px 16px;border-radius:14px;font-size:13px;line-height:1.7;margin-bottom:4px;}
+.alert-warn{background:rgba(199,124,17,.08);border:1px solid rgba(199,124,17,.16);color:#7a4c0a;}
+.alert-err{background:rgba(217,45,32,.08);border:1px solid rgba(217,45,32,.14);color:#991b1b;}
+
+/* modal */
+.modal-mask{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.30);
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
+.modal-mask.show{display:flex;}
+.modal{background:#fff;border-radius:24px;box-shadow:0 32px 72px rgba(0,0,0,.14);
+  width:min(400px,90vw);padding:28px;display:grid;gap:16px;}
+.modal-title{margin:0;font-size:18px;font-weight:700;}
+.modal-body{font-size:14px;color:var(--subtext);line-height:1.75;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;}
+
+.footer-note{text-align:center;padding:10px;color:rgba(29,29,31,.2);font-size:11px;}
+  </style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- 页面标题 -->
+  <div>
+    <a class="back-link" href="../outbound.html">← 出库单管理</a>
+    <h1 class="page-title" id="page-title">新建出库单</h1>
+    <p class="page-meta">WMS-WEB-OUT02 · 仅支持调拨出库 / 报损出库 / 其他出库（销售出库由仓库APP自动生成）</p>
+  </div>
+
+  <!-- 基本信息 -->
+  <div class="card">
+    <h3 class="card-title">基本信息</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label>出库类型 <span class="required">*</span></label>
+        <select class="form-select" id="f-type" onchange="onTypeChange()">
+          <option value="">请选择出库类型</option>
+          <option value="调拨出库">调拨出库</option>
+          <option value="报损出库">报损出库</option>
+          <option value="其他出库">其他出库</option>
+        </select>
+        <div class="field-hint">销售出库仅由仓库APP发货时自动生成，WEB端不支持手动新建</div>
+      </div>
+      <div class="field">
+        <label>出库仓库 <span class="required">*</span></label>
+        <select class="form-select" id="f-wh" onchange="onWarehouseChange()">
+          <option value="">请选择出库仓库</option>
+          <option value="1号仓库">1号仓库</option>
+          <option value="2号仓库">2号仓库</option>
+          <option value="3号仓库">3号仓库</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>来源单号</label>
+        <input class="form-input" id="f-src" placeholder="调拨单 / 报损单编号（选填，最长64字符）" maxlength="64" />
+      </div>
+      <div class="field span-3">
+        <label>出库原因</label>
+        <textarea class="form-textarea" id="f-reason" placeholder="报损/其他出库建议填写，最长200字符" maxlength="200"></textarea>
+      </div>
+      <div class="field span-3">
+        <label>备注</label>
+        <textarea class="form-textarea" id="f-remark" placeholder="出库备注说明，最长200字符" maxlength="200"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 商品明细 -->
+  <div class="card">
+    <h3 class="card-title">商品明细 <span id="row-badge" class="badge badge-grey" style="font-family:var(--font-body);font-weight:700;">0 行</span></h3>
+
+    <!-- 扫码输入框 -->
+    <div class="scan-box">
+      <div class="scan-input-wrap">
+        <span class="scan-icon">📷</span>
+        <input class="scan-input" id="scan-input" placeholder="扫描或输入商品条形码，按回车添加" autocomplete="off" />
+        <button class="btn btn-sm" style="border-radius:12px;" onclick="handleScan()">添加</button>
+      </div>
+      <div class="scan-tip">支持扫码枪扫描 · 输入后按 Enter 自动添加 · 商品档案未维护时可手动填写</div>
+      <div class="scan-result" id="scan-result"></div>
+    </div>
+
+    <!-- 明细表格 -->
+    <div class="detail-table-wrap" style="margin-top:14px;" id="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;text-align:center;">序</th>
+            <th style="min-width:140px;">商品条形码</th>
+            <th style="min-width:120px;">SKU编码</th>
+            <th style="min-width:160px;">商品名称</th>
+            <th style="width:80px;">规格</th>
+            <th style="width:60px;">单位</th>
+            <th style="width:100px;">出库数量 <span class="required">*</span></th>
+            <th style="width:120px;">批次号</th>
+            <th style="width:90px;text-align:center;">当前可用</th>
+            <th style="width:48px;text-align:center;">删</th>
+          </tr>
+        </thead>
+        <tbody id="detail-tbody">
+          <tr id="empty-row">
+            <td colspan="10">
+              <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">请扫描商品条形码或点击「添加」开始录入出库商品<br/>
+                  <span style="font-size:12px;color:var(--muted);">出库仓库选择后系统将自动展示当前可用库存</span></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="err-banner" class="alert alert-err" style="display:none;margin-top:12px;"></div>
+  </div>
+
+</div><!-- /canvas -->
+
+<!-- 提交确认 modal -->
+<div class="modal-mask" id="modal-submit">
+  <div class="modal">
+    <h3 class="modal-title">确认提交出库？</h3>
+    <p class="modal-body">提交后系统将立即执行库存扣减，<strong>操作不可撤销</strong>。若库存不足将转为「出库失败」并记录原因。</p>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="doSubmit()">确认提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部操作栏 -->
+<div class="footer-bar">
+  <div class="footer-info">
+    共 <strong id="row-count">0</strong> 行商品 ·
+    合计出库 <strong id="total-qty">0</strong> 件
+  </div>
+  <div class="footer-actions">
+    <button class="btn btn-ghost" onclick="goBack()">取消</button>
+    <button class="btn btn-warn" onclick="saveDraft()">保存草稿</button>
+    <button class="btn btn-primary" onclick="askSubmit()">提交出库</button>
+  </div>
+</div>
+
+<div class="footer-note">WMS-WEB 出库管理原型 v1.0 · WMS-WEB-OUT02</div>
+
+<script>
+/* ─── 模拟商品库 ─── */
+const PRODUCTS = {
+  '6901234560001': {sku:'SKU-00101',name:'农夫山泉 550ml',spec:'550ml/瓶',unit:'瓶',stock:{'':{1:28,2:12,3:0}}},
+  '6901234560002': {sku:'SKU-00102',name:'可口可乐 330ml',spec:'330ml/罐',unit:'罐',stock:{'':{1:150,2:80,3:40}}},
+  '6901234560003': {sku:'SKU-00103',name:'统一方便面 红烧牛肉',spec:'103g/包',unit:'包',stock:{'':{1:200,2:0,3:60}}},
+  '6901234560004': {sku:'SKU-00104',name:'蒙牛纯牛奶 250ml',spec:'250ml/盒',unit:'盒',stock:{'':{1:96,2:48,3:24}}},
+  '6901234560005': {sku:'SKU-00105',name:'卫龙辣条 大刀肉',spec:'100g/袋',unit:'袋',stock:{'':{1:5,2:20,3:10}}},
+};
+
+let rows = [];
+let rowId = 0;
+
+// 获取当前仓库编号
+function getWhNum() {
+  const wh = document.getElementById('f-wh').value;
+  const m = wh.match(/(\d)/);
+  return m ? parseInt(m[1]) : null;
+}
+
+function getStock(barcode, batch) {
+  const p = PRODUCTS[barcode];
+  if (!p) return null;
+  const whNum = getWhNum();
+  if (!whNum) return null;
+  const b = batch||'';
+  return (p.stock[b]||p.stock['']||{})[whNum] ?? null;
+}
+
+function onWarehouseChange() { rows.forEach(r => updateStockDisplay(r.id)); }
+function onTypeChange() { /* could add type-specific hints */ }
+
+function updateStockDisplay(id) {
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  const el = document.getElementById(`stock-${id}`);
+  if (!el) return;
+  const s = getStock(row.barcode, row.batch);
+  if (s===null) { el.textContent='—'; el.className='td-stock'; return; }
+  el.textContent = s;
+  el.className = s < 10 ? 'td-stock low' : 'td-stock';
+}
+
+function addRow(barcode, product) {
+  const id = ++rowId;
+  const whNum = getWhNum();
+  const stock = product ? (getStock(barcode,'')||'—') : '—';
+  const row = { id, barcode, sku:product?.sku||'', name:product?.name||'', spec:product?.spec||'', unit:product?.unit||'', qty:'', batch:'' };
+  rows.push(row);
+
+  const emptyRow = document.getElementById('empty-row');
+  if (emptyRow) emptyRow.remove();
+
+  const tbody = document.getElementById('detail-tbody');
+  const tr = document.createElement('tr');
+  tr.id = `row-${id}`;
+  tr.innerHTML = `
+    <td class="td-seq">${rows.length}</td>
+    <td><input class="tbl-input" id="bc-${id}" value="${barcode}" placeholder="条形码" onchange="onBarcodeChange(${id})" style="min-width:130px;" /></td>
+    <td><span class="td-auto" id="sku-${id}">${row.sku||'<span style=color:var(--muted)>未识别</span>'}</span></td>
+    <td><span class="td-auto" id="name-${id}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">${row.name||'<input class="tbl-input" placeholder="手动填写商品名称" style="min-width:140px;" />'}</span></td>
+    <td><span class="td-auto" id="spec-${id}">${row.spec||'—'}</span></td>
+    <td><span class="td-auto" id="unit-${id}">${row.unit||'—'}</span></td>
+    <td><input class="tbl-input" id="qty-${id}" type="number" min="1" placeholder="数量" value="${row.qty}" oninput="onQtyChange(${id})" style="width:88px;" /></td>
+    <td><input class="tbl-input" id="batch-${id}" placeholder="批次号（选填）" value="${row.batch}" oninput="onBatchChange(${id})" style="min-width:110px;" /></td>
+    <td class="td-center"><span class="td-stock" id="stock-${id}">${stock}</span></td>
+    <td class="td-center"><button class="del-btn" onclick="delRow(${id})" title="删除此行">✕</button></td>`;
+  tbody.appendChild(tr);
+  updateFooter();
+}
+
+function onBarcodeChange(id) {
+  const barcode = document.getElementById(`bc-${id}`).value.trim();
+  const row = rows.find(r=>r.id===id);
+  if (!row) return;
+  row.barcode = barcode;
+  const p = PRODUCTS[barcode];
+  if (p) {
+    row.sku=p.sku; row.name=p.name; row.spec=p.spec; row.unit=p.unit;
+    document.getElementById(`sku-${id}`).textContent  = p.sku;
+    document.getElementById(`name-${id}`).textContent = p.name;
+    document.getElementById(`spec-${id}`).textContent = p.spec;
+    document.getElementById(`unit-${id}`).textContent = p.unit;
+  }
+  updateStockDisplay(id);
+}
+
+function onQtyChange(id) {
+  const row = rows.find(r=>r.id===id);
+  if (row) { row.qty = parseInt(document.getElementById(`qty-${id}`).value)||0; }
+  updateFooter();
+}
+
+function onBatchChange(id) {
+  const row = rows.find(r=>r.id===id);
+  if (row) { row.batch = document.getElementById(`batch-${id}`).value; updateStockDisplay(id); }
+}
+
+function delRow(id) {
+  rows = rows.filter(r=>r.id!==id);
+  document.getElementById(`row-${id}`)?.remove();
+  if (!rows.length) {
+    const tbody = document.getElementById('detail-tbody');
+    tbody.innerHTML = `<tr id="empty-row"><td colspan="10">
+      <div class="empty-state"><div class="empty-icon">📋</div>
+      <div class="empty-text">请扫描商品条形码或点击「添加」开始录入出库商品</div></div></td></tr>`;
+  } else {
+    // 重排序号
+    rows.forEach((r,i)=>{ const el=document.querySelector(`#row-${r.id} .td-seq`); if(el) el.textContent=i+1; });
+  }
+  updateFooter();
+}
+
+function handleScan() {
+  const input = document.getElementById('scan-input');
+  const barcode = input.value.trim();
+  if (!barcode) return;
+
+  const resultEl = document.getElementById('scan-result');
+
+  // 格式校验
+  if (barcode.length < 6 || barcode.length > 20) {
+    resultEl.className='scan-result err';
+    resultEl.textContent = '❌ 条形码格式不正确（应为 6-20 位数字或字母数字组合）';
+    return;
+  }
+
+  // 仓库校验
+  if (!document.getElementById('f-wh').value) {
+    resultEl.className='scan-result err';
+    resultEl.textContent = '❌ 请先选择出库仓库';
+    return;
+  }
+
+  const product = PRODUCTS[barcode];
+  if (product) {
+    resultEl.className='scan-result ok';
+    const s = getStock(barcode,'');
+    resultEl.textContent = `✅ 已添加：${product.name} ${product.spec}，当前可用库存 ${s!==null?s:'—'}`;
+  } else {
+    resultEl.className='scan-result err';
+    resultEl.textContent = '⚠️ 条码未找到，已插入空行，请手动填写 SKU 编码和商品名称';
+  }
+
+  addRow(barcode, product||null);
+  input.value = '';
+  setTimeout(()=>{ if(resultEl.className.includes('ok')) resultEl.textContent=''; }, 3000);
+}
+
+document.getElementById('scan-input').addEventListener('keydown', e=>{ if(e.key==='Enter') handleScan(); });
+
+function updateFooter() {
+  const count = rows.length;
+  const total = rows.reduce((s,r)=>s+(parseInt(r.qty)||0), 0);
+  document.getElementById('row-count').textContent = count;
+  document.getElementById('total-qty').textContent  = total;
+  document.getElementById('row-badge').textContent  = `${count} 行`;
+  document.getElementById('row-badge').className    = count>0 ? 'badge badge-green' : 'badge badge-grey';
+}
+
+function validate() {
+  const errors = [];
+  if (!document.getElementById('f-type').value) errors.push('请选择出库类型');
+  if (!document.getElementById('f-wh').value)   errors.push('请选择出库仓库');
+  if (!rows.length) errors.push('请添加至少一条出库商品');
+  rows.forEach((r,i)=>{
+    const qtyEl = document.getElementById(`qty-${r.id}`);
+    const qty = parseInt(qtyEl?.value||'0');
+    if (!qty || qty<1) {
+      errors.push(`第 ${i+1} 行出库数量必须为正整数`);
+      qtyEl?.classList.add('error');
+    } else {
+      qtyEl?.classList.remove('error');
+    }
+    const stock = getStock(r.barcode, r.batch);
+    if (stock!==null && qty > stock) {
+      errors.push(`第 ${i+1} 行出库数量（${qty}）超过可用库存（${stock}）`);
+    }
+  });
+  return errors;
+}
+
+function showErrors(errors) {
+  const el = document.getElementById('err-banner');
+  if (!errors.length) { el.style.display='none'; return; }
+  el.style.display='block';
+  el.innerHTML = '⚠️ 提交失败，请检查以下问题：<ul style="margin:6px 0 0;padding-left:18px;">'
+    + errors.map(e=>`<li>${e}</li>`).join('') + '</ul>';
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function askSubmit() {
+  const errors = validate();
+  if (errors.length) { showErrors(errors); return; }
+  showErrors([]);
+  document.getElementById('modal-submit').classList.add('show');
+}
+
+function doSubmit() {
+  closeModal();
+  // 模拟跳转到详情页（已完成态）
+  const params = new URLSearchParams({no:'OUT-20240601-NEW001',status:'已完成'});
+  window.location.href = `./outbound-detail.html?${params}`;
+}
+
+function saveDraft() {
+  alert('草稿已保存\n（原型演示）\n出库单号：OUT-20240601-DRAFT01');
+}
+
+function goBack() {
+  if (rows.length > 0) {
+    if (!confirm('当前填写内容未保存，确认离开？')) return;
+  }
+  window.location.href = '../outbound.html';
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-mask').forEach(m=>m.classList.remove('show'));
+}
+
+document.querySelectorAll('.modal-mask').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(); }));
+
+// 检查URL参数（编辑草稿模式）
+const urlParams = new URLSearchParams(window.location.search);
+const editNo = urlParams.get('no');
+if (editNo) {
+  document.getElementById('page-title').textContent = '编辑出库单';
+  document.querySelector('.page-meta').textContent = `编辑草稿 · ${editNo}`;
+  // 模拟加载草稿数据
+  document.getElementById('f-type').value = '其他出库';
+  document.getElementById('f-wh').value   = '3号仓库';
+  document.getElementById('f-remark').value = '盘点差异补录';
+}
+</script>
+</body>
+</html>
