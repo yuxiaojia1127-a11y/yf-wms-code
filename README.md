@@ -15,7 +15,7 @@ public/wms-prototypes/        原型唯一维护源目录（即 Vercel 部署目
 │   ├── WMS-WEB端原型.html     WEB 正式入口
 │   ├── pages/                各功能页面（仅含页面结构，引用共享 assets）
 │   ├── assets/
-│   │   ├── wms-requirement-data.js   需求数据唯一来源
+│   │   ├── wms-requirement-data.json 需求数据唯一来源（纯 JSON，app js fetch 加载）
 │   │   └── wms-content-app.js        应用代码唯一来源
 │   └── prototype_live_server.py      本地预览服务（含需求编辑保存接口）
 ├── APP端HTML原型/             APP 端原型（同样使用共享 assets）

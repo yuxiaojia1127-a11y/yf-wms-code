@@ -943,7 +943,12 @@ const menuData = [
     let inventoryRiskSort = { field: 'priority', order: 'desc' };
     let myProductStatsExpanded = false;
     let requirementSaveState = 'idle';
-    const requirementData = window.WMS_REQUIREMENT_DATA || {};
+    const requirementData = {};
+    // 需求数据唯一来源：assets/wms-requirement-data.json（页面打开即异步加载，抽屉打开前通常已就绪）
+    const requirementDataReady = fetch('../assets/wms-requirement-data.json', { cache: 'no-store' })
+      .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
+      .then((json) => { Object.assign(requirementData, json); return requirementData; })
+      .catch((err) => { console.warn('需求数据加载失败:', err); return requirementData; });
 
     /* ── 入库管理状态 ── */
     let inboundView = 'list'; // 'list' | 'create' | 'detail'
@@ -1514,7 +1519,7 @@ const menuData = [
               }
             </div>
             <div class="drawer-foot req-drawer-foot">
-              <div class="req-footnote">保存通过本地可写原型服务完成，数据会写回当前 HTML 文件中的 requirementData 数据块，而不是只保存在浏览器内存中。</div>
+              <div class="req-footnote">保存通过本地可写原型服务完成，数据会写入共享数据文件 assets/wms-requirement-data.json，而不是只保存在浏览器内存中。</div>
               <div class="surface-head-actions">
                 <button class="ghost-btn" data-action="requirement-close">关闭</button>
                 ${requirementEditMode
@@ -6907,7 +6912,7 @@ const menuData = [
         syncRequirementStatusUi();
         openModal({
           title: '保存成功',
-          message: '简易需求文档已写入共享数据文件（assets/wms-requirement-data.js），所有页面刷新后均会读到最新内容。',
+          message: '简易需求文档已写入共享数据文件（assets/wms-requirement-data.json），所有页面刷新后均会读到最新内容。',
           confirmText: '知道了',
           confirmStyle: 'ghost'
         });

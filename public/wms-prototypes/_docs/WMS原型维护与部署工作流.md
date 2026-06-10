@@ -15,13 +15,13 @@
 
 WEB 端各页面不再各自内嵌数据和应用代码，统一引用以下两个共享文件：
 
-- 需求数据唯一来源：`WEB端HTML原型/assets/wms-requirement-data.js`
+- 需求数据唯一来源：`WEB端HTML原型/assets/wms-requirement-data.json`（纯 JSON，由应用代码 fetch 加载）
 - 应用代码唯一来源：`WEB端HTML原型/assets/wms-content-app.js`
 
 约定：
 
 - 修改需求数据/页面交互逻辑时，只改这两个文件，不要往页面 HTML 里重新内嵌副本
-- 页面内"保存"功能由本地服务写入 `wms-requirement-data.js`（按模块合并、自动备份 `.bak`、原子写入）
+- 页面内"保存"功能由本地服务直接读写该 JSON（按模块合并、自动备份 `.bak`、原子写入，无正则替换环节）
 - 新增页面时直接用 `<script src="../assets/...">` 引用共享文件
 
 ## 3. 统一规则

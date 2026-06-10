@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import tempfile
 import threading
 from http import HTTPStatus
@@ -14,16 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent  # wms-prototypes/ 根目录，同时覆盖 WEB 与 APP 两个子目录
 WEB_ENTRY = "WMS原型总入口.html"  # ROOT 下的总入口文件
 
-# 需求数据唯一数据源：所有页面统一通过 <script src> 引用该文件，
+# 需求数据唯一数据源（纯 JSON）：所有页面由 wms-content-app.js fetch 加载，
 # 保存接口也只写这个文件，避免多份内嵌数据相互覆盖、漂移。
-DATA_FILE = ROOT / "WEB端HTML原型" / "assets" / "wms-requirement-data.js"
-
-# 匹配 window.WMS_REQUIREMENT_DATA = { ... }; 数据块
-# ^};$ 匹配顶层闭合行（无缩进的 };），确保精确替换最外层对象
-WMS_DATA_PATTERN = re.compile(
-    r'(window\.WMS_REQUIREMENT_DATA\s*=\s*)([\s\S]+?)(^};$)',
-    re.MULTILINE,
-)
+DATA_FILE = ROOT / "WEB端HTML原型" / "assets" / "wms-requirement-data.json"
 
 # 串行化写入，避免并发保存产生竞态
 _WRITE_LOCK = threading.Lock()
@@ -72,33 +64,24 @@ class PrototypeLiveHandler(SimpleHTTPRequestHandler):
             raise ValueError(f"请求体不是有效 JSON：{exc}") from exc
 
     def _write_requirement_data(self, data: dict) -> None:
-        """合并写入共享数据文件：先备份，再临时文件 + 原子替换。
+        """合并写入共享 JSON 数据文件：先备份，再临时文件 + 原子替换。
 
-        采用按模块 key 合并而非整体覆盖，降低多页面/多标签页
+        按模块 key 合并而非整体覆盖，降低多页面/多标签页
         同时编辑时"后保存者覆盖先保存者"的丢数据风险。
         """
         with _WRITE_LOCK:
             if not DATA_FILE.exists():
                 raise ValueError(f"数据文件不存在：{DATA_FILE}")
             text = DATA_FILE.read_text(encoding="utf-8")
-            match = WMS_DATA_PATTERN.search(text)
-            if not match:
-                raise ValueError("数据文件中未找到 window.WMS_REQUIREMENT_DATA 数据块")
-
-            # 按模块 key 合并：只更新客户端送来的 key，保留文件中其余模块
-            current_raw = f"{match.group(2)}{match.group(3)[:-1]}"  # 去掉结尾分号
             try:
-                merged = json.loads(current_raw)
-            except json.JSONDecodeError:
-                merged = {}
+                merged = json.loads(text)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"数据文件不是有效 JSON，拒绝写入以免破坏：{exc}") from exc
+            if not isinstance(merged, dict):
+                raise ValueError("数据文件顶层应为对象")
             merged.update(data)
 
-            serialized = json.dumps(merged, ensure_ascii=False, indent=2)
-            replaced = WMS_DATA_PATTERN.sub(
-                lambda m: f"{m.group(1)}{serialized};",
-                text,
-                count=1,
-            )
+            serialized = json.dumps(merged, ensure_ascii=False, indent=2) + "\n"
 
             # 备份当前版本
             backup_path = DATA_FILE.with_suffix(DATA_FILE.suffix + ".bak")
@@ -110,7 +93,7 @@ class PrototypeLiveHandler(SimpleHTTPRequestHandler):
             )
             try:
                 with os.fdopen(fd, "w", encoding="utf-8") as tmp:
-                    tmp.write(replaced)
+                    tmp.write(serialized)
                 os.replace(tmp_name, DATA_FILE)
             except BaseException:
                 if os.path.exists(tmp_name):

@@ -479,3 +479,793 @@ select.form-input:focus { border-color: rgba(0,171,149,0.62); box-shadow: 0 0 0 
   </style>
 </head>
 <body data-page="warehouse-room">
+
+<div class="canvas">
+<section class="list-surface">
+
+  <!-- ① 页面标题区 -->
+  <div class="surface-head">
+    <div class="surface-title-wrap">
+      <h1 class="surface-title">库房管理</h1>
+      <div class="surface-subtitle">管理仓库下辖的履约库房，支持库房的查询、新建、编辑与启停操作。库房作为订单履约的最小仓储单元，与货位、单据全链路关联。</div>
+    </div>
+    <div class="surface-head-actions">
+      <button class="requirement-anchor-btn" onclick="openReqDrawer()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        简易需求文档
+      </button>
+    </div>
+  </div>
+
+  <!-- ② 筛选区 + 数据总览 -->
+  <div class="surface-controls">
+
+    <!-- 筛选行 -->
+    <div class="filters-row is-four">
+      <select class="filter-ctrl" id="f-wh">
+        <option value="">全部仓库</option>
+        <option>华南中心仓</option>
+        <option>华东前置仓</option>
+        <option>华北共享仓</option>
+      </select>
+      <select class="filter-ctrl" id="f-type">
+        <option value="">全部库房类型</option>
+        <option>常温库</option>
+        <option>冷藏库</option>
+        <option>冷冻库</option>
+        <option>危化品库</option>
+        <option>其他</option>
+      </select>
+      <select class="filter-ctrl" id="f-status">
+        <option value="">全部状态</option>
+        <option>启用</option>
+        <option>停用</option>
+      </select>
+      <input class="filter-ctrl" id="f-kw" placeholder="库房编码 / 库房名称" />
+      <div class="filters-actions">
+        <button class="accent-btn" onclick="doSearch()">查询</button>
+        <button class="neutral-btn" onclick="resetFilter()">重置</button>
+      </div>
+    </div>
+
+    <!-- 数据总览（可折叠）-->
+    <div class="stats-area">
+      <div class="stats-collapse" id="statsCollapse">
+        <div class="mini-grid is-four" style="padding-bottom:4px;">
+          <article class="mini-card" onclick="filterByStatus('')" title="点击查看全部">
+            <div class="mini-top"><span>库房总数</span><span class="mini-icon">🏪</span></div>
+            <div class="mini-value" id="stat-total">10</div>
+            <div class="mini-note">当前系统内全部库房</div>
+          </article>
+          <article class="mini-card" onclick="filterByStatus('启用')" title="点击筛选启用">
+            <div class="mini-top"><span>启用库房</span><span class="mini-icon">✅</span></div>
+            <div class="mini-value" id="stat-active">8</div>
+            <div class="mini-note">可参与单据履约</div>
+          </article>
+          <article class="mini-card warn" onclick="filterByStatus('停用')" title="点击筛选停用">
+            <div class="mini-top"><span>停用库房</span><span class="mini-icon">⏸</span></div>
+            <div class="mini-value" id="stat-inactive">2</div>
+            <div class="mini-note">点击查看已停用库房</div>
+          </article>
+          <article class="mini-card" title="货位总数">
+            <div class="mini-top"><span>货位总数</span><span class="mini-icon">📦</span></div>
+            <div class="mini-value">346</div>
+            <div class="mini-note">所有启用库房合计</div>
+          </article>
+        </div>
+      </div>
+      <div class="stats-toggle-wrap">
+        <button class="stats-toggle" id="statsToggle" aria-expanded="false" type="button" onclick="toggleStats()">
+          <span class="stats-label">数据总览</span>
+          <span class="stats-chevron"></span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /surface-controls -->
+
+  <!-- ③ 工具栏 + 表格 + 分页 -->
+  <div class="surface-table">
+
+    <div class="toolbar-row">
+      <div class="toolbar-left">
+        <button class="accent-btn" onclick="openDrawer('create')">＋ 新建库房</button>
+        <button class="neutral-btn" onclick="exportList()">⬇ 导出</button>
+        <span class="count-label">共 <strong id="total-count">10</strong> 条记录</span>
+      </div>
+      <div class="toolbar-right">
+        <div class="tool-search">
+          <input type="text" placeholder="快速搜索编码 / 名称" oninput="quickSearch(this.value)" />
+          <span>⌕</span>
+        </div>
+        <button class="icon-mini" type="button" title="刷新" onclick="render(displayed)">⟳</button>
+        <button class="icon-mini" type="button" title="列设置">☰</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>库房编码</th>
+            <th>库房名称</th>
+            <th>所属仓库</th>
+            <th>库房类型</th>
+            <th class="td-center">面积（㎡）</th>
+            <th class="td-center">货位数量</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th class="td-right">操作</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <div class="page-info">第 1 页 / 共 1 页，每页 20 条</div>
+      <div class="page-btns">
+        <div class="page-btn">‹</div>
+        <div class="page-btn active">1</div>
+        <div class="page-btn">›</div>
+      </div>
+    </div>
+
+  </div><!-- /surface-table -->
+
+</section>
+</div><!-- /canvas -->
+
+<!-- ④ 右侧主抽屉（查看 / 新建 / 编辑）-->
+<div class="drawer-mask" id="main-drawer-mask" onclick="handleMaskClick(event)">
+  <aside class="drawer" id="main-drawer">
+
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title" id="drawer-title">新建库房</div>
+        <div class="drawer-subtitle" id="drawer-subtitle">填写库房基础信息后保存</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body" id="drawer-body">
+
+      <!-- 查看模式 -->
+      <div id="view-mode" style="display:none;">
+        <div class="form-group">
+          <div class="form-section-title">基础信息</div>
+          <div class="info-grid">
+            <div class="info-row"><div class="info-label">库房编码</div><div class="info-value" id="v-code">—</div></div>
+            <div class="info-row"><div class="info-label">库房名称</div><div class="info-value" id="v-name">—</div></div>
+            <div class="info-row"><div class="info-label">所属仓库</div><div class="info-value" id="v-wh">—</div></div>
+            <div class="info-row"><div class="info-label">库房类型</div><div class="info-value" id="v-type">—</div></div>
+            <div class="info-row"><div class="info-label">状态</div><div class="info-value" id="v-status">—</div></div>
+          </div>
+          <div class="form-section-title" style="margin-top:4px;">空间信息</div>
+          <div class="info-grid">
+            <div class="info-row"><div class="info-label">面积（㎡）</div><div class="info-value" id="v-area">—</div></div>
+          </div>
+          <div class="info-row"><div class="info-label">备注</div><div class="info-value" id="v-remark">—</div></div>
+          <div class="form-section-title" style="margin-top:4px;">关联信息</div>
+          <div class="info-row">
+            <div class="info-label">货位数量</div>
+            <div class="info-value link" id="v-slots" onclick="jumpToSlots()">—</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-row"><div class="info-label">创建人</div><div class="info-value" id="v-creator">—</div></div>
+            <div class="info-row"><div class="info-label">创建时间</div><div class="info-value" id="v-time">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 编辑 / 新建模式 -->
+      <div id="edit-mode" style="display:none;">
+        <div class="form-group">
+          <div class="form-section-title">基础信息</div>
+
+          <div class="form-row">
+            <label class="form-label">库房编码</label>
+            <input class="form-input readonly" id="f-code" readonly placeholder="系统自动生成" />
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">库房名称 <span class="required">*</span></label>
+            <input class="form-input" id="f-name" placeholder="请输入库房名称" oninput="clearErr('f-name','err-name')" />
+            <div class="form-error" id="err-name">库房名称不能为空</div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">所属仓库 <span class="required">*</span></label>
+            <select class="form-input" id="f-wh-sel" onchange="onWhChange()">
+              <option value="">请选择仓库</option>
+              <option>华南中心仓</option>
+              <option>华东前置仓</option>
+              <option>华北共享仓</option>
+            </select>
+            <div class="form-error" id="err-wh">请选择所属仓库</div>
+          </div>
+
+          <div class="form-row cols-2">
+            <div>
+              <label class="form-label">库房类型</label>
+              <select class="form-input" id="f-type-sel">
+                <option>常温库</option>
+                <option>冷藏库</option>
+                <option>冷冻库</option>
+                <option>危化品库</option>
+                <option>其他</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">状态 <span class="required">*</span></label>
+              <select class="form-input" id="f-status-sel">
+                <option>启用</option>
+                <option>停用</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section-title" style="margin-top:4px;">空间信息</div>
+
+          <div class="form-row cols-2">
+            <div>
+              <label class="form-label">面积（㎡）</label>
+              <input class="form-input" id="f-area" type="number" min="0" placeholder="选填" />
+            </div>
+            <div></div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">备注</label>
+            <textarea class="form-textarea" id="f-remark" placeholder="选填，最多200字" maxlength="200"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /drawer-body -->
+
+    <div class="drawer-foot" id="drawer-foot">
+      <!-- 按钮由 JS 动态注入 -->
+    </div>
+
+  </aside>
+</div>
+
+<!-- 停用确认 Modal -->
+<div class="modal-mask" id="modal-disable">
+  <div class="modal">
+    <div class="modal-title">确认停用该库房？</div>
+    <p class="modal-body">停用后该库房将不可用于新建单据的库房选择，已有<strong>在途/未完结单据不受影响</strong>，仍可继续执行。</p>
+    <div class="modal-foot">
+      <button class="ghost-btn" onclick="closeModal('modal-disable')">取消</button>
+      <button class="modal-btn-danger" onclick="confirmDisable()">确认停用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 启用确认 Modal -->
+<div class="modal-mask" id="modal-enable">
+  <div class="modal">
+    <div class="modal-title">确认启用该库房？</div>
+    <p class="modal-body">启用后该库房将重新出现在新建单据的库房选项中，可参与订单履约。</p>
+    <div class="modal-foot">
+      <button class="ghost-btn" onclick="closeModal('modal-enable')">取消</button>
+      <button class="primary-btn" onclick="confirmEnable()">确认启用</button>
+    </div>
+  </div>
+</div>
+
+<!-- 放弃编辑确认 Modal -->
+<div class="modal-mask" id="modal-discard">
+  <div class="modal">
+    <div class="modal-title">放弃当前修改？</div>
+    <p class="modal-body">当前修改尚未保存，关闭后将丢失所有已填内容。</p>
+    <div class="modal-foot">
+      <button class="ghost-btn" onclick="closeModal('modal-discard')">继续编辑</button>
+      <button class="modal-btn-danger" onclick="forceCloseDrawer()">放弃</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<div class="footer-note">WMS-WEB 仓储管理 · 库房管理原型 v1.0 · WMS-WEB-W07</div>
+
+<!-- 需求文档 Drawer 挂载点 -->
+<div id="req-drawer-root"></div>
+
+<script>
+/* ─── 模拟数据 ─── */
+let RAW = [
+  { code:'WHC-R001', name:'A区常温库',   wh:'华南中心仓', type:'常温库',   area:1200, slots:86,  status:'启用', creator:'张三', time:'2024-01-10 10:20' },
+  { code:'WHC-R002', name:'B区冷藏库',   wh:'华南中心仓', type:'冷藏库',   area:600,  slots:48,  status:'启用', creator:'张三', time:'2024-01-10 10:35' },
+  { code:'WHC-R003', name:'C区冷冻库',   wh:'华南中心仓', type:'冷冻库',   area:400,  slots:32,  status:'启用', creator:'李四', time:'2024-01-12 09:00' },
+  { code:'WHC-R004', name:'D区危化库',   wh:'华南中心仓', type:'危化品库', area:200,  slots:20,  status:'停用', creator:'李四', time:'2024-01-15 14:10' },
+  { code:'WHE-R001', name:'华东1号库房', wh:'华东前置仓', type:'常温库',   area:800,  slots:60,  status:'启用', creator:'王五', time:'2024-02-01 08:30' },
+  { code:'WHE-R002', name:'华东2号库房', wh:'华东前置仓', type:'冷藏库',   area:300,  slots:24,  status:'启用', creator:'王五', time:'2024-02-01 08:45' },
+  { code:'WHE-R003', name:'华东退货暂存', wh:'华东前置仓', type:'其他',    area:150,  slots:12,  status:'启用', creator:'赵六', time:'2024-02-20 11:00' },
+  { code:'WHN-R001', name:'华北主库',    wh:'华北共享仓', type:'常温库',   area:2000, slots:160, status:'启用', creator:'赵六', time:'2024-03-05 09:20' },
+  { code:'WHN-R002', name:'华北冷藏区',  wh:'华北共享仓', type:'冷藏库',   area:500,  slots:40,  status:'启用', creator:'张三', time:'2024-03-05 09:40' },
+  { code:'WHN-R003', name:'华北临时库',  wh:'华北共享仓', type:'其他',     area:100,  slots:—,   status:'停用', creator:'李四', time:'2024-03-10 15:00' },
+];
+
+// 修正 slots 中 — 的情况
+RAW = RAW.map(r => ({ ...r, slots: r.slots === undefined ? 0 : r.slots }));
+
+let displayed = [...RAW];
+let pendingCode = null;
+let drawerMode = 'view'; // 'view' | 'create' | 'edit'
+let editingCode = null;
+let formDirty = false;
+
+/* ─── 状态标签 ─── */
+const STATUS_CLS = { '启用': 'success', '停用': 'danger' };
+const TYPE_CLS   = { '常温库': '', '冷藏库': 'info', '冷冻库': 'info', '危化品库': 'warning', '其他': '' };
+
+function pill(text, cls) {
+  return `<span class="status-pill${cls ? ' '+cls : ''}">${text}</span>`;
+}
+
+/* ─── 渲染表格 ─── */
+function render(data) {
+  document.getElementById('total-count').textContent = data.length;
+  updateStats();
+  const tbody = document.getElementById('table-body');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:48px;color:var(--muted);">暂无数据，请调整筛选条件</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><span class="td-link" onclick="openDrawer('view','${r.code}')">${r.code}</span></td>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.wh}</td>
+      <td>${pill(r.type, TYPE_CLS[r.type])}</td>
+      <td class="td-center">${r.area ? r.area.toLocaleString() : '—'}</td>
+      <td class="td-center">
+        ${r.slots ? `<span class="td-link" onclick="jumpToSlotsBy('${r.code}')">${r.slots}</span>` : '0'}
+      </td>
+      <td>${pill(r.status, STATUS_CLS[r.status])}</td>
+      <td class="td-muted">${r.time}</td>
+      <td class="td-right">
+        <div class="row-actions">
+          <button class="row-action-btn primary" onclick="openDrawer('view','${r.code}')">查看</button>
+          <button class="row-action-btn" onclick="openDrawer('edit','${r.code}')">编辑</button>
+          ${r.status === '启用'
+            ? `<button class="row-action-btn danger" onclick="openDisableModal('${r.code}')">停用</button>`
+            : `<button class="row-action-btn primary" onclick="openEnableModal('${r.code}')">启用</button>`
+          }
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+/* ─── 数据总览 ─── */
+function updateStats() {
+  document.getElementById('stat-total').textContent   = RAW.length;
+  document.getElementById('stat-active').textContent  = RAW.filter(r => r.status === '启用').length;
+  document.getElementById('stat-inactive').textContent = RAW.filter(r => r.status === '停用').length;
+}
+
+/* ─── 筛选 ─── */
+function doSearch() {
+  const wh     = document.getElementById('f-wh').value;
+  const type   = document.getElementById('f-type').value;
+  const status = document.getElementById('f-status').value;
+  const kw     = document.getElementById('f-kw').value.trim().toLowerCase();
+  displayed = RAW.filter(r =>
+    (!wh     || r.wh === wh) &&
+    (!type   || r.type === type) &&
+    (!status || r.status === status) &&
+    (!kw     || r.code.toLowerCase().includes(kw) || r.name.toLowerCase().includes(kw))
+  );
+  render(displayed);
+}
+
+function resetFilter() {
+  ['f-wh','f-type','f-status'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-kw').value = '';
+  displayed = [...RAW]; render(displayed);
+}
+
+function filterByStatus(s) {
+  document.getElementById('f-status').value = s;
+  doSearch();
+}
+
+function quickSearch(val) {
+  const q = val.trim().toLowerCase();
+  if (!q) { render(displayed); return; }
+  render(displayed.filter(r =>
+    r.code.toLowerCase().includes(q) || r.name.toLowerCase().includes(q) || r.wh.toLowerCase().includes(q)
+  ));
+}
+
+function exportList() {
+  showToast('正在导出，请稍候…', 'info');
+  setTimeout(() => showToast('导出完成', 'success'), 1800);
+}
+
+/* ─── stats 折叠 ─── */
+function toggleStats() {
+  const btn = document.getElementById('statsToggle');
+  const col = document.getElementById('statsCollapse');
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  if (expanded) {
+    col.style.height = col.scrollHeight + 'px';
+    requestAnimationFrame(() => { col.style.height = '0'; });
+    btn.setAttribute('aria-expanded', 'false');
+  } else {
+    col.style.height = col.scrollHeight + 'px';
+    col.addEventListener('transitionend', function h() { col.style.height = 'auto'; col.removeEventListener('transitionend', h); });
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+/* ─── 抽屉开关 ─── */
+function openDrawer(mode, code) {
+  drawerMode = mode;
+  editingCode = code || null;
+  formDirty = false;
+
+  const mask = document.getElementById('main-drawer-mask');
+  const titleEl = document.getElementById('drawer-title');
+  const subEl   = document.getElementById('drawer-subtitle');
+  const foot    = document.getElementById('drawer-foot');
+  const viewDiv = document.getElementById('view-mode');
+  const editDiv = document.getElementById('edit-mode');
+
+  if (mode === 'view') {
+    const r = RAW.find(x => x.code === code);
+    titleEl.textContent = '库房详情';
+    subEl.textContent   = r ? r.name : '';
+    viewDiv.style.display = '';
+    editDiv.style.display = 'none';
+    if (r) fillViewMode(r);
+    foot.innerHTML = `
+      <button class="ghost-btn" onclick="closeDrawer()">关闭</button>
+      <button class="primary-btn" onclick="openDrawer('edit','${code}')">去编辑</button>`;
+
+  } else if (mode === 'create') {
+    titleEl.textContent = '新建库房';
+    subEl.textContent   = '填写库房基础信息后保存';
+    viewDiv.style.display = 'none';
+    editDiv.style.display = '';
+    clearForm();
+    foot.innerHTML = `
+      <button class="ghost-btn" onclick="tryCloseDrawer()">取消</button>
+      <button class="primary-btn" onclick="saveForm()">保存</button>`;
+
+  } else if (mode === 'edit') {
+    const r = RAW.find(x => x.code === code);
+    titleEl.textContent = '编辑库房';
+    subEl.textContent   = r ? r.name : '';
+    viewDiv.style.display = 'none';
+    editDiv.style.display = '';
+    if (r) fillEditForm(r);
+    foot.innerHTML = `
+      <button class="ghost-btn" onclick="tryCloseDrawer()">取消</button>
+      <button class="primary-btn" onclick="saveForm()">保存</button>`;
+  }
+
+  mask.classList.add('show');
+  // 监听表单变化
+  setTimeout(() => {
+    document.querySelectorAll('#edit-mode input,#edit-mode select,#edit-mode textarea')
+      .forEach(el => el.addEventListener('input', () => { formDirty = true; }, { once: false }));
+  }, 100);
+}
+
+function fillViewMode(r) {
+  document.getElementById('v-code').textContent    = r.code;
+  document.getElementById('v-name').textContent    = r.name;
+  document.getElementById('v-wh').textContent      = r.wh;
+  document.getElementById('v-type').innerHTML      = `<span class="status-pill${TYPE_CLS[r.type] ? ' '+TYPE_CLS[r.type] : ''}">${r.type}</span>`;
+  document.getElementById('v-status').innerHTML    = `<span class="status-pill ${STATUS_CLS[r.status]}">${r.status}</span>`;
+  document.getElementById('v-area').textContent    = r.area ? r.area.toLocaleString() + ' ㎡' : '—';
+  document.getElementById('v-remark').textContent  = r.remark || '—';
+  document.getElementById('v-slots').textContent   = r.slots ? r.slots + ' 个（点击跳转货位管理）' : '0 个';
+  document.getElementById('v-creator').textContent = r.creator;
+  document.getElementById('v-time').textContent    = r.time;
+  document.getElementById('v-slots').dataset.code  = r.code;
+}
+
+function fillEditForm(r) {
+  document.getElementById('f-code').value      = r.code;
+  document.getElementById('f-name').value      = r.name;
+  document.getElementById('f-wh-sel').value    = r.wh;
+  document.getElementById('f-type-sel').value  = r.type;
+  document.getElementById('f-status-sel').value = r.status;
+  document.getElementById('f-area').value      = r.area || '';
+  document.getElementById('f-remark').value    = r.remark || '';
+}
+
+function clearForm() {
+  document.getElementById('f-code').value       = '';
+  document.getElementById('f-name').value       = '';
+  document.getElementById('f-wh-sel').value     = '';
+  document.getElementById('f-type-sel').value   = '常温库';
+  document.getElementById('f-status-sel').value = '启用';
+  document.getElementById('f-area').value       = '';
+  document.getElementById('f-remark').value     = '';
+  ['err-name','err-wh'].forEach(id => document.getElementById(id).classList.remove('show'));
+  ['f-name','f-wh-sel'].forEach(id => document.getElementById(id).classList.remove('error'));
+}
+
+function onWhChange() {
+  formDirty = true;
+  clearErr('f-wh-sel', 'err-wh');
+}
+
+function clearErr(inputId, errId) {
+  document.getElementById(inputId).classList.remove('error');
+  document.getElementById(errId).classList.remove('show');
+}
+
+function tryCloseDrawer() {
+  if (formDirty) {
+    document.getElementById('modal-discard').classList.add('show');
+  } else {
+    closeDrawer();
+  }
+}
+
+function closeDrawer() {
+  document.getElementById('main-drawer-mask').classList.remove('show');
+  formDirty = false;
+}
+
+function forceCloseDrawer() {
+  closeModal('modal-discard');
+  closeDrawer();
+}
+
+function handleMaskClick(e) {
+  if (e.target === document.getElementById('main-drawer-mask')) tryCloseDrawer();
+}
+
+/* ─── 表单保存 ─── */
+function saveForm() {
+  const name   = document.getElementById('f-name').value.trim();
+  const wh     = document.getElementById('f-wh-sel').value;
+  let valid = true;
+
+  if (!name) {
+    document.getElementById('f-name').classList.add('error');
+    document.getElementById('err-name').classList.add('show');
+    valid = false;
+  }
+  if (!wh) {
+    document.getElementById('f-wh-sel').classList.add('error');
+    document.getElementById('err-wh').classList.add('show');
+    valid = false;
+  }
+  if (!valid) return;
+
+  const type   = document.getElementById('f-type-sel').value;
+  const status = document.getElementById('f-status-sel').value;
+  const area   = parseInt(document.getElementById('f-area').value) || 0;
+  const remark = document.getElementById('f-remark').value.trim();
+  const now    = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g,'-').slice(0,16);
+
+  if (drawerMode === 'create') {
+    // 生成编码
+    const prefix = wh === '华南中心仓' ? 'WHC' : wh === '华东前置仓' ? 'WHE' : 'WHN';
+    const existing = RAW.filter(r => r.wh === wh).length;
+    const code = `${prefix}-R${String(existing + 1).padStart(3,'0')}`;
+    RAW.unshift({ code, name, wh, type, area, slots: 0, status, remark, creator: '当前用户', time: now });
+    displayed = [...RAW];
+    render(displayed);
+    closeDrawer();
+    showToast('库房创建成功', 'success');
+  } else {
+    RAW = RAW.map(r => r.code === editingCode ? { ...r, name, wh, type, area, status, remark } : r);
+    displayed = displayed.map(r => r.code === editingCode ? { ...r, name, wh, type, area, status, remark } : r);
+    render(displayed);
+    closeDrawer();
+    showToast('库房信息已更新', 'success');
+  }
+}
+
+/* ─── 货位跳转 ─── */
+function jumpToSlots() {
+  const code = document.getElementById('v-slots').dataset.code;
+  jumpToSlotsBy(code);
+}
+function jumpToSlotsBy(code) {
+  showToast(`跳转货位管理，筛选：库房 ${code}（原型演示）`, 'info');
+}
+
+/* ─── Modal ─── */
+function openDisableModal(code) { pendingCode = code; document.getElementById('modal-disable').classList.add('show'); }
+function openEnableModal(code)  { pendingCode = code; document.getElementById('modal-enable').classList.add('show'); }
+
+function confirmDisable() {
+  RAW = RAW.map(r => r.code === pendingCode ? { ...r, status: '停用' } : r);
+  displayed = displayed.map(r => r.code === pendingCode ? { ...r, status: '停用' } : r);
+  closeModal('modal-disable');
+  render(displayed);
+  showToast('库房已停用', 'success');
+}
+function confirmEnable() {
+  RAW = RAW.map(r => r.code === pendingCode ? { ...r, status: '启用' } : r);
+  displayed = displayed.map(r => r.code === pendingCode ? { ...r, status: '启用' } : r);
+  closeModal('modal-enable');
+  render(displayed);
+  showToast('库房已启用', 'success');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+  pendingCode = null;
+}
+
+// 点遮罩关闭 Modal
+document.querySelectorAll('.modal-mask').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) m.classList.remove('show');
+  });
+});
+
+/* ─── Toast ─── */
+function showToast(msg, type = 'success') {
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 350); }, type === 'error' ? 5000 : 3000);
+}
+
+/* ─── ESC 关闭 ─── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('main-drawer-mask').classList.contains('show')) tryCloseDrawer();
+    document.querySelectorAll('.modal-mask.show').forEach(m => m.classList.remove('show'));
+  }
+});
+
+/* ─── 初始化 ─── */
+render(RAW);
+
+try { window.parent.postMessage({ type: 'wms-content-ready', pageKey: 'warehouse-room' }, '*'); } catch(e) {}
+</script>
+
+<!-- ── 需求文档 Drawer 脚本 ── -->
+<script>
+const REQ_MD_SRC = '../assets/requirements/warehouse-room.md';
+let reqOpen = false;
+let reqState = { status: 'idle', content: '', error: '' };
+
+function escH(v) {
+  return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtInline(t) {
+  return escH(t||'').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+}
+function mdTable(lines) {
+  if (lines.length < 2) return '';
+  const pr = l => l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+  const hd = pr(lines[0]), rows = lines.slice(2).map(pr);
+  return `<table><thead><tr>${hd.map(c=>`<th>${fmtInline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${hd.map((_,i)=>`<td>${fmtInline(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function renderMd(src) {
+  src = String(src||'').replace(/\r\n/g,'\n').trim();
+  if (!src) return '<div class="req-md-empty">文档暂无内容</div>';
+  const lines = src.split('\n'), html = []; let i = 0;
+  while (i < lines.length) {
+    const raw = lines[i], line = raw.trim();
+    if (!line) { i++; continue; }
+    if (line.startsWith('```')) {
+      const code=[]; i++;
+      while(i<lines.length && !lines[i].trim().startsWith('```')){code.push(lines[i]);i++;}
+      if(i<lines.length)i++;
+      html.push(`<pre><code>${escH(code.join('\n'))}</code></pre>`); continue;
+    }
+    if(/^#{1,4}\s+/.test(line)){
+      const lv=line.match(/^#+/)[0].length;
+      html.push(`<h${lv}>${fmtInline(line.replace(/^#{1,4}\s+/,''))}</h${lv}>`); i++; continue;
+    }
+    const isTbl = line.includes('|') && i+1<lines.length && /^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]);
+    if(isTbl){
+      const tbl=[raw,lines[i+1]]; i+=2;
+      while(i<lines.length && lines[i].trim() && lines[i].includes('|')){tbl.push(lines[i]);i++;}
+      html.push(mdTable(tbl)); continue;
+    }
+    if(/^[-*]\s+/.test(line)){
+      const it=[];
+      while(i<lines.length && /^[-*]\s+/.test(lines[i].trim())){it.push(lines[i].trim().replace(/^[-*]\s+/,''));i++;}
+      html.push(`<ul>${it.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ul>`); continue;
+    }
+    if(/^\d+\.\s+/.test(line)){
+      const it=[];
+      while(i<lines.length && /^\d+\.\s+/.test(lines[i].trim())){it.push(lines[i].trim().replace(/^\d+\.\s+/,''));i++;}
+      html.push(`<ol>${it.map(x=>`<li>${fmtInline(x)}</li>`).join('')}</ol>`); continue;
+    }
+    const para=[line]; i++;
+    while(i<lines.length){
+      const nx=lines[i].trim();
+      if(!nx||/^#{1,4}\s+/.test(nx)||/^[-*]\s+/.test(nx)||/^\d+\.\s+/.test(nx))break;
+      if((nx.includes('|')&&i+1<lines.length&&/^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]))||nx.startsWith('```'))break;
+      para.push(nx); i++;
+    }
+    html.push(`<p>${fmtInline(para.join('<br/>'))}</p>`);
+  }
+  return `<div class="req-md-article">${html.join('')}</div>`;
+}
+
+function renderReqDrawer() {
+  const root = document.getElementById('req-drawer-root');
+  if (!root) return;
+  if (!reqOpen) { root.innerHTML = ''; return; }
+  const stMap = { idle:'待读取', loading:'读取中', loaded:'已读取', error:'读取失败' };
+  const stCls = reqState.status==='loaded' ? 'saved' : reqState.status==='error' ? 'err' : '';
+  const body = reqState.status==='error'
+    ? `<div class="req-md-empty">读取失败：${escH(reqState.error)}</div>`
+    : (!reqState.content||reqState.status==='loading')
+      ? '<div class="req-md-empty">正在读取需求文档…</div>'
+      : renderMd(reqState.content);
+  root.innerHTML = `
+    <div class="drawer-mask req-drawer-mask show" id="req-mask">
+      <aside class="drawer req-drawer show" style="transform:translateX(0)">
+        <div class="drawer-head req-head">
+          <div>
+            <div class="drawer-title">简易需求文档</div>
+            <div class="drawer-subtitle">库房管理 · 读取外部 md 文件</div>
+          </div>
+          <div style="display:inline-flex;align-items:center;gap:10px;">
+            <span class="requirement-status ${stCls}">${stMap[reqState.status]||'待读取'}</span>
+            <button class="drawer-close" id="req-close" aria-label="关闭">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="drawer-body req-body">
+          <div class="req-md-path">读取路径：${escH(REQ_MD_SRC)}</div>
+          ${body}
+        </div>
+        <div class="drawer-foot" style="justify-content:space-between;">
+          <span class="req-footnote">内容来自外部 md 文件，请确认本地原型服务已启动（http://127.0.0.1:8091）。</span>
+          <div style="display:inline-flex;gap:10px;">
+            <button class="ghost-btn" id="req-close2">关闭</button>
+            <button class="primary-btn" id="req-reload">重新读取</button>
+          </div>
+        </div>
+      </aside>
+    </div>`;
+  document.getElementById('req-mask').addEventListener('click', e => { if(e.target===document.getElementById('req-mask')) closeReqDrawer(); });
+  document.getElementById('req-close').addEventListener('click', closeReqDrawer);
+  document.getElementById('req-close2').addEventListener('click', closeReqDrawer);
+  document.getElementById('req-reload').addEventListener('click', () => loadReqDoc(true));
+}
+
+async function loadReqDoc(force=false) {
+  if(!force && reqState.status==='loaded' && reqState.content){ renderReqDrawer(); return; }
+  reqState = { status:'loading', content:'', error:'' };
+  renderReqDrawer();
+  try {
+    const res = await fetch(REQ_MD_SRC + '?v=' + Date.now(), { cache:'no-store' });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    reqState = { status:'loaded', content: await res.text(), error:'' };
+  } catch(err) {
+    reqState = { status:'error', content:'', error: err.message||'未知错误' };
+  }
+  renderReqDrawer();
+}
+
+function openReqDrawer() { reqOpen=true; renderReqDrawer(); loadReqDoc(); }
+function closeReqDrawer() { reqOpen=false; renderReqDrawer(); }
+document.addEventListener('keydown', e => { if(e.key==='Escape' && reqOpen) closeReqDrawer(); });
+</script>
+</body>
+</html>
+

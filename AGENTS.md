@@ -6,7 +6,7 @@
 
 WEB 端原型的数据和应用代码**各只有一份**，所有页面通过 `<script src>` 引用：
 
-- 需求数据唯一来源：`public/wms-prototypes/WEB端HTML原型/assets/wms-requirement-data.js`
+- 需求数据唯一来源：`public/wms-prototypes/WEB端HTML原型/assets/wms-requirement-data.json`（纯 JSON，由 wms-content-app.js fetch 加载）
 - 应用代码唯一来源：`public/wms-prototypes/WEB端HTML原型/assets/wms-content-app.js`
 
 **禁止**：

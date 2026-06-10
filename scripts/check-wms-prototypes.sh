@@ -17,17 +17,22 @@ for f in "$PROTO_DIR/WMS原型总入口.html" \
 done
 
 echo "==> 校验共享数据/代码文件"
-for f in "$PROTO_DIR/WEB端HTML原型/assets/wms-requirement-data.js" \
-         "$PROTO_DIR/WEB端HTML原型/assets/wms-content-app.js"; do
+APP_JS="$PROTO_DIR/WEB端HTML原型/assets/wms-content-app.js"
+DATA_JSON="$PROTO_DIR/WEB端HTML原型/assets/wms-requirement-data.json"
+for f in "$APP_JS" "$DATA_JSON"; do
   if [ ! -f "$f" ]; then
     echo "❌ 共享文件缺失：$f"
     exit 1
   fi
-  if ! node --check "$f" 2>/dev/null; then
-    echo "❌ JS 语法检查未通过：$f"
-    exit 1
-  fi
 done
+if ! node --check "$APP_JS" 2>/dev/null; then
+  echo "❌ JS 语法检查未通过：$APP_JS"
+  exit 1
+fi
+if ! python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert isinstance(d, dict)" "$DATA_JSON" 2>/dev/null; then
+  echo "❌ 数据文件不是有效 JSON 对象：$DATA_JSON"
+  exit 1
+fi
 
 echo "==> 校验页面未重新内嵌数据/代码副本（防回归）"
 python3 - "$PROTO_DIR" <<'EOF'
@@ -48,7 +53,7 @@ for p in sorted(proto_dir.rglob('*.html')):
         continue  # 草稿与文档不参与正式链路校验
     text = p.read_text(encoding='utf-8', errors='replace')
     if data_pat.search(text):
-        errors.append(f"{rel}: 检测到内嵌 WMS_REQUIREMENT_DATA 数据副本（应引用 assets/wms-requirement-data.js）")
+        errors.append(f"{rel}: 检测到内嵌 WMS_REQUIREMENT_DATA 数据副本（数据应放在 assets/wms-requirement-data.json）")
     for s in script_pat.findall(text):
         size = len(s.encode('utf-8'))
         if size > MAX_INLINE_SCRIPT and str(rel) not in SIZE_EXEMPT:
