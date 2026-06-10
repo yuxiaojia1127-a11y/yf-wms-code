@@ -8,9 +8,9 @@
 
 当前正式链路只认以下 3 个固定文件名：
 
-- `public/wms-prototypes/02WEB端HTML版/WMS原型总入口.html`
-- `public/wms-prototypes/02WEB端HTML版/WMS-WEB端原型.html`
-- `public/wms-prototypes/03APP端HTML版/WMS-APP端原型.html`
+- `public/wms-prototypes/WMS原型总入口.html`
+- `public/wms-prototypes/WEB端HTML原型/WMS-WEB端原型.html`
+- `public/wms-prototypes/APP端HTML原型/WMS-APP端原型.html`
 
 以下动作只允许针对这 3 个正式文件执行：
 

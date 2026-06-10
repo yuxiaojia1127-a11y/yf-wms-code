@@ -1,0 +1,9 @@
+{
+  "name": "yf-wms-code",
+  "private": true,
+  "description": "WMS HTML 原型维护与部署",
+  "scripts": {
+    "preview:wms-prototypes": "python3 public/wms-prototypes/WEB端HTML原型/prototype_live_server.py --port 8091",
+    "deploy:wms-prototypes": "bash scripts/deploy-wms-prototypes.sh"
+  }
+}

@@ -1,9 +1,9 @@
 const menuData = [
       { key: 'cockpit', icon: 'coverage', name: '驾驶舱', meta: '总览驾驶舱 / 1.0 自营版', direct: true, items: [ { key: 'cockpit', name: '总览驾驶舱', page: 'WMS-WEB-036', active: true } ] },
       { key: 'storage', icon: 'warehouse', name: '仓储管理', meta: '仓库 / 库区 / 货位 / 人员', items: [ { key: 'warehouse', name: '仓库管理', page: 'WMS-WEB-W01' }, { key: 'zone', name: '库区管理', page: 'WMS-WEB-W02' }, { key: 'location', name: '货位管理', page: 'WMS-WEB-W03' }, { key: 'warehouse-staff', name: '仓库人员管理', page: 'WMS-WEB-W04' } ] },
-      { key: 'product-manage', icon: 'inventory', name: '商品管理', meta: '我的商品', items: [ { key: 'my-product', name: '我的商品', page: 'WMS-WEB-006-MY' } ] },
+      { key: 'product-manage', icon: 'inventory', name: '商品管理', meta: '我的商品 / 接口上下架日志', items: [ { key: 'my-product', name: '我的商品', page: 'WMS-WEB-006-MY' }, { key: 'product-listing-log', name: '接口上下架日志', page: 'WMS-WEB-006-LOG' } ] },
       { key: 'owner-data', icon: 'owner', name: '基础资料', meta: '销售渠道管理', items: [ { key: 'shop', name: '销售渠道管理', page: 'WMS-WEB-004-SHOP' } ] },
-      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' } ] },
+      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
       { key: 'warehouse-job', icon: 'operation', name: '仓内作业', meta: '入库 / 出库 / 调拨 / 盘点 / 仓内作业跟踪', items: [ { key: 'inbound', name: '入库管理', page: 'WMS-WEB-010' }, { key: 'outbound', name: '出库管理', page: 'WMS-WEB-016' }, { key: 'transfer', name: '调拨管理', page: 'WMS-WEB-028' }, { key: 'stocktake', name: '盘点管理', page: 'WMS-WEB-STOCKTAKE' }, { key: 'warehouse-operation-track-list', name: '仓内作业跟踪', page: 'WMS-WEB-030A' } ] },
       { key: 'fulfillment', icon: 'fulfillment', name: '履约中心', meta: '履约链路跟踪', items: [ { key: 'fulfillment-link-track-list', name: '履约链路跟踪', page: 'WMS-WEB-020A' } ] },
       { key: 'after-sale', icon: 'service', name: '售后中心', meta: '退货管理', items: [ { key: 'return', name: '退货管理', page: 'WMS-WEB-026' } ] },
@@ -25,13 +25,13 @@ const menuData = [
       { title: '鸡胸肉 冷鲜 1kg', subtitle: 'CHICKEN-1KG · 1kg*1袋', stock: '库存 19 袋 · 可售 11 袋 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20袋）', level: 'warning', target: 'inventory-query' }
     ];
     const cockpitTodoFillers = [
-      { title: 'PO-240603-027', type: '入库待收货', meta: '2号仓库 · 已等待 96 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-      { title: 'SO-240603-239', type: '待复核', meta: '1号仓库 · 2 个 SKU 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-      { title: 'SO-240603-245', type: '待发运', meta: '2号仓库 · 快递 · 已等待 38 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
-      { title: 'EX-240603-015', type: '库存异常', meta: '2号仓库 · 快递 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'exception-job' },
-      { title: 'EX-240603-018', type: '履约异常', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'exception-job' },
-      { title: 'SO-240603-251', type: '待拣货', meta: '2号仓库 · 快递 · 已等待 45 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-      { title: 'TK-240603-006', type: '工单待关闭', meta: '库存差异已处理 · 等待主管确认关闭', owner: '刘静', level: 'warning', target: 'exception-job' }
+      { title: 'PO-240603-027', type: '待入库', meta: '2号仓库 · 快递 · 已等待 96 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
+      { title: 'SO-240603-263', type: '待接单揽货', meta: '1号仓库 · 快递 · 已等待 74 分钟', owner: '王敏', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-251', type: '待揽货', meta: '2号仓库 · 即时配送 · 已等待 45 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-239', type: '待打包复核', meta: '1号仓库 · 即时配送 · 已等待 36 分钟', owner: '李昊', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-245', type: '待发货', meta: '2号仓库 · 快递 · 已等待 38 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
+      { title: 'SO-240603-256', type: '待接单', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'fulfillment-link-track-list' },
+      { title: 'SO-240603-242', type: '重新派单', meta: '2号仓库 · 即时配送 · 已等待 68 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' }
     ];
     const cockpitSnapshots = {
       '全部仓库': {
@@ -63,10 +63,9 @@ const menuData = [
           { title: '鲜奶 1L', subtitle: 'MILK-1L · 1L*1盒', stock: '库存 42 盒 · 可售 18 盒 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20盒）', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'PO-240603-018', type: '入库待收货', meta: '1号仓库 · 已等待 108 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-          { title: 'SO-240603-221', type: '履约待拣货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-          { title: 'SO-240603-231', type: '待复核', meta: '2号仓库 · 拣货已完成 · 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-          { title: 'EX-240603-009', type: '异常待关闭', meta: '库存异常 · 货位冻结与盘点差异关联', owner: '陈晨', level: 'danger', target: 'exception-job' }
+          { title: 'SO-240603-218', type: '待接单', meta: '2号仓库 · 即时配送 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' },
+          { title: 'PO-240603-018', type: '待入库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
+          { title: 'SO-240603-221', type: '待揽货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' }
         ]
       },
       '1号仓库': {
@@ -97,9 +96,9 @@ const menuData = [
           { title: '鲜奶 1L', subtitle: 'MILK-1L · 1L*1盒', stock: '库存 28 盒 · 可售 14 盒 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20盒）', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'PO-240603-018', type: '入库待收货', meta: '1号仓库 · 已等待 108 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-          { title: 'SO-240603-221', type: '履约待拣货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-          { title: 'EX-240603-009', type: '异常待关闭', meta: '1号仓库 · 库存异常 · 已等待 64 分钟', owner: '陈晨', level: 'danger', target: 'exception-job' }
+          { title: 'PO-240603-018', type: '待入库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
+          { title: 'SO-240603-221', type: '待揽货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
+          { title: 'SO-240603-227', type: '重新派单', meta: '1号仓库 · 即时配送 · 已等待 64 分钟', owner: '周璇', level: 'danger', target: 'fulfillment-link-track-list' }
         ]
       },
       '2号仓库': {
@@ -130,9 +129,9 @@ const menuData = [
           { title: '可乐 330ml', subtitle: 'COLA-330 · 330ml*24听', stock: '库存 24 箱 · 锁定 7 箱 · 2号仓库', value: '高锁定占比', meta: '2号仓库 · 锁定占比 29%', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'SO-240603-231', type: '待复核', meta: '拣货已完成 · 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-          { title: 'SO-240603-248', type: '待发运', meta: '2号仓库 · 快递 · 已等待 92 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
-          { title: 'EX-240603-012', type: '出库异常', meta: '2号仓库 · 快递 · 已等待 42 分钟', owner: '周璇', level: 'warning', target: 'exception-job' }
+          { title: 'SO-240603-248', type: '待发货', meta: '2号仓库 · 快递 · 已等待 92 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
+          { title: 'SO-240603-231', type: '待打包复核', meta: '2号仓库 · 快递 · 已等待 58 分钟', owner: '李昊', level: 'danger', target: 'warehouse-operation-track-list' },
+          { title: 'PO-240603-033', type: '待入库', meta: '2号仓库 · 快递 · 已等待 49 分钟', owner: '刘静', level: 'warning', target: 'inbound' }
         ]
       }
     };
@@ -745,7 +744,8 @@ const menuData = [
       'inventory-risk-list': '../assets/requirements/inventory-risk-list.md',
       'warehouse-operation-track-list': '../assets/requirements/warehouse-operation-track-list.md',
       'fulfillment-link-track-list': '../assets/requirements/fulfillment-link-track-list.md',
-      'inbound': '../assets/requirements/inbound.md'
+      'inbound': '../assets/requirements/inbound.md',
+      'product-listing-log': '../assets/requirements/product-listing-log.md'
     };
     const requirementPageConfigs = {
       cockpit: { featureName: '驾驶舱' },
@@ -759,7 +759,8 @@ const menuData = [
       owner: { featureName: '租户目录' },
       zone: { featureName: '库区管理' },
       location: { featureName: '货位管理' },
-      inbound: { featureName: '入库管理' }
+      inbound: { featureName: '入库管理' },
+      'product-listing-log': { featureName: '接口上下架日志' }
     };
     const funnelPageConfigs = {
       'warehouse-operation-track-list': {
@@ -924,6 +925,7 @@ const menuData = [
     let requirementEditMode = false;
     let requirementDraft = null;
     let modalState = null;
+    let listingLogDetailId = '';
     let selectedWarehouseIds = new Set();
     let selectedWarehouseStaffIds = new Set();
     let selectedOwnerIds = new Set();
@@ -1620,15 +1622,15 @@ const menuData = [
     }
 
     function getUrgentTodoStatus(item) {
-      if (String(item.type || '').includes('关闭')) return '待关闭';
-      if (String(item.type || '').includes('异常')) return '待处理';
-      return '处理中';
+      return getTodoWaitMinutes(item) > 60 ? '已超时' : '待处理';
     }
 
     function getUrgentTodoSuggestion(item) {
       if (item.target === 'inbound') return '进入入库管理，确认收货或处理收货异常。';
       if (item.target === 'shipment') return '进入发货履约，优先处理待发运交接。';
       if (item.target === 'shipment-track') return '进入履约执行跟踪，定位卡点并推进处理。';
+      if (item.target === 'warehouse-operation-track-list') return '进入仓内作业跟踪，定位节点卡点并推进处理。';
+      if (item.target === 'fulfillment-link-track-list') return '进入履约链路跟踪，跟进接单与派单进度。';
       if (item.target === 'exception-job') return '进入异常与工单，补充处理记录并完成闭环。';
       return '进入对应业务页面继续处理。';
     }
@@ -3882,6 +3884,271 @@ const menuData = [
       `;
     }
 
+    /* ─── 接口上下架日志 Mock Data ─── */
+    const listingLogRows = [
+      { id: 'LOG-001', triggeredAt: '2026-06-09 10:42:18', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '下架', event: '出库发货', docNo: 'CK-240609-031', stockBefore: 1,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-002', triggeredAt: '2026-06-09 10:15:03', skuCode: 'EGG-30',      skuName: '鸡蛋 30 枚装',      category: '食品',   action: '上架', event: '入库上架', docNo: 'RK-240609-018', stockBefore: 0,  stockAfter: 12, result: '成功', failReason: '' },
+      { id: 'LOG-003', triggeredAt: '2026-06-09 09:58:44', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '下架', event: '库存冻结', docNo: 'KS-240609-005', stockBefore: 2,  stockAfter: 0,  result: '失败', failReason: 'SKU不存在于电商系统，请确认商品是否已同步' },
+      { id: 'LOG-004', triggeredAt: '2026-06-09 09:30:27', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '上架', event: '退货解冻', docNo: 'TH-240609-009', stockBefore: 0,  stockAfter: 8,  result: '成功', failReason: '' },
+      { id: 'LOG-005', triggeredAt: '2026-06-09 08:51:11', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '下架', event: '库存调整', docNo: 'KS-240609-002', stockBefore: 3,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-006', triggeredAt: '2026-06-08 17:22:39', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '上架', event: '入库上架', docNo: 'RK-240608-041', stockBefore: 0,  stockAfter: 24, result: '成功', failReason: '' },
+      { id: 'LOG-007', triggeredAt: '2026-06-08 16:04:55', skuCode: 'CHICKEN-1KG', skuName: '鸡胸肉 冷鲜 1kg',  category: '生鲜',   action: '下架', event: '出库发货', docNo: 'CK-240608-029', stockBefore: 1,  stockAfter: 0,  result: '失败', failReason: '接口请求超时（5003ms > 5000ms），已触发重试，重试3次后仍失败' },
+      { id: 'LOG-008', triggeredAt: '2026-06-08 14:38:02', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '上架', event: '退货解冻', docNo: 'TH-240608-012', stockBefore: 0,  stockAfter: 5,  result: '成功', failReason: '' },
+      { id: 'LOG-009', triggeredAt: '2026-06-08 11:19:28', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '上架', event: '入库上架', docNo: 'RK-240608-033', stockBefore: 0,  stockAfter: 36, result: '成功', failReason: '' },
+      { id: 'LOG-010', triggeredAt: '2026-06-07 15:44:17', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '下架', event: '出库发货', docNo: 'CK-240607-018', stockBefore: 2,  stockAfter: 0,  result: '成功', failReason: '' }
+    ];
+
+    function getListingLogById(id) {
+      return listingLogRows.find((r) => r.id === id) || null;
+    }
+
+    function renderProductListingLogPage() {
+      const rows = listingLogRows;
+      const queryTotal = rows.length;
+      const querySuccess = rows.filter((r) => r.result === '成功').length;
+      const queryFail = rows.filter((r) => r.result === '失败').length;
+      return `
+        <div class="page-stack">
+          <section class="list-surface">
+            <div class="surface-head">
+              <div class="surface-title-wrap">
+                <h1 class="surface-title">接口上下架日志</h1>
+                <div class="surface-subtitle">记录 WMS 自动触发的电商商品上下架接口调用明细，可追溯每条 SKU 因何事件触发了上下架及调用结果。</div>
+              </div>
+              <div class="surface-head-actions">
+                ${renderRequirementAnchor()}
+              </div>
+            </div>
+
+            <div class="surface-controls">
+              <div class="filters-row is-quarter">
+                <select class="filter-ctrl">
+                  <option selected>全部所属分类</option>
+                  <option>饮料</option>
+                  <option>乳制品</option>
+                  <option>生活用品</option>
+                  <option>食品</option>
+                  <option>生鲜</option>
+                </select>
+                <input class="filter-ctrl" type="text" placeholder="请输入 SKU 编码" />
+                <select class="filter-ctrl">
+                  <option selected>全部上下架动作</option>
+                  <option>上架</option>
+                  <option>下架</option>
+                </select>
+                <select class="filter-ctrl">
+                  <option selected>全部触发事件</option>
+                  <option>入库上架</option>
+                  <option>退货解冻</option>
+                  <option>出库发货</option>
+                  <option>库存调整</option>
+                  <option>库存冻结</option>
+                </select>
+              </div>
+              <div class="filters-row is-quarter">
+                <select class="filter-ctrl">
+                  <option selected>全部调用结果</option>
+                  <option>成功</option>
+                  <option>失败</option>
+                </select>
+                <div class="filter-ctrl date-range-display" style="grid-column: span 2; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #fff; border: 1px solid rgba(29,29,31,0.12); border-radius: 10px; font-size: 13px; color: var(--subtext);">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="14" height="13" rx="2"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>
+                  <span>2026-06-03 ~ 2026-06-09</span>
+                </div>
+                <div class="filters-actions is-unit">
+                  <button class="accent-btn" data-action="listing-log-query">查询</button>
+                  <button class="neutral-btn" data-action="listing-log-reset">重置</button>
+                  <button class="neutral-btn" data-action="listing-log-export">导出</button>
+                </div>
+              </div>
+
+              <div class="mini-grid is-four">
+                <article class="mini-card compact">
+                  <div class="mini-top"><span>触发次数</span></div>
+                  <div class="mini-value">${queryTotal}</div>
+                  <div class="mini-note">当前查询结果共触发次数</div>
+                </article>
+                <article class="mini-card compact">
+                  <div class="mini-top"><span>成功次数</span></div>
+                  <div class="mini-value" style="color: var(--accent);">${querySuccess}</div>
+                  <div class="mini-note">当前查询结果接口成功条数</div>
+                </article>
+                <article class="mini-card compact">
+                  <div class="mini-top"><span>失败次数</span></div>
+                  <div class="mini-value" style="color: var(--danger);">${queryFail}</div>
+                  <div class="mini-note">当前查询结果接口失败条数</div>
+                </article>
+                <article class="mini-card compact metric-clickable" data-action="listing-log-filter-fail" title="点击筛选失败记录">
+                  <div class="mini-top"><span>失败待关注</span></div>
+                  <div class="mini-value" style="color: var(--danger);">${queryFail}</div>
+                  <div class="mini-note">点击快速筛选当前失败记录</div>
+                </article>
+              </div>
+            </div>
+
+            <div class="surface-table">
+              <div class="toolbar-row">
+                <div class="toolbar-left"></div>
+                <div class="toolbar-right">
+                  <button class="icon-mini" type="button" aria-label="刷新">⟳</button>
+                  <button class="icon-mini" type="button" aria-label="列设置">☰</button>
+                </div>
+              </div>
+              <div class="table-wrap flat">
+                <table class="table-dense">
+                  <thead>
+                    <tr>
+                      <th style="width:148px;">触发时间</th>
+                      <th style="width:110px;">SKU编码</th>
+                      <th style="min-width:140px;">SKU名称</th>
+                      <th style="width:88px;">所属分类</th>
+                      <th style="width:80px;">上下架动作</th>
+                      <th style="width:96px;">触发事件</th>
+                      <th style="width:148px;">关联单据号</th>
+                      <th style="width:96px;">触发时可售库存</th>
+                      <th style="width:72px;">调用结果</th>
+                      <th style="min-width:160px;">失败原因</th>
+                      <th style="width:72px;text-align:right;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${rows.map((row) => `
+                      <tr style="${row.result === '失败' ? 'background: rgba(217,45,32,0.035);' : ''}${listingLogDetailId === row.id ? 'background: rgba(0,171,149,0.06);' : ''}">
+                        <td style="font-size:12px;color:var(--subtext);">${row.triggeredAt}</td>
+                        <td><span class="product-cell-text" style="font-size:12px;font-family:monospace;">${row.skuCode}</span></td>
+                        <td><div style="font-size:13px;font-weight:500;">${row.skuName}</div></td>
+                        <td><span class="status-pill neutral">${row.category}</span></td>
+                        <td><span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span></td>
+                        <td><span style="font-size:12px;color:var(--subtext);">${row.event}</span></td>
+                        <td><span class="product-cell-text" style="font-size:12px;font-family:monospace;">${row.docNo}</span></td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums;">${row.stockBefore}</td>
+                        <td><span class="status-pill ${row.result === '成功' ? 'on' : 'danger'}">${row.result}</span></td>
+                        <td style="max-width:200px;">
+                          ${row.failReason ? `<span class="product-cell-text" style="font-size:12px;color:var(--danger);" title="${row.failReason}">${row.failReason}</span>` : '<span style="color:var(--muted);font-size:12px;">--</span>'}
+                        </td>
+                        <td style="text-align:right;"><button class="row-action-btn primary" data-action="listing-log-view" data-id="${row.id}">详情</button></td>
+                      </tr>
+                    `).join('') || `<tr><td colspan="12" class="table-empty">当前筛选条件下暂无接口上下架日志</td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span>共 ${rows.length} 条，按触发时间倒序排列</span>
+                <div class="surface-head-actions">
+                  <span style="font-size:12px;color:var(--muted);">每页</span>
+                  <select style="height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-size:12px;background:#fff;">
+                    <option selected>20条</option>
+                    <option>50条</option>
+                    <option>100条</option>
+                  </select>
+                  <button class="page-btn">‹</button>
+                  <button class="page-btn active">1</button>
+                  <button class="page-btn">›</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderListingLogDetailDrawer() {
+      if (!drawerState || drawerState.entity !== 'listing-log-detail') return '';
+      const row = getListingLogById(drawerState.id);
+      if (!row) return '';
+      const reqJson = JSON.stringify({
+        skuCode: row.skuCode,
+        action: row.action === '上架' ? 'ON_SHELF' : 'OFF_SHELF',
+        triggerEvent: row.event,
+        docNo: row.docNo,
+        stockBefore: row.stockBefore,
+        stockAfter: row.stockAfter,
+        timestamp: row.triggeredAt
+      }, null, 2);
+      const resJson = row.result === '成功'
+        ? JSON.stringify({ code: 200, message: 'success', data: { skuCode: row.skuCode, status: row.action === '上架' ? 'online' : 'offline', updatedAt: row.triggeredAt } }, null, 2)
+        : JSON.stringify({ code: 500, message: row.failReason, data: null }, null, 2);
+      const resTime = row.result === '成功' ? (Math.floor(row.id.replace('LOG-','') * 73 % 200) + 80) + ' ms' : '5003 ms（超时）';
+      /* 把 JSON 存入全局，供复制按钮的 data-action 读取，避免 backtick 转义问题 */
+      window._listingLogJson = { req: reqJson, res: resJson };
+      return `
+        <div class="drawer-mask" data-action="listing-log-mask-close">
+          <div class="drawer" style="width:min(700px,100vw);">
+            <div class="drawer-head">
+              <div>
+                <h2 class="drawer-title">接口调用详情</h2>
+                <div class="drawer-subtitle">查看本次上下架接口的完整请求与响应报文</div>
+              </div>
+              <button class="drawer-close" data-action="drawer-close" aria-label="关闭">
+                <svg viewBox="0 0 14 14"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+              </button>
+            </div>
+            <div class="drawer-body">
+              <!-- 基本信息 -->
+              <div class="section-card compact">
+                <div class="section-head"><h3 class="section-title" style="font-size:16px;">基本信息</h3></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;">
+                  ${[
+                    ['SKU编码', `<span style="font-family:monospace;font-size:13px;">${row.skuCode}</span>`],
+                    ['SKU名称', row.skuName],
+                    ['所属分类', `<span class="status-pill neutral">${row.category}</span>`],
+                    ['上下架动作', `<span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span>`],
+                    ['触发事件', row.event],
+                    ['关联单据号', `<span style="font-family:monospace;font-size:13px;">${row.docNo}</span>`],
+                    ['触发时可售库存', `${row.stockBefore} 件`],
+                    ['调用结果', `<span class="status-pill ${row.result === '成功' ? 'on' : 'danger'}">${row.result}</span>`],
+                    ['触发时间', row.triggeredAt],
+                    ['失败原因', row.failReason ? `<span style="color:var(--danger);font-weight:500;">${row.failReason}</span>` : '<span style="color:var(--muted);">--</span>'],
+                  ].map(([label, val]) => `
+                    <div>
+                      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${label}</div>
+                      <div style="font-size:13px;font-weight:500;">${val}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- 报文区 Tab -->
+              <div class="section-card compact" id="logDetailTabCard">
+                <div style="display:flex;gap:0;border-bottom:1px solid var(--line);margin:-20px -22px 16px;">
+                  <button class="log-tab active" data-tab="request" style="padding:12px 20px;font-size:13px;font-weight:600;border:0;background:transparent;cursor:pointer;border-bottom:2px solid var(--accent);color:var(--accent);">请求报文</button>
+                  <button class="log-tab" data-tab="response" style="padding:12px 20px;font-size:13px;font-weight:600;border:0;background:transparent;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);">响应报文</button>
+                </div>
+                <!-- 请求报文 -->
+                <div id="logTabRequest">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:14px;">
+                    <div><div style="font-size:12px;color:var(--muted);margin-bottom:3px;">请求时间</div><div style="font-size:13px;">${row.triggeredAt}</div></div>
+                    <div><div style="font-size:12px;color:var(--muted);margin-bottom:3px;">请求地址</div><div style="font-size:12px;font-family:monospace;word-break:break-all;">POST /api/ec/product/shelf-status</div></div>
+                  </div>
+                  <div style="position:relative;">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">请求参数</div>
+                    <pre id="logReqBody" style="margin:0;padding:14px 16px;background:#f5f5f5;border-radius:10px;font-size:12px;font-family:monospace;line-height:1.7;overflow:auto;max-height:220px;white-space:pre-wrap;">${reqJson}</pre>
+                    <button class="log-copy-btn" data-action="copy-json" data-target="req" style="position:absolute;top:28px;right:10px;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:11px;cursor:pointer;">复制</button>
+                  </div>
+                  ${row.result === '失败' ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);">重试次数：<span style="color:var(--danger);font-weight:600;">3 次（已达上限）</span></div>` : ''}
+                </div>
+                <!-- 响应报文 -->
+                <div id="logTabResponse" style="display:none;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:14px;">
+                    <div><div style="font-size:12px;color:var(--muted);margin-bottom:3px;">响应状态码</div><div style="font-size:13px;font-weight:600;color:${row.result === '成功' ? 'var(--accent)' : 'var(--danger)'};">${row.result === '成功' ? '200 OK' : '500 Internal Server Error'}</div></div>
+                    <div><div style="font-size:12px;color:var(--muted);margin-bottom:3px;">响应耗时</div><div style="font-size:13px;">${resTime}</div></div>
+                  </div>
+                  <div style="position:relative;">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">响应内容</div>
+                    <pre id="logResBody" style="margin:0;padding:14px 16px;background:#f5f5f5;border-radius:10px;font-size:12px;font-family:monospace;line-height:1.7;overflow:auto;max-height:220px;white-space:pre-wrap;">${resJson}</pre>
+                    <button class="log-copy-btn" data-action="copy-json" data-target="res" style="position:absolute;top:28px;right:10px;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:11px;cursor:pointer;">复制</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="drawer-foot">
+              <button class="ghost-btn" data-action="drawer-close">关闭</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderExceptionUrgentListPage() {
       const rows = getUrgentTodoRows();
       const urgentCount = rows.filter((row) => row.priority === '紧急').length;
@@ -3908,11 +4175,13 @@ const menuData = [
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部待办类型</option>
-                  <option>入库待收货</option>
-                  <option>待发运</option>
-                  <option>库存异常</option>
-                  <option>履约异常</option>
-                  <option>待拣货</option>
+                  <option>待入库</option>
+                  <option>待接单揽货</option>
+                  <option>待揽货</option>
+                  <option>待打包复核</option>
+                  <option>待发货</option>
+                  <option>待接单</option>
+                  <option>重新派单</option>
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部紧急等级</option>
@@ -6455,7 +6724,7 @@ const menuData = [
     }
 
     function renderOverlay() {
-      overlayRoot.innerHTML = `${renderRequirementDrawer()}${renderUrgentTodoDrawer()}${renderInventoryRiskDrawer()}${renderInventoryDetailDrawer()}${renderFunnelTrackingDrawer()}${renderOwnerDrawer()}${renderWarehouseDrawer()}${renderWarehouseStaffDrawer()}${renderZoneDrawer()}${renderLocationDrawer()}${renderSkuDrawer()}${renderCenterModal()}`;
+      overlayRoot.innerHTML = `${renderRequirementDrawer()}${renderUrgentTodoDrawer()}${renderInventoryRiskDrawer()}${renderInventoryDetailDrawer()}${renderFunnelTrackingDrawer()}${renderOwnerDrawer()}${renderWarehouseDrawer()}${renderWarehouseStaffDrawer()}${renderZoneDrawer()}${renderLocationDrawer()}${renderSkuDrawer()}${renderListingLogDetailDrawer()}${renderCenterModal()}`;
       syncRequirementStatusUi();
       syncAutoResizeTextareas();
     }
@@ -6492,6 +6761,13 @@ const menuData = [
       } else if (currentItem.key === 'location') {
         drawerState = {
           entity: 'location',
+          mode,
+          id: id || null
+        };
+      } else if (currentItem.key === 'product-listing-log') {
+        listingLogDetailId = id || '';
+        drawerState = {
+          entity: 'listing-log-detail',
           mode,
           id: id || null
         };
@@ -6532,6 +6808,9 @@ const menuData = [
     }
 
     function closeDrawer() {
+      if (drawerState && drawerState.entity === 'listing-log-detail') {
+        listingLogDetailId = '';
+      }
       if (drawerState && drawerState.entity === 'urgent-todo') {
         selectedUrgentTodoId = '';
       }
@@ -6621,8 +6900,8 @@ const menuData = [
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            file: requirementFileName,
-            data: requirementData
+            // 只发送当前编辑的模块，服务端按 key 合并，避免多标签页互相覆盖
+            data: { [requirementKey]: requirementData[requirementKey] }
           })
         });
         const result = await response.json();
@@ -7190,6 +7469,9 @@ const menuData = [
         canvas.innerHTML = renderWarehouseStaffPage();
       } else if (item.key === 'my-product') {
         canvas.innerHTML = renderMyProductPage();
+      } else if (item.key === 'product-listing-log') {
+        listingLogDetailId = '';
+        canvas.innerHTML = renderProductListingLogPage();
       } else if (item.key === 'product-owner-manage') {
         canvas.innerHTML = renderOwnerProductManagePage();
       } else if (item.key === 'exception-urgent-list') {
@@ -7202,6 +7484,13 @@ const menuData = [
         canvas.innerHTML = renderFunnelListPage(item.key);
       } else if (item.key === 'inventory-risk-list') {
         canvas.innerHTML = renderInventoryRiskListPage();
+      } else if (item.key === 'stock-flow') {
+        const iframe = document.createElement('iframe');
+        iframe.src = './stock-flow.html';
+        iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+        canvas.style.cssText = 'padding:0;height:calc(100vh - 56px);overflow:hidden;';
+        canvas.innerHTML = '';
+        canvas.appendChild(iframe);
       } else if (item.key === 'shop') {
         canvas.innerHTML = renderStorePage();
       } else if (item.key === 'inbound') {
@@ -7396,6 +7685,19 @@ const menuData = [
           type: target.dataset.type || '全部类型'
         });
         navigateToItem(pageKey);
+        return;
+      }
+      if (action === 'listing-log-view') {
+        openDrawer('view', id || '');
+        renderPage(currentItem, currentGroup);
+        return;
+      }
+      if (action === 'listing-log-filter-fail') {
+        renderPage(currentItem, currentGroup);
+        return;
+      }
+      if (action === 'listing-log-query' || action === 'listing-log-reset' || action === 'listing-log-export') {
+        renderPage(currentItem, currentGroup);
         return;
       }
       if (action === 'urgent-view') {
@@ -8247,6 +8549,24 @@ const menuData = [
       }
     });
     overlayRoot.addEventListener('click', (event) => {
+      /* listing-log detail tab switch */
+      const logTab = event.target.closest('.log-tab');
+      if (logTab) {
+        const tabKey = logTab.dataset.tab;
+        const card = logTab.closest('#logDetailTabCard');
+        if (card) {
+          card.querySelectorAll('.log-tab').forEach((btn) => {
+            const active = btn.dataset.tab === tabKey;
+            btn.style.borderBottomColor = active ? 'var(--accent)' : 'transparent';
+            btn.style.color = active ? 'var(--accent)' : 'var(--muted)';
+          });
+          const req = card.querySelector('#logTabRequest');
+          const res = card.querySelector('#logTabResponse');
+          if (req) req.style.display = tabKey === 'request' ? '' : 'none';
+          if (res) res.style.display = tabKey === 'response' ? '' : 'none';
+        }
+        return;
+      }
       const actionTarget = event.target.closest('[data-action]');
       const multiSelectNode = event.target.closest('.multi-select');
       if (!actionTarget) {
@@ -8271,6 +8591,29 @@ const menuData = [
         renderOverlay();
         return;
       }
+      if (action === 'listing-log-mask-close') {
+        if (actionTarget !== event.target) return; /* 点击 drawer 内部不关闭 */
+        closeDrawer();
+        renderPage(currentItem, currentGroup);
+        return;
+      }
+      if (action === 'drawer-close') {
+        closeDrawer();
+        renderPage(currentItem, currentGroup);
+        return;
+      }
+      if (action === 'copy-json') {
+        const target = actionTarget.dataset.target;
+        const json = window._listingLogJson && window._listingLogJson[target];
+        if (json) {
+          navigator.clipboard.writeText(json).then(() => {
+            actionTarget.textContent = '✓ 已复制';
+            setTimeout(() => { actionTarget.textContent = '复制'; }, 1800);
+          }).catch(() => { actionTarget.textContent = '失败'; });
+        }
+        return;
+      }
+      /* listing-log detail tab switch (no data-action, handle via .log-tab class) */
       if (action === 'requirement-add-row') {
         const { table } = actionTarget.dataset;
         const doc = getRequirementWorkingDoc();

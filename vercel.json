@@ -1,7 +1,0 @@
-{
-  "outputDirectory": "public",
-  "buildCommand": "",
-  "rewrites": [
-    { "source": "/", "destination": "/wms-prototypes/WMS原型总入口.html" }
-  ]
-}
