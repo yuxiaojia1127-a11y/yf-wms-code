@@ -27,3 +27,11 @@ dist-ssr
 
 # 数据文件自动备份
 *.bak
+
+# _docs 参考资料中的大二进制不入库（文件保留在本地磁盘）
+public/wms-prototypes/_docs/**/*.docx
+public/wms-prototypes/_docs/**/*.xlsx
+public/wms-prototypes/_docs/**/*.pdf
+public/wms-prototypes/_docs/**/*.png
+public/wms-prototypes/_docs/**/*.jpg
+public/wms-prototypes/_docs/**/*.zip

@@ -25,6 +25,11 @@ const menuData = [
         "page": "WMS-WEB-W01"
       },
       {
+        "key": "warehouse-room",
+        "name": "库房管理",
+        "page": "WMS-WEB-W07"
+      },
+      {
         "key": "zone",
         "name": "库区管理",
         "page": "WMS-WEB-W02"
