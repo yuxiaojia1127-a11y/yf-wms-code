@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import tempfile
+import threading
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -11,17 +14,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent  # wms-prototypes/ 根目录，同时覆盖 WEB 与 APP 两个子目录
 WEB_ENTRY = "WMS原型总入口.html"  # ROOT 下的总入口文件
 
-# 匹配 <script id="requirementData" type="application/json"> 格式（旧格式，向后兼容）
-REQUIREMENT_SCRIPT_PATTERN = re.compile(
-    r'(<script id="requirementData" type="application/json">\s*)([\s\S]*?)(\s*</script>)'
-)
+# 需求数据唯一数据源：所有页面统一通过 <script src> 引用该文件，
+# 保存接口也只写这个文件，避免多份内嵌数据相互覆盖、漂移。
+DATA_FILE = ROOT / "WEB端HTML原型" / "assets" / "wms-requirement-data.js"
 
-# 匹配 window.WMS_REQUIREMENT_DATA = { ... }; 格式（当前页面使用的格式）
+# 匹配 window.WMS_REQUIREMENT_DATA = { ... }; 数据块
 # ^};$ 匹配顶层闭合行（无缩进的 };），确保精确替换最外层对象
 WMS_DATA_PATTERN = re.compile(
     r'(window\.WMS_REQUIREMENT_DATA\s*=\s*)([\s\S]+?)(^};$)',
     re.MULTILINE,
 )
+
+# 串行化写入，避免并发保存产生竞态
+_WRITE_LOCK = threading.Lock()
 
 
 class PrototypeLiveHandler(SimpleHTTPRequestHandler):
@@ -42,34 +47,21 @@ class PrototypeLiveHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.path == "/__save_requirement__":
             self._handle_save_requirement()
-        elif self.path == "/__sync_requirement_docs__":
-            self._handle_sync_requirement_docs()
         else:
             self.send_error(HTTPStatus.NOT_FOUND, "Unknown API")
 
     def _handle_save_requirement(self) -> None:
         try:
             payload = self._read_json_body()
-            file_name = payload.get("file", "")
             data = payload.get("data")
-            target_path = self._resolve_html_path(file_name)
-            self._write_requirement_data(target_path, data)
-            self._send_json({"ok": True, "file": target_path.name})
+            if not isinstance(data, dict):
+                raise ValueError("缺少 data 参数或格式不正确（应为对象）")
+            self._write_requirement_data(data)
+            self._send_json({"ok": True, "file": DATA_FILE.name})
         except ValueError as exc:
             self._send_json({"ok": False, "message": str(exc)}, status=HTTPStatus.BAD_REQUEST)
         except Exception as exc:  # pragma: no cover - defensive fallback
             self._send_json({"ok": False, "message": f"保存失败：{exc}"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-    def _handle_sync_requirement_docs(self) -> None:
-        """
-        同步外部需求文档到页面 HTML 文件。
-        客户端在重新加载外部 MD 文档前调用此接口，确保服务端与最新文件同步。
-        当前实现返回 ok 即可（客户端会随后自行 fetch 外部 MD 文件）。
-        """
-        self._send_json({"ok": True, "message": "sync acknowledged"})
-
-    def log_message(self, format: str, *args) -> None:
-        super().log_message(format, *args)
 
     def _read_json_body(self) -> dict:
         content_length = int(self.headers.get("Content-Length", "0"))
@@ -79,40 +71,51 @@ class PrototypeLiveHandler(SimpleHTTPRequestHandler):
         except json.JSONDecodeError as exc:
             raise ValueError(f"请求体不是有效 JSON：{exc}") from exc
 
-    def _resolve_html_path(self, file_name: str) -> Path:
-        if not file_name:
-            raise ValueError("缺少 file 参数")
-        candidate = (ROOT / file_name).resolve()
-        if ROOT not in candidate.parents and candidate != ROOT:
-            raise ValueError("不允许访问当前目录之外的文件")
-        if candidate.suffix.lower() != ".html":
-            raise ValueError("仅允许保存到 HTML 原型文件")
-        if not candidate.exists():
-            raise ValueError(f"目标文件不存在：{file_name}")
-        return candidate
+    def _write_requirement_data(self, data: dict) -> None:
+        """合并写入共享数据文件：先备份，再临时文件 + 原子替换。
 
-    def _write_requirement_data(self, target_path: Path, data: object) -> None:
-        html = target_path.read_text(encoding="utf-8")
-        serialized = json.dumps(data, ensure_ascii=False, indent=2)
+        采用按模块 key 合并而非整体覆盖，降低多页面/多标签页
+        同时编辑时"后保存者覆盖先保存者"的丢数据风险。
+        """
+        with _WRITE_LOCK:
+            if not DATA_FILE.exists():
+                raise ValueError(f"数据文件不存在：{DATA_FILE}")
+            text = DATA_FILE.read_text(encoding="utf-8")
+            match = WMS_DATA_PATTERN.search(text)
+            if not match:
+                raise ValueError("数据文件中未找到 window.WMS_REQUIREMENT_DATA 数据块")
 
-        # 优先尝试旧格式 <script id="requirementData" type="application/json">
-        if REQUIREMENT_SCRIPT_PATTERN.search(html):
-            replaced = REQUIREMENT_SCRIPT_PATTERN.sub(
-                lambda m: f"{m.group(1)}{serialized}{m.group(3)}",
-                html,
-                count=1,
-            )
-        # 再尝试当前页面使用的 window.WMS_REQUIREMENT_DATA = {...}; 格式
-        elif WMS_DATA_PATTERN.search(html):
+            # 按模块 key 合并：只更新客户端送来的 key，保留文件中其余模块
+            current_raw = f"{match.group(2)}{match.group(3)[:-1]}"  # 去掉结尾分号
+            try:
+                merged = json.loads(current_raw)
+            except json.JSONDecodeError:
+                merged = {}
+            merged.update(data)
+
+            serialized = json.dumps(merged, ensure_ascii=False, indent=2)
             replaced = WMS_DATA_PATTERN.sub(
                 lambda m: f"{m.group(1)}{serialized};",
-                html,
+                text,
                 count=1,
             )
-        else:
-            raise ValueError("原型文件中未找到 requirementData 数据块（支持 <script id='requirementData'> 和 window.WMS_REQUIREMENT_DATA 两种格式）")
 
-        target_path.write_text(replaced, encoding="utf-8")
+            # 备份当前版本
+            backup_path = DATA_FILE.with_suffix(DATA_FILE.suffix + ".bak")
+            backup_path.write_text(text, encoding="utf-8")
+
+            # 临时文件 + 原子替换，避免写入中断留下半截文件
+            fd, tmp_name = tempfile.mkstemp(
+                dir=str(DATA_FILE.parent), prefix=".wms-data-", suffix=".tmp"
+            )
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as tmp:
+                    tmp.write(replaced)
+                os.replace(tmp_name, DATA_FILE)
+            except BaseException:
+                if os.path.exists(tmp_name):
+                    os.unlink(tmp_name)
+                raise
 
     def _send_json(self, payload: dict, status: HTTPStatus = HTTPStatus.OK) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -135,6 +138,7 @@ def main() -> None:
     print(f"  WEB端:  http://127.0.0.1:{args.port}/WEB端HTML原型/WMS-WEB端原型.html")
     print(f"  APP端:  http://127.0.0.1:{args.port}/APP端HTML原型/WMS-APP端原型.html")
     print(f"Serving directory: {ROOT}")
+    print(f"需求数据文件: {DATA_FILE}")
     server.serve_forever()
 
 

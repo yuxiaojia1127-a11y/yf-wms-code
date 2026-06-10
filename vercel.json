@@ -1,15 +1,7 @@
 {
-  "routes": [
-    {
-      "src": "^/$",
-      "dest": "/prototype/index.html"
-    },
-    {
-      "src": "^/prototype$",
-      "dest": "/prototype/index.html"
-    },
-    {
-      "handle": "filesystem"
-    }
+  "outputDirectory": "public",
+  "buildCommand": "",
+  "rewrites": [
+    { "source": "/", "destination": "/wms-prototypes/WMS原型总入口.html" }
   ]
 }

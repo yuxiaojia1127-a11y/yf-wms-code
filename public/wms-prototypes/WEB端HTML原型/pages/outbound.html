@@ -930,8 +930,6 @@ async function loadReqDoc(force = false) {
   reqState = { status: 'loading', content: '', error: '' };
   renderReqDrawer();
   try {
-    // 先尝试同步（仅本地服务器环境有效，静态预览时会静默失败）
-    await fetch('/__sync_requirement_docs__', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
     const res = await fetch(REQ_EXTERNAL_SRC + '?v=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error(`读取失败（HTTP ${res.status}）`);
     reqState = { status: 'loaded', content: await res.text(), error: '' };

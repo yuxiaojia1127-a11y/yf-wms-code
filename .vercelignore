@@ -5,3 +5,7 @@ dist
 .trae
 .log
 .figma
+.env*
+.DS_Store
+**/.DS_Store
+.vercel

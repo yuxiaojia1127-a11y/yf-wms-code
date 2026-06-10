@@ -1139,23 +1139,8 @@ const menuData = [
     }
 
     async function syncRequirementDocsBeforeReload() {
-      try {
-        const response = await fetch('/__sync_requirement_docs__', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const contentType = response.headers.get('content-type') || '';
-        const result = contentType.includes('application/json')
-          ? await response.json().catch(() => ({}))
-          : {};
-        if (!response.ok || !result.ok) {
-          throw new Error(result.message || `同步接口不可用（${response.status}）`);
-        }
-        return true;
-      } catch (error) {
-        console.warn('Requirement document sync skipped:', error);
-        return false;
-      }
+      // 同步接口已移除：外部 MD 文档由客户端直接 fetch 最新内容
+      return true;
     }
 
     function getRequirementWorkingDoc() {

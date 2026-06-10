@@ -660,7 +660,6 @@ async function loadReqDoc(force=false){
   if(!force&&reqState.status==='loaded'&&reqState.content){renderReqDrawer();return;}
   reqState={status:'loading',content:'',error:''};renderReqDrawer();
   try{
-    await fetch('/__sync_requirement_docs__',{method:'POST',headers:{'Content-Type':'application/json'}}).catch(()=>{});
     const res=await fetch(REQ_EXTERNAL_SRC+'?v='+Date.now(),{cache:'no-store'});
     if(!res.ok) throw new Error(`读取失败（HTTP ${res.status}）`);
     reqState={status:'loaded',content:await res.text(),error:''};
