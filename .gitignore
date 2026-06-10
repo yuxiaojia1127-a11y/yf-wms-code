@@ -35,3 +35,6 @@ public/wms-prototypes/_docs/**/*.pdf
 public/wms-prototypes/_docs/**/*.png
 public/wms-prototypes/_docs/**/*.jpg
 public/wms-prototypes/_docs/**/*.zip
+
+# 历史重写前的安全备份（确认无误后可删除）
+.git-backup-pre-rewrite.bundle
