@@ -5,7 +5,7 @@ const menuData = [
       { key: 'owner-data', icon: 'owner', name: '基础资料', meta: '销售渠道管理', items: [ { key: 'shop', name: '销售渠道管理', page: 'WMS-WEB-004-SHOP' } ] },
       { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
       { key: 'warehouse-job', icon: 'operation', name: '仓内作业', meta: '入库 / 出库 / 调拨 / 盘点 / 仓内作业跟踪', items: [ { key: 'inbound', name: '入库管理', page: 'WMS-WEB-010' }, { key: 'outbound', name: '出库管理', page: 'WMS-WEB-016' }, { key: 'transfer', name: '调拨管理', page: 'WMS-WEB-028' }, { key: 'stocktake', name: '盘点管理', page: 'WMS-WEB-STOCKTAKE' }, { key: 'warehouse-operation-track-list', name: '仓内作业跟踪', page: 'WMS-WEB-030A' } ] },
-      { key: 'fulfillment', icon: 'fulfillment', name: '物流中心', meta: '物流跟踪', items: [ { key: 'logistics-track-list', name: '物流跟踪', page: 'WMS-WEB-020A' } ] },
+      { key: 'fulfillment', icon: 'fulfillment', name: '履约中心', meta: '履约链路跟踪', items: [ { key: 'fulfillment-link-track-list', name: '履约链路跟踪', page: 'WMS-WEB-020A' } ] },
       { key: 'after-sale', icon: 'service', name: '售后中心', meta: '退货管理', items: [ { key: 'return', name: '退货管理', page: 'WMS-WEB-026' } ] },
       { key: 'exception', icon: 'warning', name: '异常中心', meta: '超时/紧急列表', items: [ { key: 'exception-urgent-list', name: '超时/紧急列表', page: 'WMS-WEB-032A' } ] }
     ];
@@ -30,8 +30,8 @@ const menuData = [
       { title: 'SO-240603-251', type: '待揽货', room: '综合库房', meta: '2号仓库 · 即时配送 · 已等待 45 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
       { title: 'SO-240603-239', type: '待打包复核', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 36 分钟', owner: '李昊', level: 'warning', target: 'warehouse-operation-track-list' },
       { title: 'SO-240603-245', type: '待发货', room: '综合库房', meta: '2号仓库 · 快递 · 已等待 38 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
-      { title: 'SO-240603-256', type: '待接单', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'logistics-track-list' },
-      { title: 'SO-240603-242', type: '重新派单', room: '综合库房', meta: '2号仓库 · 即时配送 · 已等待 68 分钟', owner: '陈晨', level: 'danger', target: 'logistics-track-list' }
+      { title: 'SO-240603-256', type: '待接单', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'fulfillment-link-track-list' },
+      { title: 'SO-240603-242', type: '重新派单', room: '综合库房', meta: '2号仓库 · 即时配送 · 已等待 68 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' }
     ];
     const cockpitSnapshots = {
       '全部仓库': {
@@ -39,10 +39,10 @@ const menuData = [
         subtitle: '汇总展示库存、入库、出库、履约和异常的关键运行信号，保留旧工作台用于对比评审。',
         cards: [
           { name: '可用库存', value: '86,420', note: '冻结库存 850', icon: 'inventory', tone: 'success', kicker: '较昨日 +3.8%', target: 'inventory-query' },
-          { name: '履约及时率', value: '94.6%', note: 'SLA 内完成 428 / 452', icon: 'coverage', tone: 'success', kicker: '较昨日 +1.2%', target: 'logistics-track-list' },
+          { name: '履约及时率', value: '94.6%', note: 'SLA 内完成 428 / 452', icon: 'coverage', tone: 'success', kicker: '较昨日 +1.2%', target: 'fulfillment-link-track-list' },
           { name: '库存预警', value: '22', note: '低库存 12 · 高锁定 10', icon: 'warning', tone: 'warning', kicker: '5条高预警', kickerTone: 'danger', target: 'inventory-risk-list' },
           { name: '锁定占比', value: '12%', note: '高于阈值 SKU 4 个', icon: 'coverage', tone: 'warning', kicker: '1条高预警', kickerTone: 'danger', target: 'inventory-risk-list' },
-          { name: '异常待处理', value: '7', note: '物流 3 · 入库 2 · 出库 2', icon: 'warning', tone: 'danger', kicker: '2条已等待超60分钟', target: 'exception-urgent-list' }
+          { name: '异常待处理', value: '7', note: '履约 3 · 入库 2 · 出库 2', icon: 'warning', tone: 'danger', kicker: '2条已等待超60分钟', target: 'exception-urgent-list' }
         ],
         funnel: [
           { label: '待入库', value: '3', progress: 82, meta: '3单超时处理', tone: 'warning' },
@@ -63,7 +63,7 @@ const menuData = [
           { title: '鲜奶 1L', subtitle: 'MILK-1L · 1L*1盒', stock: '库存 42 盒 · 可售 18 盒 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20盒）', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'SO-240603-218', type: '待接单', room: '综合库房', meta: '2号仓库 · 即时配送 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'logistics-track-list' },
+          { title: 'SO-240603-218', type: '待接单', room: '综合库房', meta: '2号仓库 · 即时配送 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' },
           { title: 'PO-240603-018', type: '待入库', room: '常温主库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
           { title: 'SO-240603-221', type: '待揽货', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' }
         ]
@@ -73,7 +73,7 @@ const menuData = [
         subtitle: '聚焦 1号仓库的库存风险、即时履约压力和异常待办，用于对照旧工作台判断信息是否更聚焦。',
         cards: [
           { name: '可用库存', value: '48,220', note: '常温品库存较充足', icon: 'inventory', tone: 'success', kicker: '较昨日 +5.1%', target: 'inventory-query' },
-          { name: '履约及时率', value: '95.2%', note: 'SLA 内完成 231 / 243', icon: 'coverage', tone: 'success', kicker: '稳定', target: 'logistics-track-list' },
+          { name: '履约及时率', value: '95.2%', note: 'SLA 内完成 231 / 243', icon: 'coverage', tone: 'success', kicker: '稳定', target: 'fulfillment-link-track-list' },
           { name: '库存预警', value: '11', note: '低库存 4 · 高锁定 7', icon: 'warning', tone: 'warning', kicker: '以高锁定为主', target: 'inventory-risk-list' },
           { name: '锁定占比', value: '14%', note: '即时履约热点 SKU 占用偏高', icon: 'coverage', tone: 'warning', kicker: '需关注', target: 'inventory-risk-list' },
           { name: '异常待处理', value: '4', note: '履约 2 · 库存 1 · 入库 1', icon: 'warning', tone: 'danger', kicker: '1 条超时', target: 'exception-urgent-list' }
@@ -98,7 +98,7 @@ const menuData = [
         todos: [
           { title: 'PO-240603-018', type: '待入库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
           { title: 'SO-240603-221', type: '待揽货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
-          { title: 'SO-240603-227', type: '重新派单', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 64 分钟', owner: '周璇', level: 'danger', target: 'logistics-track-list' }
+          { title: 'SO-240603-227', type: '重新派单', room: '常温主库', meta: '1号仓库 · 即时配送 · 已等待 64 分钟', owner: '周璇', level: 'danger', target: 'fulfillment-link-track-list' }
         ]
       },
       '2号仓库': {
@@ -106,7 +106,7 @@ const menuData = [
         subtitle: '聚焦 2号仓库的低库存和复核压力，便于与旧工作台看板对比信息密度和处理指向。',
         cards: [
           { name: '可用库存', value: '38,200', note: '快递发运库存占比较高', icon: 'inventory', tone: 'success', kicker: '较昨日 +1.2%', target: 'inventory-query' },
-          { name: '履约及时率', value: '93.8%', note: 'SLA 内完成 197 / 210', icon: 'coverage', tone: 'warning', kicker: '略低于目标', target: 'logistics-track-list' },
+          { name: '履约及时率', value: '93.8%', note: 'SLA 内完成 197 / 210', icon: 'coverage', tone: 'warning', kicker: '略低于目标', target: 'fulfillment-link-track-list' },
           { name: '库存预警', value: '10', note: '低库存 8 · 高锁定 2', icon: 'warning', tone: 'warning', kicker: '以低库存为主', target: 'inventory-risk-list' },
           { name: '锁定占比', value: '10%', note: '整体可控', icon: 'coverage', tone: 'success', kicker: '正常', target: 'inventory-risk-list' },
           { name: '异常待处理', value: '3', note: '履约 1 · 出库 1 · 库存 1', icon: 'warning', tone: 'danger', kicker: '1 条超时', target: 'exception-urgent-list' }
@@ -144,11 +144,11 @@ const menuData = [
       { id: 'FNL-006', taskId: '006', orderNo: 'SO-240603-121', group: '仓内作业跟踪', type: '待打包复核', warehouse: '2号仓库', room: '综合库房', channel: '快递', statusText: '待处理', waitMinutes: 34, owner: '李昊', updatedAt: '2026-06-03 10:20', target: 'warehouse-operation-track-list', customer: '联系人 TAN', addressCode: '47600', distance: '15.42km', goodsCount: '11', createdAt: '2026-06-03 09:46:23', promiseTime: '2026-06-03 10:35', summary: '打包完成待复核，存在批次复核任务。' },
       { id: 'FNL-007', taskId: '007', orderNo: 'SO-240603-131', group: '仓内作业跟踪', type: '待发货', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '待处理', waitMinutes: 29, owner: '李昊', updatedAt: '2026-06-03 10:17', target: 'warehouse-operation-track-list', customer: '联系人 YAN', addressCode: '47010', distance: '16.80km', goodsCount: '7', createdAt: '2026-06-03 09:50:10', promiseTime: '2026-06-03 10:45', summary: '出库复核完成，待装车发货。' },
       { id: 'FNL-013', taskId: '013', orderNo: 'SO-240603-135', group: '仓内作业跟踪', type: '已发货', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '陈晨', updatedAt: '2026-06-03 09:52', target: 'warehouse-operation-track-list', customer: '联系人 LEE', addressCode: '47100', distance: '14.20km', goodsCount: '5', createdAt: '2026-06-03 08:36:00', promiseTime: '2026-06-03 10:00', summary: '订单已完成全流程发货，作业节点已闭环。' },
-      { id: 'FNL-008', orderNo: 'EX-240603-015', group: '物流跟踪', type: '待接单', warehouse: '2号仓库', room: '综合库房', channel: '即时配送', statusText: '已超时', waitMinutes: 132, owner: '陈晨', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 CUI', addressCode: '43300', distance: '12.39km', goodsCount: '12', createdAt: '2026-06-01 15:16:36', promiseTime: '2026-06-03 09:20', summary: '履约单待接单超时，需人工跟进承运商。' },
-      { id: 'FNL-009', orderNo: 'SO-240603-205', group: '物流跟踪', type: '重新派单', warehouse: '1号仓库', room: '常温主库', channel: '即时配送', statusText: '待处理', waitMinutes: 22, owner: '赵川', updatedAt: '2026-06-03 10:11', target: 'shipment-track', customer: '联系人 FONG', addressCode: '42800', distance: '9.62km', goodsCount: '3', createdAt: '2026-06-03 09:48:11', promiseTime: '2026-06-03 10:20', summary: '首位骑手拒单后待重新派单。' },
-      { id: 'FNL-010', orderNo: 'SO-240603-221', group: '物流跟踪', type: '已取货', warehouse: '1号仓库', room: '冷藏专区', channel: '即时配送', statusText: '待处理', waitMinutes: 46, owner: '赵川', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 GOH', addressCode: '47800', distance: '6.15km', goodsCount: '4', createdAt: '2026-06-03 09:39:26', promiseTime: '2026-06-03 10:25', summary: '骑手已取货，待进入配送中状态。' },
-      { id: 'FNL-011', orderNo: 'SO-240603-245', group: '物流跟踪', type: '配送中', warehouse: '2号仓库', room: '综合库房', channel: '快递', statusText: '待处理', waitMinutes: 38, owner: '王敏', updatedAt: '2026-06-03 10:28', target: 'shipment-track', customer: '联系人 ONG', addressCode: '40200', distance: '18.86km', goodsCount: '2', createdAt: '2026-06-03 09:54:42', promiseTime: '2026-06-03 10:50', summary: '包裹已出仓，配送轨迹未回传签收状态。' },
-      { id: 'FNL-012', orderNo: 'SO-240603-268', group: '物流跟踪', type: '已送达（当日）', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '周璇', updatedAt: '2026-06-03 10:29', target: 'shipment-track', customer: '联系人 TAN', addressCode: '46100', distance: '14.02km', goodsCount: '5', createdAt: '2026-06-03 08:36:20', promiseTime: '2026-06-03 10:10', summary: '已送达当日订单，保留用于查看异常签收反馈。' }
+      { id: 'FNL-008', orderNo: 'EX-240603-015', group: '履约链路跟踪', type: '待接单', warehouse: '2号仓库', room: '综合库房', channel: '即时配送', statusText: '已超时', waitMinutes: 132, owner: '陈晨', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 CUI', addressCode: '43300', distance: '12.39km', goodsCount: '12', createdAt: '2026-06-01 15:16:36', promiseTime: '2026-06-03 09:20', summary: '履约单待接单超时，需人工跟进承运商。' },
+      { id: 'FNL-009', orderNo: 'SO-240603-205', group: '履约链路跟踪', type: '重新派单', warehouse: '1号仓库', room: '常温主库', channel: '即时配送', statusText: '待处理', waitMinutes: 22, owner: '赵川', updatedAt: '2026-06-03 10:11', target: 'shipment-track', customer: '联系人 FONG', addressCode: '42800', distance: '9.62km', goodsCount: '3', createdAt: '2026-06-03 09:48:11', promiseTime: '2026-06-03 10:20', summary: '首位骑手拒单后待重新派单。' },
+      { id: 'FNL-010', orderNo: 'SO-240603-221', group: '履约链路跟踪', type: '已取货', warehouse: '1号仓库', room: '冷藏专区', channel: '即时配送', statusText: '待处理', waitMinutes: 46, owner: '赵川', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 GOH', addressCode: '47800', distance: '6.15km', goodsCount: '4', createdAt: '2026-06-03 09:39:26', promiseTime: '2026-06-03 10:25', summary: '骑手已取货，待进入配送中状态。' },
+      { id: 'FNL-011', orderNo: 'SO-240603-245', group: '履约链路跟踪', type: '配送中', warehouse: '2号仓库', room: '综合库房', channel: '快递', statusText: '待处理', waitMinutes: 38, owner: '王敏', updatedAt: '2026-06-03 10:28', target: 'shipment-track', customer: '联系人 ONG', addressCode: '40200', distance: '18.86km', goodsCount: '2', createdAt: '2026-06-03 09:54:42', promiseTime: '2026-06-03 10:50', summary: '包裹已出仓，配送轨迹未回传签收状态。' },
+      { id: 'FNL-012', orderNo: 'SO-240603-268', group: '履约链路跟踪', type: '已送达（当日）', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '周璇', updatedAt: '2026-06-03 10:29', target: 'shipment-track', customer: '联系人 TAN', addressCode: '46100', distance: '14.02km', goodsCount: '5', createdAt: '2026-06-03 08:36:20', promiseTime: '2026-06-03 10:10', summary: '已送达当日订单，保留用于查看异常签收反馈。' }
     ];
     const inventoryQueryRows = [
       { id: 'IQ-001', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', category: '生鲜禽蛋', warehouse: '2号仓库', room: '综合库房', physical: 15, available: 9, locked: 0, frozen: 0, inTransit: 4, batchCount: 2, locationCount: 3, unit: '托', updatedAt: '2026-06-03 10:30' },
@@ -741,7 +741,7 @@ const menuData = [
       'inventory-detail': '../assets/requirements/inventory-detail.md',
       'inventory-risk-list': '../assets/requirements/inventory-risk-list.md',
       'warehouse-operation-track-list': '../assets/requirements/warehouse-operation-track-list.md',
-      'logistics-track-list': '../assets/requirements/logistics-track-list.md',
+      'fulfillment-link-track-list': '../assets/requirements/fulfillment-link-track-list.md',
       'inbound': '../assets/requirements/inbound.md',
       'product-listing-log': '../assets/requirements/product-listing-log.md'
     };
@@ -752,7 +752,7 @@ const menuData = [
       'inventory-detail': { featureName: '库存明细' },
       'inventory-risk-list': { featureName: '库存风险列表' },
       'warehouse-operation-track-list': { featureName: '仓内作业跟踪明细列表' },
-      'logistics-track-list': { featureName: '物流跟踪明细列表' },
+      'fulfillment-link-track-list': { featureName: '履约链路跟踪明细列表' },
       warehouse: { featureName: '仓库管理' },
       owner: { featureName: '租户目录' },
       zone: { featureName: '库区管理' },
@@ -774,9 +774,9 @@ const menuData = [
         drawerSubtitle: '用于查看当前仓内节点单据的联系人、地址、等待时长与推荐处理动作。',
         guideFocus: '联系人、地址和承诺时间用于帮助快速识别仓内节点处理优先级。'
       },
-      'logistics-track-list': {
-        title: '物流跟踪',
-        group: '物流跟踪',
+      'fulfillment-link-track-list': {
+        title: '履约链路跟踪',
+        group: '履约链路跟踪',
         entity: 'fulfillment-link-funnel',
         typeOptions: ['待接单', '重新派单', '已取货', '配送中', '已送达（当日）'],
         subtitle: '',
@@ -790,7 +790,7 @@ const menuData = [
     };
     const funnelGroupPageMap = {
       '仓内作业跟踪': 'warehouse-operation-track-list',
-      '物流跟踪': 'logistics-track-list'
+      '履约链路跟踪': 'fulfillment-link-track-list'
     };
     const requirementTableConfigs = {
       listQuery: {
@@ -938,7 +938,7 @@ const menuData = [
     let inventoryDetailFilter = { skuCode: '', warehouse: '全部仓库' };
     let funnelTrackingState = {
       'warehouse-operation-track-list': { selectedId: '', type: '全部类型' },
-      'logistics-track-list': { selectedId: '', type: '全部类型' }
+      'fulfillment-link-track-list': { selectedId: '', type: '全部类型' }
     };
     let inventoryRiskSort = { field: 'priority', order: 'desc' };
     let myProductStatsExpanded = false;
@@ -1635,7 +1635,7 @@ const menuData = [
       if (item.target === 'shipment') return '进入发货履约，优先处理待发运交接。';
       if (item.target === 'shipment-track') return '进入履约执行跟踪，定位卡点并推进处理。';
       if (item.target === 'warehouse-operation-track-list') return '进入仓内作业跟踪，定位节点卡点并推进处理。';
-      if (item.target === 'logistics-track-list') return '进入物流跟踪，跟进接单与派单进度。';
+      if (item.target === 'fulfillment-link-track-list') return '进入履约链路跟踪，跟进接单与派单进度。';
       if (item.target === 'exception-job') return '进入异常与工单，补充处理记录并完成闭环。';
       return '进入对应业务页面继续处理。';
     }
@@ -2026,7 +2026,7 @@ const menuData = [
               </div>
               <div class="cockpit-funnel-actions">
                 <button class="ghost-btn" data-action="cockpit-open" data-target="warehouse-operation-track-list">仓内作业跟踪</button>
-                <button class="ghost-btn" data-action="cockpit-open" data-target="logistics-track-list">物流跟踪</button>
+                <button class="ghost-btn" data-action="cockpit-open" data-target="fulfillment-link-track-list">履约链路跟踪</button>
               </div>
             </div>
             <div class="funnel-list">
@@ -2047,9 +2047,9 @@ const menuData = [
                 `).join('')}
               </div>
               <div class="funnel-group">
-                <div class="funnel-group-title">物流跟踪</div>
+                <div class="funnel-group-title">履约链路跟踪</div>
                 ${fulfillmentPendingRows.map((item) => `
-                  <article class="funnel-item is-key" data-action="funnel-open" data-group="物流跟踪" data-type="${item.label}" style="cursor:pointer;">
+                  <article class="funnel-item is-key" data-action="funnel-open" data-group="履约链路跟踪" data-type="${item.label}" style="cursor:pointer;">
                     <div class="funnel-head">
                       <div class="funnel-title-group">
                         <span class="funnel-label">${item.label}</span>
@@ -2062,7 +2062,7 @@ const menuData = [
                   </article>
                 `).join('')}
                 ${fulfillmentDeliveredRows.map((item) => `
-                  <article class="funnel-item is-key" data-action="funnel-open" data-group="物流跟踪" data-type="${item.label}" style="cursor:pointer;">
+                  <article class="funnel-item is-key" data-action="funnel-open" data-group="履约链路跟踪" data-type="${item.label}" style="cursor:pointer;">
                     <div class="funnel-head">
                       <div class="funnel-title-group">
                         <span class="funnel-label">${item.label}</span>
@@ -4766,7 +4766,7 @@ const menuData = [
       const isWarehousePickDetail = record.group === '仓内作业跟踪' && ['待接单揽货','待揽货','待打包复核','待发货','已发货'].includes(record.type);
       const isWarehouseInboundDetail = record.group === '仓内作业跟踪' && record.type === '待入库';
       const isTaskDetail = isWarehousePickDetail || isWarehouseInboundDetail;
-      const isFulfillmentLink = record.group === '物流跟踪';
+      const isFulfillmentLink = record.group === '履约链路跟踪';
       const drawerTitle = isFulfillmentLink ? `${record.type}详情` : isTaskDetail ? '任务详情' : config.drawerTitle;
       const drawerSubtitle = isTaskDetail || isFulfillmentLink ? '' : config.drawerSubtitle;
       const fulfillmentDetail = isFulfillmentLink ? renderFulfillmentLinkDetail(record) : null;
@@ -7552,7 +7552,7 @@ const menuData = [
         canvas.innerHTML = renderInventoryQueryPage();
       } else if (item.key === 'inventory-detail') {
         canvas.innerHTML = renderInventoryDetailPage();
-      } else if (item.key === 'warehouse-operation-track-list' || item.key === 'logistics-track-list') {
+      } else if (item.key === 'warehouse-operation-track-list' || item.key === 'fulfillment-link-track-list') {
         canvas.innerHTML = renderFunnelListPage(item.key);
       } else if (item.key === 'inventory-risk-list') {
         canvas.innerHTML = renderInventoryRiskListPage();

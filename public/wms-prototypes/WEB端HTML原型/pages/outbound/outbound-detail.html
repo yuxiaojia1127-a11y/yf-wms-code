@@ -152,7 +152,7 @@ tbody tr.row-fail{background:rgba(217,45,32,.03);}
 const ORDERS = {
   'OUT-20240601-000128': {
     no:'OUT-20240601-000128', type:'销售出库', gen:'APP', src:'SO-2024060112345',
-    wh:'1号仓库', status:'已完成', creator:'张三（发货员）',
+    wh:'1号仓库', room:'常温主库', status:'已完成', creator:'张三（发货员）',
     created:'2024-06-01 09:10', submitted:'2024-06-01 09:12',
     reason:'', remark:'',
     items:[
@@ -171,7 +171,7 @@ const ORDERS = {
   },
   'OUT-20240601-000122': {
     no:'OUT-20240601-000122', type:'销售出库', gen:'APP', src:'SO-2024060112340',
-    wh:'2号仓库', status:'出库失败', creator:'系统',
+    wh:'2号仓库', room:'综合库房', status:'出库失败', creator:'系统',
     created:'2024-06-01 07:50', submitted:'2024-06-01 07:51',
     reason:'SKU-00103「统一方便面」可用库存不足（需 30，剩余 0），库存扣减失败，已回滚全部明细',
     remark:'',
@@ -183,7 +183,7 @@ const ORDERS = {
   },
   'OUT-20240601-000124': {
     no:'OUT-20240601-000124', type:'其他出库', gen:'WEB', src:'',
-    wh:'3号仓库', status:'草稿', creator:'王五',
+    wh:'3号仓库', room:'主库房', status:'草稿', creator:'王五',
     created:'2024-06-01 08:20', submitted:'—',
     reason:'盘点差异补录', remark:'仓管复核后提交',
     items:[
@@ -297,6 +297,10 @@ function render(order) {
               <div class="info-item">
                 <span class="info-label">出库仓库</span>
                 <span class="info-value">${order.wh}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">出库库房</span>
+                <span class="info-value">${order.room||'—'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">创建人 / 发货员</span>

@@ -518,6 +518,13 @@ tbody tr:hover { background: rgba(0,171,149,0.025); }
         <option>2号仓库</option>
         <option>3号仓库</option>
       </select>
+      <select class="filter-ctrl" id="f-room">
+        <option value="">全部库房</option>
+        <option>常温主库</option>
+        <option>冷藏专区</option>
+        <option>综合库房</option>
+        <option>主库房</option>
+      </select>
       <input class="filter-ctrl" id="f-no" placeholder="清输入出库单号 / 来源单号" />
     </div>
 
@@ -605,6 +612,7 @@ tbody tr:hover { background: rgba(0,171,149,0.025); }
             <th>生成方式</th>
             <th>来源单号</th>
             <th>仓库</th>
+            <th>库房</th>
             <th class="td-center">SKU 种类</th>
             <th class="td-center">出库数量</th>
             <th>出库状态</th>
@@ -660,18 +668,18 @@ tbody tr:hover { background: rgba(0,171,149,0.025); }
 <script>
 /* ─── 模拟数据 ─── */
 const RAW = [
-  {no:'OUT-20240601-000128',type:'销售出库',gen:'APP',src:'SO-2024060112345',wh:'1号仓库',skus:3,qty:24,status:'已完成',creator:'张三（发货员）',time:'2024-06-01 09:12'},
-  {no:'OUT-20240601-000127',type:'销售出库',gen:'APP',src:'SO-2024060112344',wh:'1号仓库',skus:5,qty:60,status:'已完成',creator:'李四（发货员）',time:'2024-06-01 08:55'},
-  {no:'OUT-20240601-000126',type:'调拨出库',gen:'WEB',src:'TR-2024060100023',wh:'2号仓库',skus:2,qty:100,status:'已完成',creator:'王五',time:'2024-06-01 08:40'},
-  {no:'OUT-20240601-000125',type:'报损出库',gen:'WEB',src:'',wh:'1号仓库',skus:1,qty:12,status:'已完成',creator:'赵六',time:'2024-06-01 08:30'},
-  {no:'OUT-20240601-000124',type:'其他出库',gen:'WEB',src:'',wh:'3号仓库',skus:4,qty:0,status:'草稿',creator:'王五',time:'2024-06-01 08:20'},
-  {no:'OUT-20240601-000123',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',skus:0,qty:0,status:'草稿',creator:'张三',time:'2024-06-01 08:10'},
-  {no:'OUT-20240601-000122',type:'销售出库',gen:'APP',src:'SO-2024060112340',wh:'2号仓库',skus:6,qty:72,status:'出库失败',creator:'系统',time:'2024-06-01 07:50'},
-  {no:'OUT-20240601-000121',type:'销售出库',gen:'APP',src:'SO-2024060112339',wh:'1号仓库',skus:2,qty:18,status:'提交中',creator:'系统',time:'2024-06-01 07:45'},
-  {no:'OUT-20240531-000320',type:'调拨出库',gen:'WEB',src:'TR-2024053100089',wh:'2号仓库',skus:3,qty:150,status:'已完成',creator:'李四',time:'2024-05-31 17:30'},
-  {no:'OUT-20240531-000319',type:'销售出库',gen:'APP',src:'SO-2024053112000',wh:'1号仓库',skus:8,qty:96,status:'已完成',creator:'张三（发货员）',time:'2024-05-31 16:58'},
-  {no:'OUT-20240531-000318',type:'报损出库',gen:'WEB',src:'',wh:'3号仓库',skus:1,qty:5,status:'已取消',creator:'赵六',time:'2024-05-31 15:20'},
-  {no:'OUT-20240531-000317',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',skus:3,qty:30,status:'已完成',creator:'王五',time:'2024-05-31 14:10'},
+  {no:'OUT-20240601-000128',type:'销售出库',gen:'APP',src:'SO-2024060112345',wh:'1号仓库',room:'常温主库',skus:3,qty:24,status:'已完成',creator:'张三（发货员）',time:'2024-06-01 09:12'},
+  {no:'OUT-20240601-000127',type:'销售出库',gen:'APP',src:'SO-2024060112344',wh:'1号仓库',room:'常温主库',skus:5,qty:60,status:'已完成',creator:'李四（发货员）',time:'2024-06-01 08:55'},
+  {no:'OUT-20240601-000126',type:'调拨出库',gen:'WEB',src:'TR-2024060100023',wh:'2号仓库',room:'综合库房',skus:2,qty:100,status:'已完成',creator:'王五',time:'2024-06-01 08:40'},
+  {no:'OUT-20240601-000125',type:'报损出库',gen:'WEB',src:'',wh:'1号仓库',room:'常温主库',skus:1,qty:12,status:'已完成',creator:'赵六',time:'2024-06-01 08:30'},
+  {no:'OUT-20240601-000124',type:'其他出库',gen:'WEB',src:'',wh:'3号仓库',room:'主库房',skus:4,qty:0,status:'草稿',creator:'王五',time:'2024-06-01 08:20'},
+  {no:'OUT-20240601-000123',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',room:'常温主库',skus:0,qty:0,status:'草稿',creator:'张三',time:'2024-06-01 08:10'},
+  {no:'OUT-20240601-000122',type:'销售出库',gen:'APP',src:'SO-2024060112340',wh:'2号仓库',room:'综合库房',skus:6,qty:72,status:'出库失败',creator:'系统',time:'2024-06-01 07:50'},
+  {no:'OUT-20240601-000121',type:'销售出库',gen:'APP',src:'SO-2024060112339',wh:'1号仓库',room:'冷藏专区',skus:2,qty:18,status:'提交中',creator:'系统',time:'2024-06-01 07:45'},
+  {no:'OUT-20240531-000320',type:'调拨出库',gen:'WEB',src:'TR-2024053100089',wh:'2号仓库',room:'综合库房',skus:3,qty:150,status:'已完成',creator:'李四',time:'2024-05-31 17:30'},
+  {no:'OUT-20240531-000319',type:'销售出库',gen:'APP',src:'SO-2024053112000',wh:'1号仓库',room:'常温主库',skus:8,qty:96,status:'已完成',creator:'张三（发货员）',time:'2024-05-31 16:58'},
+  {no:'OUT-20240531-000318',type:'报损出库',gen:'WEB',src:'',wh:'3号仓库',room:'主库房',skus:1,qty:5,status:'已取消',creator:'赵六',time:'2024-05-31 15:20'},
+  {no:'OUT-20240531-000317',type:'其他出库',gen:'WEB',src:'',wh:'1号仓库',room:'常温主库',skus:3,qty:30,status:'已完成',creator:'王五',time:'2024-05-31 14:10'},
 ];
 
 const STATUS_CLS = {草稿:'',提交中:'info',已完成:'success',已取消:'',出库失败:'danger'};
@@ -711,6 +719,7 @@ function render(data) {
       <td>${genTag(r.gen)}</td>
       <td class="td-muted">${r.src||'—'}</td>
       <td>${r.wh}</td>
+      <td>${r.room||'--'}</td>
       <td class="td-center">${r.skus||'—'}</td>
       <td class="td-center">${r.qty||'—'}</td>
       <td>${pill(r.status, STATUS_CLS[r.status])}</td>
@@ -725,6 +734,7 @@ function doSearch() {
   const status = document.getElementById('f-status').value;
   const gen    = document.getElementById('f-gen').value;
   const wh     = document.getElementById('f-wh').value;
+  const room   = document.getElementById('f-room').value;
   const no     = document.getElementById('f-no').value.trim();
   const src    = document.getElementById('f-src').value.trim();
   displayed = RAW.filter(r =>
@@ -732,6 +742,7 @@ function doSearch() {
     (!status || r.status===status) &&
     (!gen    || r.gen===gen) &&
     (!wh     || r.wh===wh) &&
+    (!room   || r.room===room) &&
     (!no     || r.no.includes(no)) &&
     (!src    || r.src.includes(src))
   );
@@ -739,7 +750,7 @@ function doSearch() {
 }
 
 function resetFilter() {
-  ['f-type','f-status','f-gen','f-wh'].forEach(id=>document.getElementById(id).value='');
+  ['f-type','f-status','f-gen','f-wh','f-room'].forEach(id=>document.getElementById(id).value='');
   ['f-no','f-src','f-sku','f-from','f-to'].forEach(id=>document.getElementById(id).value='');
   displayed=[...RAW]; render(displayed);
 }

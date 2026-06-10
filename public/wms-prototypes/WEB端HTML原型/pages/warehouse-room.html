@@ -1198,7 +1198,7 @@ function renderMd(src) {
       if((nx.includes('|')&&i+1<lines.length&&/^\s*\|?[\-:\s|]+\|?\s*$/.test(lines[i+1]))||nx.startsWith('```'))break;
       para.push(nx); i++;
     }
-    html.push(`<p>${fmtInline(para.join('<br/>'))}</p>`);
+    html.push(`<p>${para.map(l => fmtInline(l)).join('<br>')}</p>`);
   }
   return `<div class="req-md-article">${html.join('')}</div>`;
 }

@@ -146,12 +146,12 @@ const menuData = [
   {
     "key": "fulfillment",
     "icon": "fulfillment",
-    "name": "物流中心",
-    "meta": "物流跟踪",
+    "name": "履约中心",
+    "meta": "履约链路跟踪",
     "items": [
       {
-        "key": "logistics-track-list",
-        "name": "物流跟踪",
+        "key": "fulfillment-link-track-list",
+        "name": "履约链路跟踪",
         "page": "WMS-WEB-020A"
       }
     ]

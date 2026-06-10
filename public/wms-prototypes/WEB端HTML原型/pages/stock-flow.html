@@ -362,6 +362,13 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
         <option value="wh2">2号仓库</option>
         <option value="wh3">华南仓</option>
       </select>
+      <select class="filter-ctrl" id="f-room">
+        <option value="">全部库房</option>
+        <option value="常温主库">常温主库</option>
+        <option value="冷藏专区">冷藏专区</option>
+        <option value="综合库房">综合库房</option>
+        <option value="主库房">主库房</option>
+      </select>
       <input type="text" class="filter-ctrl" id="f-sku" placeholder="请输入商品 SKU 编码"/>
       <input type="text" class="filter-ctrl" id="f-name" placeholder="请输入商品名称"/>
       <!-- 级联商品分类 -->
@@ -464,6 +471,7 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
             <th>流水号</th>
             <th>发生时间</th>
             <th>仓库</th>
+            <th>库房</th>
             <th>商品信息</th>
             <th>商品分类</th>
             <th>流水类型</th>
@@ -508,6 +516,7 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
         <div class="drawer-field"><span class="drawer-field-label">流水号</span><span class="drawer-field-value" id="d-no">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">发生时间</span><span class="drawer-field-value" id="d-time">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">仓库</span><span class="drawer-field-value" id="d-warehouse">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">库房</span><span class="drawer-field-value" id="d-room">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">库区</span><span class="drawer-field-value" id="d-zone">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">货位</span><span class="drawer-field-value" id="d-loc">—</span></div>
       </div>
@@ -761,6 +770,7 @@ const SKUS=[
   {name:'护肤精华 30ml',code:'SERUM-30ML',spec:'30ml/支',unit:'支',barcode:'6901234500001',cat:'日化 > 护肤 > 精华',catId:'c132'},
 ];
 const WHS=['1号仓库','2号仓库','华南仓'];
+const ROOMS={'1号仓库':['常温主库','冷藏专区'],'2号仓库':['综合库房'],'华南仓':['主库房']};
 const OPS=['张三','李四','王五','系统','赵六'];
 const ZONES=['A区','B区','C区'];
 const LOCS=['A-01-01','A-02-03','B-01-02','C-02-01'];
@@ -781,7 +791,7 @@ function genRow(i,daysAgo){
   const pfx={in:'IN',out:'OUT',adj:'ADJ',stocktake:'ST',freeze:'FZ',unfreeze:'UFZ',lock:'LK',unlock:'ULK'};
   const nd=d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate());
   return{
-    no:'FL-'+nd+'-'+String(i+1).padStart(6,'0'), time:fmtT(d), warehouse:wh, sku, ft, biz,
+    no:'FL-'+nd+'-'+String(i+1).padStart(6,'0'), time:fmtT(d), warehouse:wh, room:pick(ROOMS[wh]||['主库房']), sku, ft, biz,
     refNo:pfx[ft.key]+'-'+nd+'-'+String(rnd(1,999)).padStart(4,'0'), refType:biz,
     batch:rnd(0,3)>0?'BN-'+nd+'-'+pad2(rnd(1,20)):'-',
     qty, bp, ap, bl, al, bf, af,
@@ -849,6 +859,7 @@ function renderTable(){
       <td><a class="table-link" onclick="openDrawer(${s+idx})">${r.no}</a></td>
       <td style="white-space:nowrap;font-size:12px;">${r.time}</td>
       <td>${r.warehouse}</td>
+      <td>${r.room||'--'}</td>
       <td><div class="sku-cell"><span class="sku-name">${r.sku.name}</span><span class="sku-code">${r.sku.code}</span></div></td>
       <td><span class="category-cell" title="${r.sku.cat}">${r.sku.cat}</span></td>
       <td><span class="flow-tag ${r.ft.cls}">${r.ft.label}</span></td>
@@ -889,6 +900,7 @@ function openDrawer(idx){
   document.getElementById('d-no').textContent=r.no;
   document.getElementById('d-time').textContent=r.time;
   document.getElementById('d-warehouse').textContent=r.warehouse;
+  document.getElementById('d-room').textContent=r.room||'--';
   document.getElementById('d-zone').textContent=r.zone;
   document.getElementById('d-loc').textContent=r.loc;
   document.getElementById('d-sku-name').textContent=r.sku.name;

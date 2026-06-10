@@ -2147,6 +2147,9 @@
     .filters-row.is-quarter {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
+    .filters-row.is-five {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
     .filters-actions {
       display: inline-flex;
       gap: 12px;
