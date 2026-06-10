@@ -734,8 +734,6 @@ const menuData = [
       }
     ];
     const serviceCapabilityOptions = ['常温', '冷藏', '冷冻'];
-    const requirementSeedNode = document.getElementById('requirementData');
-    const requirementFileName = window.location.pathname.slice(1).split('?')[0];
     const requirementExternalSources = {
       cockpit: '../assets/requirements/cockpit-self-operated.md',
       'exception-urgent-list': '../assets/requirements/exception-urgent-list.md',
@@ -945,7 +943,7 @@ const menuData = [
     let inventoryRiskSort = { field: 'priority', order: 'desc' };
     let myProductStatsExpanded = false;
     let requirementSaveState = 'idle';
-    const requirementData = window.WMS_REQUIREMENT_DATA || JSON.parse(requirementSeedNode?.textContent || '{}');
+    const requirementData = window.WMS_REQUIREMENT_DATA || {};
 
     /* ── 入库管理状态 ── */
     let inboundView = 'list'; // 'list' | 'create' | 'detail'
@@ -1138,11 +1136,6 @@ const menuData = [
       }
       renderOverlay();
       return state;
-    }
-
-    async function syncRequirementDocsBeforeReload() {
-      // 同步接口已移除：外部 MD 文档由客户端直接 fetch 最新内容
-      return true;
     }
 
     function getRequirementWorkingDoc() {
@@ -6908,16 +6901,13 @@ const menuData = [
         if (!response.ok || !result.ok) {
           throw new Error(result.message || '保存失败');
         }
-        if (requirementSeedNode) {
-          requirementSeedNode.textContent = JSON.stringify(requirementData, null, 2);
-        }
         requirementSaveState = 'saved';
         requirementEditMode = false;
         requirementDraft = null;
         syncRequirementStatusUi();
         openModal({
           title: '保存成功',
-          message: '简易需求文档已写回当前原型 HTML 文件，你下次刷新页面仍会保留最新内容。',
+          message: '简易需求文档已写入共享数据文件（assets/wms-requirement-data.js），所有页面刷新后均会读到最新内容。',
           confirmText: '知道了',
           confirmStyle: 'ghost'
         });
@@ -8647,12 +8637,6 @@ const menuData = [
         return;
       }
       if (action === 'requirement-reload') {
-        if (isExternalRequirementDoc()) {
-          syncRequirementDocsBeforeReload().finally(() => {
-            loadExternalRequirementDoc(getRequirementDocKey(), true);
-          });
-          return;
-        }
         loadExternalRequirementDoc(getRequirementDocKey(), true);
         return;
       }
