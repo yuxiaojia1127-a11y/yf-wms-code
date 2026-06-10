@@ -2761,8 +2761,8 @@ window.WMS_REQUIREMENT_DATA = {
         "fieldType": "文本",
         "fieldLength": "30",
         "required": "否",
-        "example": "入库待收货 / 履约待拣货 / 异常待关闭",
-        "description": "展示待办所属业务类型。"
+        "example": "待入库 / 待接单揽货 / 待揽货 / 待打包复核 / 待发货 / 待接单 / 重新派单",
+        "description": "展示待办所属业务类型，与作业漏斗节点状态保持一致。"
       },
       {
         "fieldName": "辅助说明",
@@ -2854,6 +2854,7 @@ window.WMS_REQUIREMENT_DATA = {
       "今日作业漏斗中的每个节点都是独立统计需求，必须有单独数量和节点说明。",
       "今日作业漏斗中的进度条统一表示节点健康度，按 SLA 内未超时任务数 / 当前节点总任务数 计算。",
       "库存风险 Top 和超时 / 紧急待办是完整模块需求，包含列表、分页、排序、下钻和空态规则。",
+      "超时 / 紧急待办的待办类型与作业漏斗节点状态保持一致：待入库、待接单揽货、待揽货、待打包复核、待发货、待接单、重新派单。",
       "点击模块级按钮后进入对应业务页面继续处理，不在驾驶舱内直接完成业务操作。",
       "风险 Top 与紧急待办支持分页展示，当前页默认展示 10 条数据。",
       "当数据为空时，模块区展示空态提示，不展示异常样式。",
@@ -2965,7 +2966,7 @@ window.WMS_REQUIREMENT_DATA = {
         "fieldType": "文本",
         "fieldLength": "32",
         "required": "是",
-        "example": "EX-240603-015",
+        "example": "SO-240603-218",
         "description": "展示待办或异常单号。"
       },
       {
@@ -2973,8 +2974,8 @@ window.WMS_REQUIREMENT_DATA = {
         "fieldType": "标签",
         "fieldLength": "20",
         "required": "是",
-        "example": "库存异常 / 入库待收货",
-        "description": "展示当前待办类型。"
+        "example": "待入库 / 待接单揽货 / 待揽货 / 待打包复核 / 待发货 / 待接单 / 重新派单",
+        "description": "展示当前待办类型，与作业漏斗节点状态保持一致。"
       },
       {
         "fieldName": "仓库",
@@ -3046,6 +3047,7 @@ window.WMS_REQUIREMENT_DATA = {
     ],
     "keyRules": [
       "页面数据口径与驾驶舱“超时 / 紧急待办”模块保持一致。",
+      "待办类型与驾驶舱作业漏斗节点状态保持一致：待入库、待接单揽货、待揽货、待打包复核、待发货、待接单、重新派单。",
       "处理人属于必展示字段。",
       "导出范围为当前筛选结果。",
       "驾驶舱模块入口默认进入本页面。"
@@ -5230,13 +5232,13 @@ const menuData = [
       { title: '鸡胸肉 冷鲜 1kg', subtitle: 'CHICKEN-1KG · 1kg*1袋', stock: '库存 19 袋 · 可售 11 袋 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20袋）', level: 'warning', target: 'inventory-query' }
     ];
     const cockpitTodoFillers = [
-      { title: 'PO-240603-027', type: '入库待收货', meta: '2号仓库 · 已等待 96 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-      { title: 'SO-240603-239', type: '待复核', meta: '1号仓库 · 2 个 SKU 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-      { title: 'SO-240603-245', type: '待发运', meta: '2号仓库 · 快递 · 已等待 38 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
-      { title: 'EX-240603-015', type: '库存异常', meta: '2号仓库 · 快递 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'exception-job' },
-      { title: 'EX-240603-018', type: '履约异常', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'exception-job' },
-      { title: 'SO-240603-251', type: '待拣货', meta: '2号仓库 · 快递 · 已等待 45 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-      { title: 'TK-240603-006', type: '工单待关闭', meta: '库存差异已处理 · 等待主管确认关闭', owner: '刘静', level: 'warning', target: 'exception-job' }
+      { title: 'PO-240603-027', type: '待入库', meta: '2号仓库 · 快递 · 已等待 96 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
+      { title: 'SO-240603-263', type: '待接单揽货', meta: '1号仓库 · 快递 · 已等待 74 分钟', owner: '王敏', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-251', type: '待揽货', meta: '2号仓库 · 即时配送 · 已等待 45 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-239', type: '待打包复核', meta: '1号仓库 · 即时配送 · 已等待 36 分钟', owner: '李昊', level: 'warning', target: 'warehouse-operation-track-list' },
+      { title: 'SO-240603-245', type: '待发货', meta: '2号仓库 · 快递 · 已等待 38 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
+      { title: 'SO-240603-256', type: '待接单', meta: '1号仓库 · 即时配送 · 已等待 52 分钟', owner: '周璇', level: 'warning', target: 'fulfillment-link-track-list' },
+      { title: 'SO-240603-242', type: '重新派单', meta: '2号仓库 · 即时配送 · 已等待 68 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' }
     ];
     const cockpitSnapshots = {
       '全部仓库': {
@@ -5268,10 +5270,9 @@ const menuData = [
           { title: '鲜奶 1L', subtitle: 'MILK-1L · 1L*1盒', stock: '库存 42 盒 · 可售 18 盒 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20盒）', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'PO-240603-018', type: '入库待收货', meta: '1号仓库 · 已等待 108 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-          { title: 'SO-240603-221', type: '履约待拣货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-          { title: 'SO-240603-231', type: '待复核', meta: '2号仓库 · 拣货已完成 · 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-          { title: 'EX-240603-009', type: '异常待关闭', meta: '库存异常 · 货位冻结与盘点差异关联', owner: '陈晨', level: 'danger', target: 'exception-job' }
+          { title: 'SO-240603-218', type: '待接单', meta: '2号仓库 · 即时配送 · 已等待 132 分钟', owner: '陈晨', level: 'danger', target: 'fulfillment-link-track-list' },
+          { title: 'PO-240603-018', type: '待入库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
+          { title: 'SO-240603-221', type: '待揽货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' }
         ]
       },
       '1号仓库': {
@@ -5302,9 +5303,9 @@ const menuData = [
           { title: '鲜奶 1L', subtitle: 'MILK-1L · 1L*1盒', stock: '库存 28 盒 · 可售 14 盒 · 1号仓库', value: '低库存', meta: '可售库存低于安全库存（20盒）', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'PO-240603-018', type: '入库待收货', meta: '1号仓库 · 已等待 108 分钟', owner: '张倩', level: 'warning', target: 'inbound' },
-          { title: 'SO-240603-221', type: '履约待拣货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'shipment-track' },
-          { title: 'EX-240603-009', type: '异常待关闭', meta: '1号仓库 · 库存异常 · 已等待 64 分钟', owner: '陈晨', level: 'danger', target: 'exception-job' }
+          { title: 'PO-240603-018', type: '待入库', meta: '1号仓库 · 快递 · 已等待 108 分钟', owner: '张倩', level: 'danger', target: 'inbound' },
+          { title: 'SO-240603-221', type: '待揽货', meta: '1号仓库 · 即时配送 · 已等待 46 分钟', owner: '赵川', level: 'warning', target: 'warehouse-operation-track-list' },
+          { title: 'SO-240603-227', type: '重新派单', meta: '1号仓库 · 即时配送 · 已等待 64 分钟', owner: '周璇', level: 'danger', target: 'fulfillment-link-track-list' }
         ]
       },
       '2号仓库': {
@@ -5335,9 +5336,9 @@ const menuData = [
           { title: '可乐 330ml', subtitle: 'COLA-330 · 330ml*24听', stock: '库存 24 箱 · 锁定 7 箱 · 2号仓库', value: '高锁定占比', meta: '2号仓库 · 锁定占比 29%', level: 'warning', target: 'inventory-query' }
         ],
         todos: [
-          { title: 'SO-240603-231', type: '待复核', meta: '拣货已完成 · 批次差异待确认', owner: '李昊', level: 'danger', target: 'shipment-track' },
-          { title: 'SO-240603-248', type: '待发运', meta: '2号仓库 · 快递 · 已等待 92 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
-          { title: 'EX-240603-012', type: '出库异常', meta: '2号仓库 · 快递 · 已等待 42 分钟', owner: '周璇', level: 'warning', target: 'exception-job' }
+          { title: 'SO-240603-248', type: '待发货', meta: '2号仓库 · 快递 · 已等待 92 分钟', owner: '王敏', level: 'warning', target: 'shipment' },
+          { title: 'SO-240603-231', type: '待打包复核', meta: '2号仓库 · 快递 · 已等待 58 分钟', owner: '李昊', level: 'danger', target: 'warehouse-operation-track-list' },
+          { title: 'PO-240603-033', type: '待入库', meta: '2号仓库 · 快递 · 已等待 49 分钟', owner: '刘静', level: 'warning', target: 'inbound' }
         ]
       }
     };
@@ -6840,15 +6841,15 @@ const menuData = [
     }
 
     function getUrgentTodoStatus(item) {
-      if (String(item.type || '').includes('关闭')) return '待关闭';
-      if (String(item.type || '').includes('异常')) return '待处理';
-      return '处理中';
+      return getTodoWaitMinutes(item) > 60 ? '已超时' : '待处理';
     }
 
     function getUrgentTodoSuggestion(item) {
       if (item.target === 'inbound') return '进入入库管理，确认收货或处理收货异常。';
       if (item.target === 'shipment') return '进入发货履约，优先处理待发运交接。';
       if (item.target === 'shipment-track') return '进入履约执行跟踪，定位卡点并推进处理。';
+      if (item.target === 'warehouse-operation-track-list') return '进入仓内作业跟踪，定位节点卡点并推进处理。';
+      if (item.target === 'fulfillment-link-track-list') return '进入履约链路跟踪，跟进接单与派单进度。';
       if (item.target === 'exception-job') return '进入异常与工单，补充处理记录并完成闭环。';
       return '进入对应业务页面继续处理。';
     }
@@ -9128,11 +9129,13 @@ const menuData = [
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部待办类型</option>
-                  <option>入库待收货</option>
-                  <option>待发运</option>
-                  <option>库存异常</option>
-                  <option>履约异常</option>
-                  <option>待拣货</option>
+                  <option>待入库</option>
+                  <option>待接单揽货</option>
+                  <option>待揽货</option>
+                  <option>待打包复核</option>
+                  <option>待发货</option>
+                  <option>待接单</option>
+                  <option>重新派单</option>
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部紧急等级</option>

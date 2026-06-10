@@ -9,90 +9,88 @@
   --bg:#f5f5f7;--line:rgba(29,29,31,0.08);--text:#1d1d1f;--subtext:rgba(29,29,31,0.72);
   --muted:rgba(29,29,31,0.48);--accent:#00ab95;--accent-soft:rgba(0,171,149,0.10);
   --warn:#c77c11;--danger:#d92d20;
-  --radius-lg:22px;--radius-md:18px;--radius-pill:999px;
-  --shadow-soft:0 8px 24px rgba(0,0,0,0.035);
+  --radius-xl:20px;--radius-lg:16px;--radius-md:12px;--radius-pill:999px;
+  --shadow:0 8px 24px rgba(0,0,0,0.06);
   --font-heading:"SF Pro Display",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   --font-body:"SF Pro Text",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;min-height:100%;font-family:var(--font-body);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
-body::before{content:"";position:fixed;inset:0;z-index:-1;
-  background:radial-gradient(circle at top left,rgba(255,255,255,.95),transparent 36%),
-             radial-gradient(circle at top right,rgba(0,171,149,.10),transparent 26%),
-             linear-gradient(180deg,#fafafc,#f5f5f7);}
 button,input,select{font:inherit;}
 a{text-decoration:none;color:inherit;}
 
-.canvas{padding:24px 28px 48px;display:grid;gap:20px;max-width:1400px;}
+/* canvas & page-stack */
+.canvas{width:100%;max-width:none;margin:0;padding:20px 20px 34px;box-sizing:border-box;display:grid;gap:20px;}
+.page-stack{display:grid;gap:14px;}
 
-/* back & head */
-.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:4px;}
-.back-link:hover{color:var(--accent);}
-.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
-.detail-title-group{display:grid;gap:4px;}
-.detail-no{font-family:var(--font-heading);font-size:24px;font-weight:700;letter-spacing:-.04em;}
-.detail-meta{font-size:12px;color:var(--muted);}
-.detail-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+/* list-surface */
+.list-surface{border-radius:var(--radius-xl);background:rgba(255,255,255,0.96);border:1px solid rgba(255,255,255,0.94);box-shadow:var(--shadow);overflow:hidden;}
+
+/* surface-head */
+.surface-head{padding:18px 22px 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid rgba(29,29,31,0.06);background:rgba(255,255,255,0.92);}
+.surface-title{margin:0;font-family:var(--font-heading);font-size:22px;line-height:1.14;letter-spacing:-0.045em;font-weight:650;}
+.surface-subtitle{color:var(--muted);font-size:12px;margin-top:3px;}
+
+/* back button */
+.ib-back-btn{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--subtext);cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(29,29,31,0.05);border:none;white-space:nowrap;flex-shrink:0;}
+.ib-back-btn:hover{background:rgba(29,29,31,0.09);}
+
+/* surface-controls */
+.surface-controls{padding:20px 22px;display:grid;gap:16px;background:rgba(255,255,255,0.92);}
+
+/* form sections */
+.form-section{background:#fff;border-radius:var(--radius-lg);border:1px solid rgba(29,29,31,0.07);padding:22px;}
+.form-section-title{font-size:15px;font-weight:600;color:var(--text);margin:0 0 18px;display:flex;align-items:center;gap:8px;}
 
 /* buttons */
-.btn{height:38px;border-radius:var(--radius-pill);border:1px solid var(--line);background:rgba(255,255,255,.92);
-  display:inline-flex;align-items:center;gap:7px;padding:0 16px;font-size:13px;font-weight:600;
-  color:var(--text);cursor:pointer;white-space:nowrap;transition:all .15s;}
-.btn:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06);}
-.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 6px 16px rgba(0,171,149,.22);}
-.btn-primary:hover{background:#009983;}
-.btn-ghost{color:var(--subtext);}
-.btn-danger{background:#d92d20;color:#fff;border-color:#d92d20;}
-.btn-sm{height:32px;padding:0 12px;font-size:12px;}
+.accent-btn{height:38px;border-radius:999px;border:1px solid rgba(0,171,149,0.40);background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 16px;font-size:13px;font-weight:650;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 6px 16px rgba(0,171,149,0.18);white-space:nowrap;}
+.accent-btn:hover{filter:brightness(0.97);}
+.neutral-btn{height:38px;border-radius:999px;border:1px solid rgba(29,29,31,0.12);background:rgba(255,255,255,0.94);color:rgba(29,29,31,0.82);display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;font-size:13px;font-weight:650;letter-spacing:-0.01em;cursor:pointer;transition:background .18s,border-color .18s;white-space:nowrap;}
+.neutral-btn:hover{background:#fff;border-color:rgba(29,29,31,0.18);}
+.danger-btn{height:38px;border-radius:999px;border:1px solid rgba(217,45,32,0.4);background:var(--danger);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;font-size:13px;font-weight:650;cursor:pointer;white-space:nowrap;}
+.danger-btn:hover{filter:brightness(0.95);}
+.detail-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
 
 /* pills */
-.pill{display:inline-flex;align-items:center;height:26px;padding:0 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;white-space:nowrap;}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;white-space:nowrap;}
 .pill-default{background:rgba(29,29,31,.06);color:var(--subtext);}
 .pill-blue{background:rgba(37,99,235,.10);color:#1d4ed8;}
 .pill-green{background:rgba(0,171,149,.12);color:var(--accent);}
 .pill-red{background:rgba(217,45,32,.10);color:var(--danger);}
 .pill-orange{background:rgba(199,124,17,.12);color:var(--warn);}
-.pill-lg{height:32px;padding:0 14px;font-size:13px;}
-
-/* card */
-.card{background:rgba(255,255,255,.92);border-radius:var(--radius-lg);border:1px solid rgba(255,255,255,.94);box-shadow:var(--shadow-soft);padding:24px;}
+.pill-lg{height:28px;padding:0 12px;font-size:13px;}
 
 /* alert */
-.alert{padding:14px 18px;border-radius:16px;font-size:13px;line-height:1.75;display:flex;align-items:flex-start;gap:12px;}
+.alert{padding:14px 18px;border-radius:14px;font-size:13px;line-height:1.75;display:flex;align-items:flex-start;gap:12px;}
 .alert-warn{background:rgba(199,124,17,.08);border:1px solid rgba(199,124,17,.14);color:#7a4c0a;}
 .alert-info{background:rgba(29,29,31,.04);border:1px solid rgba(29,29,31,.07);color:var(--subtext);}
 .alert-fail{background:rgba(217,45,32,.07);border:1px solid rgba(217,45,32,.12);color:#991b1b;}
 .alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
-.alert-body{display:grid;gap:6px;}
+.alert-body{display:grid;gap:4px;}
 .alert-title{font-weight:700;font-size:13px;}
 .alert-text{font-size:12px;line-height:1.7;}
 
 /* info grid */
-.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 20px;}
-.info-item{display:grid;gap:4px;}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 20px;}
+.info-item{display:grid;gap:5px;}
 .info-label{font-size:11px;font-weight:650;color:var(--muted);letter-spacing:.01em;}
 .info-value{font-size:13px;font-weight:600;color:var(--text);line-height:1.5;}
 .info-value.mono{font-family:monospace;font-size:12px;}
 
-/* divider */
-.divider{height:1px;background:rgba(29,29,31,.06);margin:0;}
-
 /* tabs */
-.tabs{display:flex;gap:0;border-bottom:1px solid rgba(29,29,31,.07);margin-bottom:20px;}
-.tab{padding:10px 20px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tabs{display:flex;gap:0;border-bottom:1px solid rgba(29,29,31,.07);margin-bottom:18px;}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 6px;border-radius:999px;
-  background:rgba(0,171,149,.12);color:var(--accent);font-size:11px;font-weight:700;margin-left:6px;}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:rgba(0,171,149,.12);color:var(--accent);font-size:11px;font-weight:700;margin-left:5px;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
 /* table */
-.table-wrap{border-radius:14px;border:1px solid rgba(29,29,31,.05);overflow:auto;background:rgba(250,250,252,.9);}
+.table-wrap{overflow:hidden;border-radius:14px;border:1px solid rgba(29,29,31,.05);background:rgba(250,250,252,.9);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-thead th{padding:9px 14px;background:rgba(29,29,31,.025);font-weight:650;color:var(--subtext);
-  font-size:11px;letter-spacing:.01em;text-align:left;border-bottom:1px solid rgba(29,29,31,.05);white-space:nowrap;}
-tbody td{padding:11px 14px;border-bottom:1px solid rgba(29,29,31,.04);vertical-align:middle;}
+thead th{padding:9px 12px;text-align:left;color:var(--muted);background:rgba(29,29,31,0.02);border-bottom:1px solid rgba(29,29,31,0.05);font-weight:600;font-size:12px;white-space:nowrap;}
+tbody td{padding:10px 12px;border-bottom:1px solid rgba(29,29,31,.04);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:0;}
 tbody tr:hover{background:rgba(0,171,149,.02);}
 tbody tr.row-fail{background:rgba(217,45,32,.03);}
@@ -110,8 +108,6 @@ tbody tr.row-fail{background:rgba(217,45,32,.03);}
 .flow-tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;}
 .flow-unfreeze{background:rgba(99,102,241,.10);color:#4338ca;}
 .flow-deduct{background:rgba(199,124,17,.10);color:var(--warn);}
-
-.footer-note{text-align:center;padding:10px;color:rgba(29,29,31,.2);font-size:11px;}
 
 /* modal */
 .modal-mask{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.30);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
@@ -133,8 +129,8 @@ tbody tr.row-fail{background:rgba(217,45,32,.03);}
     <h3 class="modal-title">确认取消出库单？</h3>
     <p class="modal-body">取消后该草稿出库单将标记为「已取消」，不参与任何库存操作，<strong>此操作不可撤销</strong>。</p>
     <div class="modal-foot">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">再想想</button>
-      <button class="btn btn-danger btn-sm" onclick="doCancel()">确认取消</button>
+      <button class="neutral-btn" onclick="closeModal()">再想想</button>
+      <button class="danger-btn" onclick="doCancel()">确认取消</button>
     </div>
   </div>
 </div>
@@ -145,13 +141,11 @@ tbody tr.row-fail{background:rgba(217,45,32,.03);}
     <h3 class="modal-title">确认重新提交？</h3>
     <p class="modal-body">系统将对该出库单重新执行库存扣减，请确认商品信息和可用库存充足后再操作。</p>
     <div class="modal-foot">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="doRetry()">确认重新提交</button>
+      <button class="neutral-btn" onclick="closeModal()">取消</button>
+      <button class="accent-btn" onclick="doRetry()">确认重新提交</button>
     </div>
   </div>
 </div>
-
-<div class="footer-note">WMS-WEB 出库管理原型 v1.0 · WMS-WEB-OUT03</div>
 
 <script>
 /* ─── 模拟数据库 ─── */
@@ -215,204 +209,220 @@ function render(order) {
   const isAPP    = order.gen==='APP';
 
   canvas.innerHTML = `
-    <!-- 返回 & 标题 -->
-    <div>
-      <a class="back-link" href="../outbound.html">← 出库单管理</a>
-      <div class="detail-head">
-        <div class="detail-title-group">
+    <div class="page-stack">
+      <section class="list-surface">
+
+        <!-- 表头 -->
+        <div class="surface-head">
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <span class="detail-no">${order.no}</span>
-            <span class="pill ${STATUS_CLS[order.status]||'pill-default'} pill-lg">${order.status}</span>
+            <button class="ib-back-btn" onclick="window.location.href='../outbound.html'">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              出库单管理
+            </button>
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h1 class="surface-title">${order.no}</h1>
+                <span class="pill ${STATUS_CLS[order.status]||'pill-default'} pill-lg">${order.status}</span>
+              </div>
+              <p class="surface-subtitle">
+                <span class="gen-tag"><span class="gen-dot ${isAPP?'app':'web'}"></span>${isAPP?'仓库APP自动生成':'WEB手动新建'}</span>
+                &nbsp;·&nbsp; 创建于 ${order.created}
+              </p>
+            </div>
           </div>
-          <div class="detail-meta">
-            <span class="gen-tag"><span class="gen-dot ${isAPP?'app':'web'}"></span>${isAPP?'仓库APP自动生成':'WEB手动新建'}</span>
-            &nbsp;·&nbsp; 创建于 ${order.created}
+          <div class="detail-actions">
+            ${isDraft ? `
+              <a class="neutral-btn" href="./outbound-create.html?no=${encodeURIComponent(order.no)}">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                编辑
+              </a>
+              <button class="danger-btn" onclick="openModal('cancel')">取消出库单</button>
+            ` : ''}
+            ${isFail ? `<button class="accent-btn" onclick="openModal('retry')">🔄 重新提交</button>` : ''}
+            <button class="neutral-btn" onclick="window.print()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 5V3a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.3"/><path d="M4 9h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              打印
+            </button>
           </div>
         </div>
-        <div class="detail-actions">
+
+        <!-- 内容区 -->
+        <div class="surface-controls">
+
           ${isDraft ? `
-            <a class="btn btn-ghost" href="./outbound-create.html?no=${encodeURIComponent(order.no)}">✏️ 编辑</a>
-            <button class="btn btn-danger btn-sm" onclick="openModal('cancel')">取消出库单</button>
-          ` : ''}
+          <div class="alert alert-info">
+            <div class="alert-icon">📝</div>
+            <div class="alert-body">
+              <div class="alert-title">草稿状态</div>
+              <div class="alert-text">当前出库单处于草稿状态，提交后将执行库存扣减。草稿中可随时编辑商品明细。</div>
+            </div>
+          </div>` : ''}
+
           ${isFail ? `
-            <button class="btn btn-primary" onclick="openModal('retry')">🔄 重新提交</button>
-          ` : ''}
-          <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 打印</button>
-        </div>
-      </div>
+          <div class="alert alert-fail">
+            <div class="alert-icon">❌</div>
+            <div class="alert-body">
+              <div class="alert-title">出库失败原因</div>
+              <div class="alert-text">${order.reason}</div>
+            </div>
+          </div>` : ''}
+
+          <!-- 基本信息 -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="3" stroke="var(--accent)" stroke-width="1.5"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round"/></svg>
+              基本信息
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">出库单号</span>
+                <span class="info-value mono">${order.no}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">出库类型</span>
+                <span class="info-value"><span class="pill ${TYPE_CLS[order.type]||'pill-default'}">${order.type}</span></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">生成方式</span>
+                <span class="info-value"><span class="gen-tag"><span class="gen-dot ${isAPP?'app':'web'}"></span>${isAPP?'仓库APP自动生成':'WEB手动新建'}</span></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">出库状态</span>
+                <span class="info-value"><span class="pill ${STATUS_CLS[order.status]||'pill-default'}">${order.status}</span></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">来源单号</span>
+                <span class="info-value">${order.src||'—'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">出库仓库</span>
+                <span class="info-value">${order.wh}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">创建人 / 发货员</span>
+                <span class="info-value">${order.creator}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">创建时间</span>
+                <span class="info-value">${order.created}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">发货 / 提交时间</span>
+                <span class="info-value">${order.submitted}</span>
+              </div>
+              <div class="info-item" style="grid-column:span 3;">
+                <span class="info-label">出库原因</span>
+                <span class="info-value" style="font-weight:400;color:var(--subtext);">${order.reason||'—'}</span>
+              </div>
+              <div class="info-item" style="grid-column:span 4;">
+                <span class="info-label">备注</span>
+                <span class="info-value" style="font-weight:400;color:var(--subtext);">${order.remark||'—'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 明细 & 流水（非草稿） -->
+          ${!isDraft ? `
+          <div class="form-section">
+            <div class="tabs">
+              <div class="tab active" id="tab-items" onclick="switchTab('items')">
+                出库明细 <span class="tab-count">${order.items.length}</span>
+              </div>
+              <div class="tab" id="tab-flows" onclick="switchTab('flows')">
+                出库流水 <span class="tab-count" style="${order.flows.length?'':'background:rgba(29,29,31,.06);color:var(--muted);'}">${order.flows.length}</span>
+              </div>
+            </div>
+
+            <!-- 出库明细 -->
+            <div class="tab-panel active" id="panel-items">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:40px;text-align:center;">序</th>
+                      <th>商品条形码</th><th>SKU编码</th><th>商品名称</th>
+                      <th>规格</th><th>单位</th>
+                      <th style="text-align:center;">出库数量</th>
+                      <th>批次号</th>
+                      <th style="text-align:center;">解冻锁定</th>
+                      <th style="text-align:center;">实扣实物</th>
+                      <th style="text-align:center;">扣减状态</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${order.items.map(r=>`
+                    <tr class="${r.stockStatus==='失败'?'row-fail':''}">
+                      <td class="td-muted td-center">${r.seq}</td>
+                      <td class="td-mono">${r.barcode}</td>
+                      <td class="td-mono">${r.sku}</td>
+                      <td style="font-weight:600;">${r.name}</td>
+                      <td class="td-muted">${r.spec}</td>
+                      <td class="td-muted">${r.unit}</td>
+                      <td class="td-center" style="font-weight:700;">${r.qty}</td>
+                      <td class="td-muted">${r.batch||'—'}</td>
+                      <td class="td-center">${r.unfreeze!==null?r.unfreeze:'—'}</td>
+                      <td class="td-center">${r.deduct!==null?r.deduct:'—'}</td>
+                      <td class="td-center"><span class="pill ${STOCK_CLS[r.stockStatus]||'pill-default'}">${r.stockStatus}</span></td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 出库流水 -->
+            <div class="tab-panel" id="panel-flows">
+              ${order.flows.length ? `
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>流水号</th>
+                      <th style="text-align:center;">流水类型</th>
+                      <th>SKU编码</th><th>商品名称</th><th>仓库</th>
+                      <th>批次号</th>
+                      <th style="text-align:center;">变动数量</th>
+                      <th>操作人</th><th>操作时间</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${order.flows.map(f=>`
+                    <tr>
+                      <td class="td-mono" style="font-size:11px;">${f.no}</td>
+                      <td class="td-center">
+                        <span class="flow-tag ${f.type==='解冻锁定'?'flow-unfreeze':'flow-deduct'}">${f.type}</span>
+                      </td>
+                      <td class="td-mono">${f.sku}</td>
+                      <td style="font-weight:600;font-size:12px;">${f.name}</td>
+                      <td class="td-muted">${f.wh}</td>
+                      <td class="td-muted">${f.batch||'—'}</td>
+                      <td class="td-center" style="font-weight:700;color:var(--danger);">${f.qty}</td>
+                      <td class="td-muted">${f.op}</td>
+                      <td class="td-muted">${f.time}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>` : `
+              <div style="text-align:center;padding:48px 20px;color:var(--muted);">
+                <div style="font-size:32px;margin-bottom:10px;">📊</div>
+                <div style="font-size:14px;">暂无出库流水记录</div>
+                <div style="font-size:12px;margin-top:4px;">出库单提交成功后将自动生成解冻和扣减流水</div>
+              </div>`}
+            </div>
+          </div>
+          ` : `
+          <!-- 草稿态：明细待提交提示 -->
+          <div class="alert alert-info">
+            <div class="alert-icon">ℹ️</div>
+            <div class="alert-body">
+              <div class="alert-title">草稿状态</div>
+              <div class="alert-text">出库明细和流水将在出库单提交成功后生成。当前共 <strong>${order.items.length}</strong> 行商品明细待提交。</div>
+            </div>
+          </div>
+          `}
+
+        </div><!-- /surface-controls -->
+      </section>
     </div>
-
-    <!-- 草稿提示 -->
-    ${isDraft ? `
-    <div class="alert alert-info">
-      <div class="alert-icon">📝</div>
-      <div class="alert-body">
-        <div class="alert-title">草稿状态</div>
-        <div class="alert-text">当前出库单处于草稿状态，提交后将执行库存扣减。草稿中可随时编辑商品明细。</div>
-      </div>
-    </div>` : ''}
-
-    <!-- 失败提示 -->
-    ${isFail ? `
-    <div class="alert alert-fail">
-      <div class="alert-icon">❌</div>
-      <div class="alert-body">
-        <div class="alert-title">出库失败原因</div>
-        <div class="alert-text">${order.reason}</div>
-      </div>
-    </div>` : ''}
-
-    <!-- 基本信息 -->
-    <div class="card">
-      <div style="font-family:var(--font-heading);font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-        <span style="width:3px;height:15px;border-radius:3px;background:var(--accent);display:inline-block;"></span>基本信息
-      </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">出库单号</span>
-          <span class="info-value mono">${order.no}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">出库类型</span>
-          <span class="info-value"><span class="pill ${TYPE_CLS[order.type]||'pill-default'}" style="font-size:12px;">${order.type}</span></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">生成方式</span>
-          <span class="info-value"><span class="gen-tag" style="font-size:12px;"><span class="gen-dot ${isAPP?'app':'web'}"></span>${isAPP?'仓库APP自动生成':'WEB手动新建'}</span></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">出库状态</span>
-          <span class="info-value"><span class="pill ${STATUS_CLS[order.status]||'pill-default'}">${order.status}</span></span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">来源单号</span>
-          <span class="info-value">${order.src||'—'}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">出库仓库</span>
-          <span class="info-value">${order.wh}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">创建人 / 发货员</span>
-          <span class="info-value">${order.creator}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">创建时间</span>
-          <span class="info-value">${order.created}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">发货 / 提交时间</span>
-          <span class="info-value">${order.submitted}</span>
-        </div>
-        <div class="info-item" style="grid-column:span 3;">
-          <span class="info-label">出库原因</span>
-          <span class="info-value" style="font-weight:400;color:var(--subtext);">${order.reason||'—'}</span>
-        </div>
-        <div class="info-item" style="grid-column:span 4;">
-          <span class="info-label">备注</span>
-          <span class="info-value" style="font-weight:400;color:var(--subtext);">${order.remark||'—'}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 明细 & 流水 Tabs（仅非草稿显示） -->
-    ${!isDraft ? `
-    <div class="card">
-      <div class="tabs">
-        <div class="tab active" id="tab-items" onclick="switchTab('items')">
-          出库明细 <span class="tab-count">${order.items.length}</span>
-        </div>
-        <div class="tab" id="tab-flows" onclick="switchTab('flows')">
-          出库流水 <span class="tab-count" style="${order.flows.length?'':'background:rgba(29,29,31,.06);color:var(--muted);'}">${order.flows.length}</span>
-        </div>
-      </div>
-
-      <!-- 出库明细 tab -->
-      <div class="tab-panel active" id="panel-items">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:40px;text-align:center;">序</th>
-                <th>商品条形码</th><th>SKU编码</th><th>商品名称</th>
-                <th>规格</th><th>单位</th>
-                <th style="text-align:center;">出库数量</th>
-                <th>批次号</th>
-                <th style="text-align:center;">解冻锁定</th>
-                <th style="text-align:center;">实扣实物</th>
-                <th style="text-align:center;">扣减状态</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${order.items.map(r=>`
-              <tr class="${r.stockStatus==='失败'?'row-fail':''}">
-                <td class="td-muted td-center">${r.seq}</td>
-                <td class="td-mono">${r.barcode}</td>
-                <td class="td-mono">${r.sku}</td>
-                <td style="font-weight:600;">${r.name}</td>
-                <td class="td-muted">${r.spec}</td>
-                <td class="td-muted">${r.unit}</td>
-                <td class="td-center" style="font-weight:700;">${r.qty}</td>
-                <td class="td-muted">${r.batch||'—'}</td>
-                <td class="td-center">${r.unfreeze!==null?r.unfreeze:'—'}</td>
-                <td class="td-center">${r.deduct!==null?r.deduct:'—'}</td>
-                <td class="td-center"><span class="pill ${STOCK_CLS[r.stockStatus]||'pill-default'}">${r.stockStatus}</span></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 出库流水 tab -->
-      <div class="tab-panel" id="panel-flows">
-        ${order.flows.length ? `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>流水号</th>
-                <th style="text-align:center;">流水类型</th>
-                <th>SKU编码</th><th>商品名称</th><th>仓库</th>
-                <th>批次号</th>
-                <th style="text-align:center;">变动数量</th>
-                <th>操作人</th><th>操作时间</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${order.flows.map(f=>`
-              <tr>
-                <td class="td-mono" style="font-size:11px;">${f.no}</td>
-                <td class="td-center">
-                  <span class="flow-tag ${f.type==='解冻锁定'?'flow-unfreeze':'flow-deduct'}">${f.type}</span>
-                </td>
-                <td class="td-mono">${f.sku}</td>
-                <td style="font-weight:600;font-size:12px;">${f.name}</td>
-                <td class="td-muted">${f.wh}</td>
-                <td class="td-muted">${f.batch||'—'}</td>
-                <td class="td-center" style="font-weight:700;color:var(--danger);">${f.qty}</td>
-                <td class="td-muted">${f.op}</td>
-                <td class="td-muted">${f.time}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>` : `
-        <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-          <div style="font-size:32px;margin-bottom:10px;">📊</div>
-          <div style="font-size:14px;">暂无出库流水记录</div>
-          <div style="font-size:12px;margin-top:4px;">出库单提交成功后将自动生成解冻和扣减流水</div>
-        </div>`}
-      </div>
-    </div>
-    ` : `
-    <!-- 草稿态只展示基本信息提示 -->
-    <div class="alert alert-info">
-      <div class="alert-icon">ℹ️</div>
-      <div class="alert-body">
-        <div class="alert-title">草稿状态</div>
-        <div class="alert-text">出库明细和流水将在出库单提交成功后生成。当前共 <strong>${order.items.length}</strong> 行商品明细待提交。</div>
-      </div>
-    </div>
-    `}
   `;
 }
 
@@ -446,12 +456,14 @@ document.querySelectorAll('.modal-mask').forEach(m=>m.addEventListener('click',e
 const params = new URLSearchParams(window.location.search);
 const no = params.get('no') || 'OUT-20240601-000128';
 currentOrder = ORDERS[no] || ORDERS['OUT-20240601-000128'];
-// 用URL中的status覆盖（支持新建后跳转演示）
 const urlStatus = params.get('status');
 if (urlStatus && currentOrder) currentOrder = {...currentOrder, status:urlStatus};
 
 render(currentOrder);
 document.title = `${currentOrder.no} · 出库单详情`;
+
+// 通知父级 shell 高亮出库管理菜单
+try { window.parent.postMessage({type:'wms-content-ready',pageKey:'outbound'},'*'); } catch(e) {}
 </script>
 </body>
 </html>
