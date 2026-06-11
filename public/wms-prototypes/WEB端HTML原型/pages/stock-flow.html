@@ -139,6 +139,7 @@ select.filter-ctrl{
 .stats-toggle[aria-expanded="true"] .stats-chevron{transform:rotate(-135deg);}
 .mini-grid{display:grid;gap:14px;}
 .mini-grid.is-four{grid-template-columns:repeat(4,minmax(0,1fr));}
+.mini-grid.is-three{grid-template-columns:repeat(3,minmax(0,1fr));}
 .mini-card{
   padding:22px;border-radius:24px;
   background:linear-gradient(180deg,#ffffff 0%,#fcfcfd 100%);
@@ -274,6 +275,18 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
 .cascade-item:hover{background:rgba(0,171,149,0.07);}
 .cascade-item.active{background:rgba(0,171,149,0.10);color:var(--accent);}
 .cascade-divider{height:1px;background:rgba(29,29,31,0.07);margin:4px 0;}
+.cascade-search{padding:8px 10px 6px;}
+.cascade-search input{height:34px;border-radius:10px;width:100%;}
+.cascade-empty{padding:14px;text-align:center;color:var(--muted);font-size:12px;}
+
+/* ── 可搜索下拉（仓库/库房）── */
+.combo-wrap{position:relative;}
+.combo-caret{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(29,29,31,0.38);pointer-events:none;}
+.combo-panel{display:none;position:absolute;top:44px;left:0;right:0;z-index:30;background:#fff;border:1px solid rgba(29,29,31,0.10);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.10);padding:4px 0;max-height:240px;overflow-y:auto;}
+.combo-item{padding:8px 14px;font-size:13px;cursor:pointer;color:var(--text);}
+.combo-item:hover{background:rgba(0,171,149,0.07);}
+.combo-item.active{background:rgba(0,171,149,0.10);color:var(--accent);}
+.combo-empty{padding:14px;text-align:center;color:var(--muted);font-size:12px;}
 
 /* ── 需求抽屉：覆盖基础 drawer 的 display:none / transform 隐藏 ── */
 .drawer-mask.requirement-mask{display:block;}
@@ -315,19 +328,19 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
 .primary-btn:hover{filter:brightness(0.97);}
 /* ── 响应式 ── */
 @media(max-width:1100px){
-  .mini-grid.is-four{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .mini-grid.is-four,.mini-grid.is-three{grid-template-columns:repeat(2,minmax(0,1fr));}
   .filters-row,.filters-row.is-four{grid-template-columns:repeat(2,minmax(0,1fr));}
   .filters-actions{grid-column:1/-1;}
   .drawer{width:min(480px,100vw);}
 }
 @media(max-width:720px){
   .canvas{padding:14px 14px 40px;gap:14px;}
-  .mini-grid.is-four{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .mini-grid.is-four,.mini-grid.is-three{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
   .filters-row,.filters-row.is-quarter{grid-template-columns:1fr;}
   table{min-width:900px;}
 }
 @media(max-width:480px){
-  .mini-grid.is-four{grid-template-columns:1fr;}
+  .mini-grid.is-four,.mini-grid.is-three{grid-template-columns:1fr;}
   .drawer{width:100vw;}
 }
 </style>
@@ -340,7 +353,7 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
   <div class="surface-head">
     <div class="surface-title-wrap">
       <h1 class="surface-title">出入库流水</h1>
-      <div class="surface-subtitle">管理库存每次变动的流水明细及余额快照，支持按仓库、商品、分类、来源单等多维度查询。</div>
+      <div class="surface-subtitle">管理库存每次出入库变动的流水明细，支持按仓库、商品、分类、来源单等多维度查询。</div>
     </div>
     <div class="surface-head-actions">
       <button class="requirement-anchor-btn" onclick="openRequirementDrawer()">
@@ -356,19 +369,8 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
 
     <!-- Row 1：仓库 / SKU / 商品名称 / 商品分类 -->
     <div class="filters-row is-quarter">
-      <select class="filter-ctrl" id="f-warehouse">
-        <option value="">全部仓库</option>
-        <option value="wh1">1号仓库</option>
-        <option value="wh2">2号仓库</option>
-        <option value="wh3">华南仓</option>
-      </select>
-      <select class="filter-ctrl" id="f-room">
-        <option value="">全部库房</option>
-        <option value="常温主库">常温主库</option>
-        <option value="冷藏专区">冷藏专区</option>
-        <option value="综合库房">综合库房</option>
-        <option value="主库房">主库房</option>
-      </select>
+      <div class="combo-wrap" id="combo-warehouse"></div>
+      <div class="combo-wrap" id="combo-room"></div>
       <input type="text" class="filter-ctrl" id="f-sku" placeholder="请输入商品 SKU 编码"/>
       <input type="text" class="filter-ctrl" id="f-name" placeholder="请输入商品名称"/>
       <!-- 级联商品分类 -->
@@ -378,12 +380,17 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
           <span id="cascade-label" style="color:rgba(29,29,31,0.38);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">请选择商品分类</span>
           <span style="font-size:10px;color:rgba(29,29,31,0.38);flex-shrink:0;margin-left:6px;">▼</span>
         </div>
-        <div class="cascade-panel" id="cascade-panel">
-          <div id="casc-l1"></div>
-          <div id="casc-l2" style="display:none;"><div class="cascade-divider"></div></div>
-          <div id="casc-l3" style="display:none;"><div class="cascade-divider"></div></div>
+        <div class="cascade-panel" id="cascade-panel" onclick="event.stopPropagation()">
+          <div class="cascade-search"><input type="text" class="filter-ctrl" id="casc-search" placeholder="搜索分类关键词" autocomplete="off" oninput="cascSearch(this.value)"/></div>
+          <div id="casc-flat" style="display:none;"></div>
+          <div id="casc-levels">
+            <div id="casc-l1"></div>
+            <div id="casc-l2" style="display:none;"><div class="cascade-divider"></div></div>
+            <div id="casc-l3" style="display:none;"><div class="cascade-divider"></div></div>
+          </div>
         </div>
       </div>
+      <input type="text" class="filter-ctrl" id="f-loc" placeholder="请输入货位编码"/>
     </div>
 
     <!-- Row 2：流水类型 / 业务类型 / 来源单号 / 日期范围 / 按钮 -->
@@ -392,23 +399,17 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
         <option value="">全部流水类型</option>
         <option value="in">入库</option>
         <option value="out">出库</option>
-        <option value="adj">调整</option>
-        <option value="stocktake">盘点</option>
-        <option value="freeze">冻结</option>
-        <option value="unfreeze">解冻</option>
-        <option value="lock">锁定</option>
-        <option value="unlock">解锁</option>
       </select>
       <select class="filter-ctrl" id="f-biz">
         <option value="">全部业务类型</option>
         <option value="采购入库">采购入库</option>
         <option value="退货入库">退货入库</option>
         <option value="调拨入库">调拨入库</option>
+        <option value="其他入库">其他入库</option>
         <option value="销售出库">销售出库</option>
         <option value="调拨出库">调拨出库</option>
         <option value="报损出库">报损出库</option>
-        <option value="库存调整">库存调整</option>
-        <option value="盘点">盘点</option>
+        <option value="其他出库">其他出库</option>
       </select>
       <input type="text" class="filter-ctrl" id="f-ref" placeholder="请输入来源单号"/>
       <div class="date-pair">
@@ -424,26 +425,21 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
     <!-- 数据总览（可折叠 mini-cards）-->
     <div class="stats-area">
       <div class="stats-collapse" id="statsCollapse">
-        <div class="mini-grid is-four" style="padding-bottom:4px;">
-          <article class="mini-card compact" onclick="filterCard('all')" style="cursor:pointer;">
-            <div class="mini-top"><span>全部流水</span><span class="mini-icon">≡</span></div>
-            <div class="mini-value" id="m-total">—</div>
-            <div class="mini-note">近7天</div>
-          </article>
+        <div class="mini-grid is-three" style="padding-bottom:4px;">
           <article class="mini-card compact" onclick="filterCard('in')" style="cursor:pointer;">
             <div class="mini-top"><span>入库流水</span><span class="mini-icon">↑</span></div>
             <div class="mini-value" id="m-in">—</div>
             <div class="mini-note">次数</div>
           </article>
-          <article class="mini-card compact warn" onclick="filterCard('out')" style="cursor:pointer;">
-            <div class="mini-top"><span>出库流水</span><span class="mini-icon">↓</span></div>
-            <div class="mini-value" id="m-out">—</div>
+          <article class="mini-card compact warn" onclick="filterCard('salesout')" style="cursor:pointer;">
+            <div class="mini-top"><span>销售出库流水</span><span class="mini-icon">↓</span></div>
+            <div class="mini-value" id="m-salesout">—</div>
             <div class="mini-note">次数</div>
           </article>
-          <article class="mini-card compact" onclick="filterCard('other')" style="cursor:pointer;">
-            <div class="mini-top"><span>其他流水</span><span class="mini-icon">⊕</span></div>
-            <div class="mini-value" id="m-other">—</div>
-            <div class="mini-note">调整/盘点/冻结/锁定</div>
+          <article class="mini-card compact" onclick="filterCard('otherout')" style="cursor:pointer;">
+            <div class="mini-top"><span>其他出库流水</span><span class="mini-icon">⊕</span></div>
+            <div class="mini-value" id="m-otherout">—</div>
+            <div class="mini-note">次数</div>
           </article>
         </div>
       </div>
@@ -468,7 +464,7 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
       <table>
         <thead>
           <tr>
-            <th>流水号</th>
+            <th>出入库单号</th>
             <th>发生时间</th>
             <th>仓库</th>
             <th>库房</th>
@@ -478,14 +474,12 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
             <th>业务类型</th>
             <th>来源单号</th>
             <th class="td-right">变动数量</th>
-            <th class="td-right">变动前余额</th>
-            <th class="td-right">变动后余额</th>
             <th>操作人</th>
             <th class="td-center">操作</th>
           </tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="13" style="text-align:center;padding:40px;color:var(--muted);">正在加载数据…</td></tr>
+          <tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted);">正在加载数据…</td></tr>
         </tbody>
       </table>
     </div>
@@ -513,7 +507,7 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
     <div class="drawer-section">
       <div class="drawer-section-label">流水基础信息</div>
       <div class="drawer-grid">
-        <div class="drawer-field"><span class="drawer-field-label">流水号</span><span class="drawer-field-value" id="d-no">—</span></div>
+        <div class="drawer-field"><span class="drawer-field-label">出入库单号</span><span class="drawer-field-value" id="d-no">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">发生时间</span><span class="drawer-field-value" id="d-time">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">仓库</span><span class="drawer-field-value" id="d-warehouse">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">库房</span><span class="drawer-field-value" id="d-room">—</span></div>
@@ -543,30 +537,10 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
       </div>
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-label">余额快照</div>
-      <div class="balance-compare">
-        <div class="balance-side">
-          <div class="balance-side-label">变动前</div>
-          <div class="balance-row"><span class="balance-row-label">实物库存</span><span class="balance-row-val" id="d-b0-phy">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">锁定库存</span><span class="balance-row-val" id="d-b0-lock">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">冻结库存</span><span class="balance-row-val" id="d-b0-freeze">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">可用库存</span><span class="balance-row-val" id="d-b0-avail">—</span></div>
-        </div>
-        <div class="balance-side">
-          <div class="balance-side-label">变动后</div>
-          <div class="balance-row"><span class="balance-row-label">实物库存</span><span class="balance-row-val" id="d-b1-phy">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">锁定库存</span><span class="balance-row-val" id="d-b1-lock">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">冻结库存</span><span class="balance-row-val" id="d-b1-freeze">—</span></div>
-          <div class="balance-row"><span class="balance-row-label">可用库存</span><span class="balance-row-val" id="d-b1-avail">—</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-section">
       <div class="drawer-section-label">来源信息</div>
       <div class="drawer-grid">
         <div class="drawer-field"><span class="drawer-field-label">来源单号</span><span class="drawer-field-value link" id="d-ref-no">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">来源单类型</span><span class="drawer-field-value" id="d-ref-type">—</span></div>
-        <div class="drawer-field"><span class="drawer-field-label">关联订单号</span><span class="drawer-field-value" id="d-order-no">—</span></div>
       </div>
     </div>
     <div class="drawer-section">
@@ -693,7 +667,23 @@ const CATS = [
     {id:'c31',name:'厨具',ch:[{id:'c311',name:'锅具'},{id:'c312',name:'刀具'}]},
     {id:'c32',name:'床品',ch:[{id:'c321',name:'被芯'},{id:'c322',name:'枕头'}]}]}
 ];
-let cascSel={l1:null,l2:null,l3:null},cascVal='';
+let cascSel={l1:null,l2:null,l3:null},cascPath='';
+/* 扁平化全部分类路径（含各层级），用于关键词模糊搜索 */
+function flatCats(){
+  const out=[];
+  (function walk(nodes,pp){nodes.forEach(n=>{const p=pp?pp+' > '+n.name:n.name;out.push(p);if(n.ch)walk(n.ch,p);});})(CATS,'');
+  return out;
+}
+function cascSearch(kw){
+  const flat=document.getElementById('casc-flat'),levels=document.getElementById('casc-levels');
+  const k=(kw||'').trim().toLowerCase();
+  if(!k){flat.style.display='none';levels.style.display='block';return;}
+  const hits=flatCats().filter(p=>p.toLowerCase().includes(k));
+  flat.innerHTML=hits.length
+    ?hits.map(p=>`<div class="cascade-item" onclick="event.stopPropagation();setCascVal('${p}');document.getElementById('cascade-panel').style.display='none';">${p}</div>`).join('')
+    :'<div class="cascade-empty">无匹配分类</div>';
+  flat.style.display='block';levels.style.display='none';
+}
 
 function buildL(elId, items, level, parentPath){
   const el=document.getElementById(elId); el.innerHTML='';
@@ -710,22 +700,21 @@ function selectCasc(c, level, parentPath){
   cascSel['l'+level]=c.id;
   if(level===1){cascSel.l2=null;cascSel.l3=null;}
   if(level===2){cascSel.l3=null;}
+  /* 任意层级均可选中：点击即生效，选中上级时包含其所有子级 */
+  setCascVal(path);
   if(c.ch && c.ch.length){
     buildL('casc-l'+(level+1), c.ch, level+1, path);
     document.getElementById('casc-l'+(level+1)).style.display='block';
     if(level<2) document.getElementById('casc-l3').style.display='none';
     buildL('casc-l'+level, level===1?CATS:(CATS.find(x=>x.id===cascSel.l1)?.ch||[]), level, parentPath);
   } else {
-    document.getElementById('casc-l2').style.display = level>=2 ? 'block' : 'none';
-    document.getElementById('casc-l3').style.display = level>=3 ? 'block' : 'none';
-    setCascVal(path, c.id);
     document.getElementById('cascade-panel').style.display='none';
   }
 }
-function setCascVal(label, id){
+function setCascVal(label){
   const lbl=document.getElementById('cascade-label');
   lbl.textContent=label; lbl.style.color='var(--text)';
-  cascVal=id;
+  cascPath=label;
 }
 function toggleCascade(e){
   e.stopPropagation();
@@ -734,10 +723,35 @@ function toggleCascade(e){
     buildL('casc-l1',CATS,1,'');
     document.getElementById('casc-l2').style.display='none';
     document.getElementById('casc-l3').style.display='none';
+    document.getElementById('casc-search').value='';
+    cascSearch('');
     panel.style.display='block';
   } else { panel.style.display='none'; }
 }
 document.addEventListener('click',()=>{ const p=document.getElementById('cascade-panel'); if(p) p.style.display='none'; });
+
+/* ===== 可搜索下拉（仓库/库房模糊搜索）===== */
+const COMBOS={};
+function buildCombo(rootId, placeholder, options){
+  const root=document.getElementById(rootId);
+  root.innerHTML=`<input type="text" class="filter-ctrl combo-input" placeholder="${placeholder}" autocomplete="off"/><span class="combo-caret">▼</span><div class="combo-panel"></div>`;
+  const input=root.querySelector('.combo-input'), panel=root.querySelector('.combo-panel');
+  function renderList(kw){
+    const k=(kw||'').trim().toLowerCase();
+    const list=options.filter(o=>!k||o.toLowerCase().includes(k));
+    panel.innerHTML=list.length
+      ?list.map(o=>`<div class="combo-item${o===input.value?' active':''}">${o}</div>`).join('')
+      :'<div class="combo-empty">无匹配选项</div>';
+  }
+  input.addEventListener('focus',()=>{renderList('');panel.style.display='block';});
+  input.addEventListener('input',()=>{renderList(input.value);panel.style.display='block';});
+  panel.addEventListener('mousedown',e=>{
+    const it=e.target.closest('.combo-item'); if(!it) return;
+    input.value=it.textContent; panel.style.display='none'; e.preventDefault();
+  });
+  document.addEventListener('click',e=>{ if(!root.contains(e.target)) panel.style.display='none'; });
+  COMBOS[rootId]={ get value(){return input.value.trim();}, reset(){input.value='';}, set(v){input.value=v||'';} };
+}
 
 /* ===== stats toggle ===== */
 function toggleStats(){
@@ -756,11 +770,8 @@ function toggleStats(){
 /* ===== 模拟数据 ===== */
 const FLOW_TYPES=[
   {key:'in',label:'入库',cls:'in'},{key:'out',label:'出库',cls:'out'},
-  {key:'adj',label:'调整',cls:'adj'},{key:'stocktake',label:'盘点',cls:'stocktake'},
-  {key:'freeze',label:'冻结',cls:'freeze'},{key:'unfreeze',label:'解冻',cls:'unfreeze'},
-  {key:'lock',label:'锁定',cls:'lock'},{key:'unlock',label:'解锁',cls:'unlock'},
 ];
-const BIZ_MAP={in:['采购入库','退货入库','调拨入库'],out:['销售出库','调拨出库','报损出库'],adj:['库存调整'],stocktake:['盘点'],freeze:['冻结操作'],unfreeze:['解冻操作'],lock:['订单锁定'],unlock:['订单解锁']};
+const BIZ_MAP={in:['采购入库','退货入库','调拨入库','其他入库'],out:['销售出库','调拨出库','报损出库','其他出库']};
 const SKUS=[
   {name:'洗衣液 2L',code:'DETERGENT-2L',spec:'2L/瓶',unit:'瓶',barcode:'6901234567890',cat:'日化 > 洗护 > 洗衣液',catId:'c111'},
   {name:'洗发水 400ml',code:'SHAMPOO-400ML',spec:'400ml/瓶',unit:'瓶',barcode:'6901234567891',cat:'日化 > 洗护 > 洗发水',catId:'c112'},
@@ -771,7 +782,7 @@ const SKUS=[
 ];
 const WHS=['1号仓库','2号仓库','华南仓'];
 const ROOMS={'1号仓库':['常温主库','冷藏专区'],'2号仓库':['综合库房'],'华南仓':['主库房']};
-const OPS=['张三','李四','王五','系统','赵六'];
+const OPS=['张三','李四','王五','赵六'];
 const ZONES=['A区','B区','C区'];
 const LOCS=['A-01-01','A-02-03','B-01-02','C-02-01'];
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
@@ -782,22 +793,18 @@ function fmtT(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getD
 function genRow(i,daysAgo){
   const ft=pick(FLOW_TYPES), sku=pick(SKUS), wh=pick(WHS);
   const biz=pick(BIZ_MAP[ft.key]);
-  const dir=(ft.key==='in'||ft.key==='adj'||ft.key==='unfreeze'||ft.key==='unlock')?1:-1;
+  const dir=ft.key==='in'?1:-1;
   const qty=dir*rnd(1,200);
-  const bp=rnd(100,2000), ap=Math.max(0,bp+(ft.key==='freeze'||ft.key==='unfreeze'||ft.key==='lock'||ft.key==='unlock'?0:qty));
-  const bl=rnd(0,80), al=ft.key==='lock'?bl+Math.abs(qty):ft.key==='unlock'?Math.max(0,bl-Math.abs(qty)):bl;
-  const bf=rnd(0,60), af=ft.key==='freeze'?bf+Math.abs(qty):ft.key==='unfreeze'?Math.max(0,bf-Math.abs(qty)):bf;
   const d=new Date(); d.setDate(d.getDate()-daysAgo); d.setHours(rnd(7,22),rnd(0,59),rnd(0,59));
-  const pfx={in:'IN',out:'OUT',adj:'ADJ',stocktake:'ST',freeze:'FZ',unfreeze:'UFZ',lock:'LK',unlock:'ULK'};
   const nd=d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate());
+  const isSales=biz==='销售出库';
   return{
-    no:'FL-'+nd+'-'+String(i+1).padStart(6,'0'), time:fmtT(d), warehouse:wh, room:pick(ROOMS[wh]||['主库房']), sku, ft, biz,
-    refNo:pfx[ft.key]+'-'+nd+'-'+String(rnd(1,999)).padStart(4,'0'), refType:biz,
+    no:(ft.key==='in'?'IN-':'OUT-')+nd+'-'+String(i+1).padStart(6,'0'), time:fmtT(d), warehouse:wh, room:pick(ROOMS[wh]||['主库房']), sku, ft, biz,
+    refNo:isSales?'SO-'+nd+'-'+String(rnd(1,9999)).padStart(4,'0'):'-',
+    refType:isSales?'销售订单':'-',
     batch:rnd(0,3)>0?'BN-'+nd+'-'+pad2(rnd(1,20)):'-',
-    qty, bp, ap, bl, al, bf, af,
-    ba:Math.max(0,bp-bl-bf), aa:Math.max(0,ap-al-af),
-    op:pick(OPS), zone:pick(ZONES), loc:pick(LOCS),
-    orderNo:(ft.key==='out'||ft.key==='lock')?'ORD-'+nd+'-'+String(rnd(1,9999)).padStart(5,'0'):'-',
+    qty,
+    op:isSales?'系统':pick(OPS), zone:pick(ZONES), loc:pick(LOCS),
     remark:rnd(0,5)===0?'客户急单':rnd(0,5)===1?'批量操作':'-',
   };
 }
@@ -809,19 +816,23 @@ RAW.sort((a,b)=>b.time.localeCompare(a.time));
 let filtered=[], currentPage=1, pageSize=20;
 
 function applyFilter(){
-  const wh=document.getElementById('f-warehouse').value;
+  const wh=COMBOS['combo-warehouse']?COMBOS['combo-warehouse'].value:'';
+  const rm=COMBOS['combo-room']?COMBOS['combo-room'].value:'';
   const sku=document.getElementById('f-sku').value.trim().toLowerCase();
   const nm=document.getElementById('f-name').value.trim().toLowerCase();
+  const loc=document.getElementById('f-loc').value.trim().toLowerCase();
   const tp=document.getElementById('f-type').value;
   const bz=document.getElementById('f-biz').value;
   const ref=document.getElementById('f-ref').value.trim().toLowerCase();
   const ds=document.getElementById('f-date-start').value;
   const de=document.getElementById('f-date-end').value;
   filtered=RAW.filter(r=>{
-    if(wh&&!r.warehouse.includes(wh==='wh1'?'1号':wh==='wh2'?'2号':'华南')) return false;
+    if(wh&&!r.warehouse.includes(wh)) return false;
+    if(rm&&!(r.room||'').includes(rm)) return false;
     if(sku&&!r.sku.code.toLowerCase().includes(sku)) return false;
     if(nm&&!r.sku.name.toLowerCase().includes(nm)) return false;
-    if(cascVal&&r.sku.catId!==cascVal) return false;
+    if(loc&&!(r.loc||'').toLowerCase().includes(loc)) return false;
+    if(cascPath&&!(r.sku.cat===cascPath||r.sku.cat.startsWith(cascPath+' > '))) return false;
     if(tp&&r.ft.key!==tp) return false;
     if(bz&&r.biz!==bz) return false;
     if(ref&&!r.refNo.toLowerCase().includes(ref)) return false;
@@ -833,11 +844,9 @@ function applyFilter(){
 }
 
 function renderMetrics(){
-  const all=RAW.length;
-  document.getElementById('m-total').textContent=all;
   document.getElementById('m-in').textContent=RAW.filter(r=>r.ft.key==='in').length;
-  document.getElementById('m-out').textContent=RAW.filter(r=>r.ft.key==='out').length;
-  document.getElementById('m-other').textContent=RAW.filter(r=>r.ft.key!=='in'&&r.ft.key!=='out').length;
+  document.getElementById('m-salesout').textContent=RAW.filter(r=>r.ft.key==='out'&&r.biz==='销售出库').length;
+  document.getElementById('m-otherout').textContent=RAW.filter(r=>r.ft.key==='out'&&r.biz!=='销售出库').length;
 }
 
 function renderTable(){
@@ -848,7 +857,7 @@ function renderTable(){
   if(currentPage>tp) currentPage=tp;
   document.getElementById('page-info').textContent=`第 ${currentPage} 页，共 ${tp} 页`;
   if(!total){
-    tbody.innerHTML='<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--muted);">暂无数据，请调整查询条件</td></tr>';
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted);">暂无数据，请调整查询条件</td></tr>';
     document.getElementById('page-btns').innerHTML=''; return;
   }
   const s=(currentPage-1)*pageSize, rows=filtered.slice(s,s+pageSize);
@@ -864,10 +873,8 @@ function renderTable(){
       <td><span class="category-cell" title="${r.sku.cat}">${r.sku.cat}</span></td>
       <td><span class="flow-tag ${r.ft.cls}">${r.ft.label}</span></td>
       <td>${r.biz}</td>
-      <td><a class="table-link">${r.refNo}</a></td>
+      <td>${r.refNo==='-'?'<span class="td-muted">-</span>':`<a class="table-link">${r.refNo}</a>`}</td>
       <td class="td-right"><span class="${qcls}">${qs}</span></td>
-      <td class="td-right">${r.bp}</td>
-      <td class="td-right">${r.ap}</td>
       <td>${r.op}</td>
       <td class="td-center"><a class="table-link" onclick="openDrawer(${s+idx})">查看详情</a></td>
     </tr>`;
@@ -915,14 +922,10 @@ function openDrawer(idx){
   document.getElementById('d-direction').textContent=r.qty>0?'增加（+）':r.qty<0?'减少（-）':'无变化';
   const qcls=r.qty>0?'qty-pos':r.qty<0?'qty-neg':'';
   document.getElementById('d-qty').innerHTML=`<span class="${qcls}">${r.qty>0?'+'+r.qty:r.qty}</span>`;
-  function setB(id,val,diff){const el=document.getElementById(id);el.textContent=val;el.className='balance-row-val'+(diff>0?' up':diff<0?' down':'');}
-  setB('d-b0-phy',r.bp,0); setB('d-b1-phy',r.ap,r.ap-r.bp);
-  setB('d-b0-lock',r.bl,0); setB('d-b1-lock',r.al,r.al-r.bl);
-  setB('d-b0-freeze',r.bf,0); setB('d-b1-freeze',r.af,r.af-r.bf);
-  setB('d-b0-avail',r.ba,0); setB('d-b1-avail',r.aa,r.aa-r.ba);
-  document.getElementById('d-ref-no').textContent=r.refNo;
+  const refEl=document.getElementById('d-ref-no');
+  refEl.textContent=r.refNo;
+  refEl.classList.toggle('link',r.refNo!=='-');
   document.getElementById('d-ref-type').textContent=r.refType;
-  document.getElementById('d-order-no').textContent=r.orderNo;
   document.getElementById('d-operator').textContent=r.op;
   document.getElementById('d-op-time').textContent=r.time;
   document.getElementById('d-remark').textContent=r.remark;
@@ -937,11 +940,12 @@ function closeDrawer(){
 /* ===== 操作 ===== */
 function doSearch(){applyFilter();renderTable();}
 function doReset(){
-  ['f-warehouse','f-type','f-biz'].forEach(id=>document.getElementById(id).value='');
-  ['f-sku','f-name','f-ref','f-date-start','f-date-end'].forEach(id=>document.getElementById(id).value='');
+  ['f-type','f-biz'].forEach(id=>document.getElementById(id).value='');
+  ['f-sku','f-name','f-loc','f-ref','f-date-start','f-date-end'].forEach(id=>document.getElementById(id).value='');
+  Object.values(COMBOS).forEach(c=>c.reset());
   const lbl=document.getElementById('cascade-label');
   lbl.textContent='请选择商品分类'; lbl.style.color='rgba(29,29,31,0.38)';
-  cascVal=''; cascSel={l1:null,l2:null,l3:null};
+  cascPath=''; cascSel={l1:null,l2:null,l3:null};
   applyFilter(); renderTable();
 }
 function doExport(){
@@ -949,9 +953,10 @@ function doExport(){
   alert(`导出 ${Math.min(filtered.length,10000)} 条流水记录（原型演示）`);
 }
 function filterCard(type){
-  document.getElementById('f-type').value=type==='all'||type==='other'?'':type;
+  document.getElementById('f-type').value=type==='in'?'in':'out';
+  document.getElementById('f-biz').value=type==='salesout'?'销售出库':'';
   applyFilter();
-  if(type==='other') filtered=RAW.filter(r=>r.ft.key!=='in'&&r.ft.key!=='out');
+  if(type==='otherout') filtered=filtered.filter(r=>r.biz!=='销售出库');
   currentPage=1; renderTable();
 }
 
@@ -961,8 +966,18 @@ function initDates(){
   document.getElementById('f-date-start').value=s.toISOString().slice(0,10);
   document.getElementById('f-date-end').value=now.toISOString().slice(0,10);
 }
+/* 下钻入参：从库存查询/库存明细页跳转时自动带入 SKU + 仓库（+ 库房）筛选 */
+function applyPresetFromUrl(){
+  const ps=new URLSearchParams(location.search);
+  if(ps.get('sku')) document.getElementById('f-sku').value=ps.get('sku');
+  if(ps.get('loc')) document.getElementById('f-loc').value=ps.get('loc');
+  if(ps.get('warehouse')&&COMBOS['combo-warehouse']) COMBOS['combo-warehouse'].set(ps.get('warehouse'));
+  if(ps.get('room')&&COMBOS['combo-room']) COMBOS['combo-room'].set(ps.get('room'));
+}
 window.addEventListener('DOMContentLoaded',()=>{
-  initDates(); renderMetrics(); applyFilter(); renderTable();
+  buildCombo('combo-warehouse','全部仓库（支持模糊搜索）',WHS);
+  buildCombo('combo-room','全部库房（支持模糊搜索）',[...new Set(Object.values(ROOMS).flat())]);
+  initDates(); applyPresetFromUrl(); renderMetrics(); applyFilter(); renderTable();
   try{window.parent.postMessage({type:'wms-content-ready',pageKey:'stock-flow'},'*');}catch(e){}
 });
 </script>

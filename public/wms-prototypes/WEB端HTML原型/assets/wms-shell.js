@@ -81,7 +81,7 @@ const menuData = [
     "key": "inventory",
     "icon": "inventory",
     "name": "库存中心",
-    "meta": "库存查询 / 库存明细 / 库存控制 / 库存风险 / 出入库流水",
+    "meta": "库存查询 / 库存明细 / 库存风险 / 出入库流水",
     "items": [
       {
         "key": "inventory-query",
@@ -92,11 +92,6 @@ const menuData = [
         "key": "inventory-detail",
         "name": "库存明细",
         "page": "WMS-WEB-013"
-      },
-      {
-        "key": "inventory-control",
-        "name": "库存控制",
-        "page": "WMS-WEB-015"
       },
       {
         "key": "inventory-risk-list",

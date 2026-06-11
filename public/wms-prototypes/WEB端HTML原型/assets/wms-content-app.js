@@ -3,7 +3,7 @@ const menuData = [
       { key: 'storage', icon: 'warehouse', name: '仓储管理', meta: '仓库 / 库房 / 库区 / 货位 / 人员', items: [ { key: 'warehouse', name: '仓库管理', page: 'WMS-WEB-W01' }, { key: 'warehouse-room', name: '库房管理', page: 'WMS-WEB-W07' }, { key: 'zone', name: '库区管理', page: 'WMS-WEB-W02' }, { key: 'location', name: '货位管理', page: 'WMS-WEB-W03' }, { key: 'warehouse-staff', name: '仓库人员管理', page: 'WMS-WEB-W04' } ] },
       { key: 'product-manage', icon: 'inventory', name: '商品管理', meta: '我的商品 / 接口上下架日志', items: [ { key: 'my-product', name: '我的商品', page: 'WMS-WEB-006-MY' }, { key: 'product-listing-log', name: '接口上下架日志', page: 'WMS-WEB-006-LOG' } ] },
       { key: 'owner-data', icon: 'owner', name: '基础资料', meta: '销售渠道管理', items: [ { key: 'shop', name: '销售渠道管理', page: 'WMS-WEB-004-SHOP' } ] },
-      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存控制 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-control', name: '库存控制', page: 'WMS-WEB-015' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
+      { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
       { key: 'warehouse-job', icon: 'operation', name: '仓内作业', meta: '入库 / 出库 / 调拨 / 盘点 / 仓内作业跟踪', items: [ { key: 'inbound', name: '入库管理', page: 'WMS-WEB-010' }, { key: 'outbound', name: '出库管理', page: 'WMS-WEB-016' }, { key: 'transfer', name: '调拨管理', page: 'WMS-WEB-028' }, { key: 'stocktake', name: '盘点管理', page: 'WMS-WEB-STOCKTAKE' }, { key: 'warehouse-operation-track-list', name: '仓内作业跟踪', page: 'WMS-WEB-030A' } ] },
       { key: 'fulfillment', icon: 'fulfillment', name: '物流中心', meta: '物流跟踪', items: [ { key: 'logistics-track-list', name: '物流跟踪', page: 'WMS-WEB-020A' } ] },
       { key: 'after-sale', icon: 'service', name: '售后中心', meta: '退货管理', items: [ { key: 'return', name: '退货管理', page: 'WMS-WEB-026' } ] },
@@ -1015,22 +1015,6 @@ const menuData = [
       const n=new Date();
       return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
     }
-    function ibGenLedger(order) {
-      // 从入库单号提取短 ID 用于流水号, e.g. IN-20260601-000012 → 000012
-      const shortId = order.id.split('-').pop();
-      return order.items
-        .filter(r=>r.ledger==='done')
-        .map((r,i)=>({
-          no: `LDG-${shortId}-${String(i+1).padStart(3,'0')}`,
-          skuCode: r.skuCode,
-          name: r.name,
-          warehouse: order.warehouse,
-          qty: r.qty,
-          batch: r.batch||'--',
-          operator: order.creator,
-          opTime: order.submittedAt||order.createdAt
-        }));
-    }
     const requirementExternalState = {};
 
     function warehouseName() { return warehouseSelect.value; }
@@ -1713,7 +1697,7 @@ const menuData = [
       if (type === '高预警库存') return '建议优先补货或调整履约分配，避免继续跌破高预警库存阈值。';
       if (type === '安全库存预警') return '建议关注补货节奏和销量变化，避免进一步跌破高预警库存阈值。';
       if (type === '严重高锁定' || type === '高锁定占比') return '建议核查锁定来源、释放异常锁定，并确认是否存在未闭环履约或冻结占用。';
-      return '建议进入库存控制页继续排查风险原因。';
+      return '建议进入库存风险列表页继续排查风险原因。';
     }
 
     function getInventoryRiskDefaultSortOrder(field) {
@@ -1830,6 +1814,11 @@ const menuData = [
       };
     }
 
+    let stockFlowPreset = null;
+    function openStockFlowWithPreset(preset) {
+      stockFlowPreset = preset;
+      navigateToItem('stock-flow');
+    }
     function openInventoryDetailFromQuery(rowId) {
       const record = getInventoryQueryRowById(rowId);
       if (!record) return;
@@ -4515,7 +4504,7 @@ const menuData = [
               </div>
               <div class="pick-goods-list">
                 ${(batch.goods || []).map((item) => `
-                  <article class="pick-goods-item" style="padding:10px 12px;display:grid;gap:6px;">
+                  <article class="pick-goods-item" style="padding:10px 12px;display:grid;grid-template-columns:1fr;gap:6px;">
                     <div class="pick-goods-location-row">
                       ${item.location ? `<span class="loc-chip">${item.location}</span>` : ''}
                       <span class="barcode-chip">${item.barcode}</span>
@@ -4609,7 +4598,7 @@ const menuData = [
             <h4 style="margin:0;font-size:14px;">入库商品 <span style="font-size:13px;font-weight:400;color:var(--subtext);margin-left:4px;">${goods.length}（共${totalQty}件）</span></h4>
             <div class="pick-goods-list">
               ${goods.map((item) => `
-                <article class="pick-goods-item" style="padding:10px 12px;display:grid;gap:6px;">
+                <article class="pick-goods-item" style="padding:10px 12px;display:grid;grid-template-columns:1fr;gap:6px;">
                   <div class="pick-goods-location-row">
                     ${item.location ? `<span class="loc-chip">${item.location}</span>` : ''}
                     <span class="barcode-chip">${item.barcode}</span>
@@ -4975,7 +4964,7 @@ const menuData = [
                         <td>${row.frozen ? `${row.frozen} ${row.unit}` : '--'}</td>
                         <td>${row.inTransit ? `${row.inTransit} ${row.unit}` : '--'}</td>
                         <td>${row.updatedAt}</td>
-                        <td style="text-align:right;"><button class="row-action-btn primary" data-action="inventory-query-open-detail" data-id="${row.id}">查看明细</button></td>
+                        <td style="text-align:right;white-space:nowrap;"><button class="row-action-btn primary" data-action="inventory-query-open-detail" data-id="${row.id}">查看明细</button> <button class="row-action-btn" data-action="inventory-query-view-flow" data-id="${row.id}">查看流水</button></td>
                       </tr>
                     `).join('') || `<tr><td colspan="12" class="table-empty">当前筛选条件下暂无库存查询数据</td></tr>`}
                   </tbody>
@@ -5115,7 +5104,7 @@ const menuData = [
                         <td>${row.locked ? `${row.locked} ${row.unit}` : '--'}</td>
                         <td>${row.frozen ? `${row.frozen} ${row.unit}` : '--'}</td>
                         <td>${row.updatedAt}</td>
-                        <td style="text-align:right;"><button class="row-action-btn primary" data-action="inventory-detail-view" data-id="${row.id}">查看详情</button></td>
+                        <td style="text-align:right;white-space:nowrap;"><button class="row-action-btn primary" data-action="inventory-detail-view" data-id="${row.id}">查看详情</button> <button class="row-action-btn" data-action="inventory-detail-view-flow" data-id="${row.id}">查看流水</button></td>
                       </tr>
                     `).join('') || `<tr><td colspan="14" class="table-empty">当前筛选条件下暂无库存明细数据</td></tr>`}
                   </tbody>
@@ -7059,7 +7048,7 @@ const menuData = [
             <div class="surface-head">
               <div class="surface-title-wrap">
                 <h1 class="surface-title">入库管理</h1>
-                <div class="surface-subtitle">管理采购、退货、调拨等入库单，支持扫码添加商品明细，提交后自动更新库存并生成入库流水。</div>
+                <div class="surface-subtitle">管理采购、退货、调拨等入库单，支持扫码添加商品明细，提交后自动更新库存。</div>
               </div>
               <div class="surface-head-actions">
                 ${renderRequirementAnchor()}
@@ -7343,39 +7332,17 @@ const menuData = [
               <div style="background:#fff;border-radius:16px;border:1px solid rgba(29,29,31,0.07);overflow:hidden;${isFailed?'':''}">
                 <div style="padding:16px 24px 0">
                   <div class="ib-tabs">
-                    <button class="ib-tab${inboundDetailTab==='items'?' active':''}" data-action="ib-tab-items">入库明细</button>
-                    <button class="ib-tab${inboundDetailTab==='ledger'?' active':''}" data-action="ib-tab-ledger">库存流水</button>
+                    <button class="ib-tab active" data-action="ib-tab-items">入库明细</button>
                   </div>
                 </div>
                 <div class="table-wrap flat" style="border-radius:0;border:none;border-top:1px solid rgba(29,29,31,0.06)">
-                  ${inboundDetailTab==='items'?`
                   <table class="table-dense">
                     <thead><tr>
                       <th>#</th><th>条形码</th><th>SKU编码</th><th>商品名称</th><th>规格</th><th>单位</th>
                       <th>入库数量</th><th>批次号</th><th>生产日期</th><th>到期日期</th><th>库存入账</th>
                     </tr></thead>
                     <tbody>${itemRows}</tbody>
-                  </table>`:(()=>{
-                    const ledgers = ibGenLedger(order);
-                    if (!ledgers.length) return `<div class="ib-ledger-empty">暂无库存流水，入库完成后自动生成</div>`;
-                    const ledgerRows = ledgers.map(l=>`<tr>
-                      <td style="color:var(--subtext);font-size:12px">${l.no}</td>
-                      <td style="font-weight:500">${l.skuCode}</td>
-                      <td>${l.name}</td>
-                      <td>${l.warehouse}</td>
-                      <td style="color:var(--accent);font-weight:700">+${l.qty}</td>
-                      <td style="color:var(--subtext)">${l.batch}</td>
-                      <td>${l.operator}</td>
-                      <td style="color:var(--subtext)">${l.opTime}</td>
-                    </tr>`).join('');
-                    return `<table class="table-dense">
-                      <thead><tr>
-                        <th>流水号</th><th>SKU编码</th><th>商品名称</th><th>仓库</th>
-                        <th>入库数量</th><th>批次号</th><th>操作人</th><th>操作时间</th>
-                      </tr></thead>
-                      <tbody>${ledgerRows}</tbody>
-                    </table>`;
-                  })()}
+                  </table>
                 </div>
                 ${isFailed?`
                 <div class="ib-detail-action-bar">
@@ -7558,7 +7525,9 @@ const menuData = [
         canvas.innerHTML = renderInventoryRiskListPage();
       } else if (item.key === 'stock-flow') {
         const iframe = document.createElement('iframe');
-        iframe.src = './stock-flow.html';
+        const presetQs = stockFlowPreset ? ('?' + new URLSearchParams(stockFlowPreset).toString()) : '';
+        stockFlowPreset = null;
+        iframe.src = './stock-flow.html' + presetQs;
         iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
         canvas.style.cssText = 'padding:0;height:calc(100vh - 56px);overflow:hidden;';
         canvas.innerHTML = '';
@@ -7861,6 +7830,17 @@ const menuData = [
       }
       if (action === 'inventory-query-open-detail') {
         openInventoryDetailFromQuery(id || '');
+        return;
+      }
+      if (action === 'inventory-query-view-flow') {
+        const record = getInventoryQueryRowById(id || '');
+        if (record) openStockFlowWithPreset({ sku: record.skuCode, warehouse: record.warehouse, room: record.room || '' });
+        return;
+      }
+      if (action === 'inventory-detail-view-flow') {
+        const record = getInventoryDetailRowById(id || '');
+        closeDrawer();
+        if (record) openStockFlowWithPreset({ sku: record.skuCode, warehouse: record.warehouse, room: record.room || '', loc: record.location || '' });
         return;
       }
       if (action === 'inventory-detail-query' || action === 'inventory-detail-export') {
@@ -8594,9 +8574,6 @@ const menuData = [
       }
       if (action === 'ib-tab-items') {
         inboundDetailTab = 'items'; ibRerender(); return;
-      }
-      if (action === 'ib-tab-ledger') {
-        inboundDetailTab = 'ledger'; ibRerender(); return;
       }
       /* ── end 入库管理事件 ── */
     });

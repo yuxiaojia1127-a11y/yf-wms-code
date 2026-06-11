@@ -105,9 +105,6 @@ tbody tr.row-fail{background:rgba(217,45,32,.03);}
 .gen-dot.web{background:var(--accent);}
 
 /* flow type tag */
-.flow-tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;}
-.flow-unfreeze{background:rgba(99,102,241,.10);color:#4338ca;}
-.flow-deduct{background:rgba(199,124,17,.10);color:var(--warn);}
 
 /* modal */
 .modal-mask{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.30);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
@@ -159,14 +156,6 @@ const ORDERS = {
       {seq:1,barcode:'6901234560001',sku:'SKU-00101',name:'农夫山泉 550ml',spec:'550ml/瓶',unit:'瓶',qty:12,batch:'B2024050101',unfreeze:12,deduct:12,stockStatus:'成功'},
       {seq:2,barcode:'6901234560002',sku:'SKU-00102',name:'可口可乐 330ml',spec:'330ml/罐',unit:'罐',qty:6, batch:'',          unfreeze:6, deduct:6, stockStatus:'成功'},
       {seq:3,barcode:'6901234560004',sku:'SKU-00104',name:'蒙牛纯牛奶 250ml',spec:'250ml/盒',unit:'盒',qty:6,batch:'B2024050201',unfreeze:6, deduct:6, stockStatus:'成功'},
-    ],
-    flows:[
-      {no:'FW-20240601-000256',type:'解冻锁定',sku:'SKU-00101',name:'农夫山泉 550ml',wh:'1号仓库',batch:'B2024050101',qty:-12,op:'张三（发货员）',time:'2024-06-01 09:12'},
-      {no:'FW-20240601-000257',type:'扣减实物',sku:'SKU-00101',name:'农夫山泉 550ml',wh:'1号仓库',batch:'B2024050101',qty:-12,op:'系统',time:'2024-06-01 09:12'},
-      {no:'FW-20240601-000258',type:'解冻锁定',sku:'SKU-00102',name:'可口可乐 330ml',wh:'1号仓库',batch:'',            qty:-6, op:'张三（发货员）',time:'2024-06-01 09:12'},
-      {no:'FW-20240601-000259',type:'扣减实物',sku:'SKU-00102',name:'可口可乐 330ml',wh:'1号仓库',batch:'',            qty:-6, op:'系统',time:'2024-06-01 09:12'},
-      {no:'FW-20240601-000260',type:'解冻锁定',sku:'SKU-00104',name:'蒙牛纯牛奶 250ml',wh:'1号仓库',batch:'B2024050201',qty:-6,op:'张三（发货员）',time:'2024-06-01 09:12'},
-      {no:'FW-20240601-000261',type:'扣减实物',sku:'SKU-00104',name:'蒙牛纯牛奶 250ml',wh:'1号仓库',batch:'B2024050201',qty:-6,op:'系统',time:'2024-06-01 09:12'},
     ]
   },
   'OUT-20240601-000122': {
@@ -178,8 +167,7 @@ const ORDERS = {
     items:[
       {seq:1,barcode:'6901234560003',sku:'SKU-00103',name:'统一方便面 红烧牛肉',spec:'103g/包',unit:'包',qty:30,batch:'',unfreeze:0,deduct:0,stockStatus:'失败'},
       {seq:2,barcode:'6901234560002',sku:'SKU-00102',name:'可口可乐 330ml',spec:'330ml/罐',unit:'罐',qty:18,batch:'',unfreeze:0,deduct:0,stockStatus:'失败'},
-    ],
-    flows:[]
+    ]
   },
   'OUT-20240601-000124': {
     no:'OUT-20240601-000124', type:'其他出库', gen:'WEB', src:'',
@@ -188,8 +176,7 @@ const ORDERS = {
     reason:'盘点差异补录', remark:'仓管复核后提交',
     items:[
       {seq:1,barcode:'6901234560005',sku:'SKU-00105',name:'卫龙辣条 大刀肉',spec:'100g/袋',unit:'袋',qty:5,batch:'',unfreeze:null,deduct:null,stockStatus:'—'},
-    ],
-    flows:[]
+    ]
   },
 };
 
@@ -199,7 +186,6 @@ const TYPE_CLS   = {销售出库:'pill-green',调拨出库:'pill-blue',报损出
 const STOCK_CLS  = {'成功':'pill-green','失败':'pill-red','—':'pill-default'};
 
 let currentOrder = null;
-let activeTab = 'items';
 
 /* ─── 渲染 ─── */
 function render(order) {
@@ -325,15 +311,12 @@ function render(order) {
             </div>
           </div>
 
-          <!-- 明细 & 流水（非草稿） -->
+          <!-- 明细（非草稿） -->
           ${!isDraft ? `
           <div class="form-section">
             <div class="tabs">
-              <div class="tab active" id="tab-items" onclick="switchTab('items')">
+              <div class="tab active" id="tab-items">
                 出库明细 <span class="tab-count">${order.items.length}</span>
-              </div>
-              <div class="tab" id="tab-flows" onclick="switchTab('flows')">
-                出库流水 <span class="tab-count" style="${order.flows.length?'':'background:rgba(29,29,31,.06);color:var(--muted);'}">${order.flows.length}</span>
               </div>
             </div>
 
@@ -373,45 +356,6 @@ function render(order) {
               </div>
             </div>
 
-            <!-- 出库流水 -->
-            <div class="tab-panel" id="panel-flows">
-              ${order.flows.length ? `
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>流水号</th>
-                      <th style="text-align:center;">流水类型</th>
-                      <th>SKU编码</th><th>商品名称</th><th>仓库</th>
-                      <th>批次号</th>
-                      <th style="text-align:center;">变动数量</th>
-                      <th>操作人</th><th>操作时间</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${order.flows.map(f=>`
-                    <tr>
-                      <td class="td-mono" style="font-size:11px;">${f.no}</td>
-                      <td class="td-center">
-                        <span class="flow-tag ${f.type==='解冻锁定'?'flow-unfreeze':'flow-deduct'}">${f.type}</span>
-                      </td>
-                      <td class="td-mono">${f.sku}</td>
-                      <td style="font-weight:600;font-size:12px;">${f.name}</td>
-                      <td class="td-muted">${f.wh}</td>
-                      <td class="td-muted">${f.batch||'—'}</td>
-                      <td class="td-center" style="font-weight:700;color:var(--danger);">${f.qty}</td>
-                      <td class="td-muted">${f.op}</td>
-                      <td class="td-muted">${f.time}</td>
-                    </tr>`).join('')}
-                  </tbody>
-                </table>
-              </div>` : `
-              <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-                <div style="font-size:32px;margin-bottom:10px;">📊</div>
-                <div style="font-size:14px;">暂无出库流水记录</div>
-                <div style="font-size:12px;margin-top:4px;">出库单提交成功后将自动生成解冻和扣减流水</div>
-              </div>`}
-            </div>
           </div>
           ` : `
           <!-- 草稿态：明细待提交提示 -->
@@ -419,7 +363,7 @@ function render(order) {
             <div class="alert-icon">ℹ️</div>
             <div class="alert-body">
               <div class="alert-title">草稿状态</div>
-              <div class="alert-text">出库明细和流水将在出库单提交成功后生成。当前共 <strong>${order.items.length}</strong> 行商品明细待提交。</div>
+              <div class="alert-text">出库明细将在出库单提交成功后生成。当前共 <strong>${order.items.length}</strong> 行商品明细待提交。</div>
             </div>
           </div>
           `}
@@ -430,13 +374,6 @@ function render(order) {
   `;
 }
 
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById(`tab-${tab}`)?.classList.add('active');
-  document.getElementById(`panel-${tab}`)?.classList.add('active');
-}
 
 function openModal(type) {
   document.getElementById(`modal-${type}`).classList.add('show');
