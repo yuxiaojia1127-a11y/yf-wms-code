@@ -1,6 +1,6 @@
 const menuData = [
       { key: 'cockpit', icon: 'coverage', name: '驾驶舱', meta: '总览驾驶舱 / 1.0 自营版', direct: true, items: [ { key: 'cockpit', name: '总览驾驶舱', page: 'WMS-WEB-036', active: true } ] },
-      { key: 'storage', icon: 'warehouse', name: '仓储管理', meta: '仓库 / 库房 / 库区 / 货位 / 人员', items: [ { key: 'warehouse', name: '仓库管理', page: 'WMS-WEB-W01' }, { key: 'warehouse-room', name: '库房管理', page: 'WMS-WEB-W07' }, { key: 'zone', name: '库区管理', page: 'WMS-WEB-W02' }, { key: 'location', name: '货位管理', page: 'WMS-WEB-W03' }, { key: 'warehouse-staff', name: '仓库人员管理', page: 'WMS-WEB-W04' } ] },
+      { key: 'storage', icon: 'warehouse', name: '仓储管理', meta: '仓库 / 库房 / 货位 / 人员', items: [ { key: 'warehouse', name: '仓库管理', page: 'WMS-WEB-W01' }, { key: 'warehouse-room', name: '库房管理', page: 'WMS-WEB-W07' }, { key: 'location', name: '货位管理', page: 'WMS-WEB-W03' }, { key: 'warehouse-staff', name: '仓库人员管理', page: 'WMS-WEB-W04' } ] },
       { key: 'product-manage', icon: 'inventory', name: '商品管理', meta: '我的商品 / 接口上下架日志', items: [ { key: 'my-product', name: '我的商品', page: 'WMS-WEB-006-MY' }, { key: 'product-listing-log', name: '接口上下架日志', page: 'WMS-WEB-006-LOG' } ] },
       { key: 'owner-data', icon: 'owner', name: '基础资料', meta: '销售渠道管理', items: [ { key: 'shop', name: '销售渠道管理', page: 'WMS-WEB-004-SHOP' } ] },
       { key: 'inventory', icon: 'inventory', name: '库存中心', meta: '库存查询 / 库存明细 / 库存风险 / 出入库流水', items: [ { key: 'inventory-query', name: '库存查询', page: 'WMS-WEB-012' }, { key: 'inventory-detail', name: '库存明细', page: 'WMS-WEB-013' }, { key: 'inventory-risk-list', name: '库存风险列表', page: 'WMS-WEB-015A' }, { key: 'stock-flow', name: '出入库流水', page: 'WMS-WEB-014' } ] },
@@ -52,7 +52,8 @@ const menuData = [
           { label: '待发货', value: '9', progress: 34, meta: '3单超时处理', breakdown: '即时配送 3 · 快递 6', tone: 'warning' },
           { label: '待接单', value: '6', progress: 29, meta: '2单超时处理', breakdown: '即时配送 1 · 快递 5', tone: 'warning' },
           { label: '重新派单', value: '4', progress: 22, meta: '1单超时处理', breakdown: '即时配送 2 · 快递 2', tone: 'warning' },
-          { label: '已取货', value: '12', progress: 48, meta: '2单超时处理', breakdown: '即时配送 8 · 快递 4', tone: 'warning' },
+          { label: '物流异常', value: '2', progress: 18, meta: '2单超时处理', breakdown: '即时配送 1 · 快递 1', tone: 'danger' },
+          { label: '已接单', value: '10', progress: 44, meta: '2单超时处理', breakdown: '即时配送 7 · 快递 3', tone: 'warning' },
           { label: '配送中', value: '19', progress: 63, meta: '3单超时处理', breakdown: '即时配送 11 · 快递 8', tone: 'warning' },
           { label: '已送达（当日）', value: '428', progress: 95, meta: '3单配送异常', breakdown: '即时配送 176 · 快递 252', tone: 'success' }
         ],
@@ -86,7 +87,8 @@ const menuData = [
           { label: '待发货', value: '4', progress: 28, meta: '1单超时处理', breakdown: '即时配送 2 · 快递 2', tone: 'warning' },
           { label: '待接单', value: '3', progress: 24, meta: '1单超时处理', breakdown: '即时配送 1 · 快递 2', tone: 'warning' },
           { label: '重新派单', value: '2', progress: 18, meta: '1单超时处理', breakdown: '即时配送 1 · 快递 1', tone: 'warning' },
-          { label: '已取货', value: '7', progress: 52, meta: '1单超时处理', breakdown: '即时配送 5 · 快递 2', tone: 'warning' },
+          { label: '物流异常', value: '1', progress: 12, meta: '1单超时处理', breakdown: '即时配送 1 · 快递 0', tone: 'danger' },
+          { label: '已接单', value: '6', progress: 48, meta: '1单超时处理', breakdown: '即时配送 4 · 快递 2', tone: 'warning' },
           { label: '配送中', value: '11', progress: 66, meta: '2单超时处理', breakdown: '即时配送 6 · 快递 5', tone: 'warning' },
           { label: '已送达（当日）', value: '231', progress: 96, meta: '2单配送异常', breakdown: '即时配送 112 · 快递 119', tone: 'success' }
         ],
@@ -119,7 +121,8 @@ const menuData = [
           { label: '待发货', value: '5', progress: 31, meta: '1单超时处理', breakdown: '即时配送 1 · 快递 4', tone: 'warning' },
           { label: '待接单', value: '3', progress: 26, meta: '1单超时处理', breakdown: '即时配送 0 · 快递 3', tone: 'warning' },
           { label: '重新派单', value: '1', progress: 14, meta: '1单超时处理', breakdown: '即时配送 0 · 快递 1', tone: 'warning' },
-          { label: '已取货', value: '5', progress: 44, meta: '1单超时处理', breakdown: '即时配送 3 · 快递 2', tone: 'warning' },
+          { label: '物流异常', value: '1', progress: 10, meta: '1单超时处理', breakdown: '即时配送 0 · 快递 1', tone: 'danger' },
+          { label: '已接单', value: '4', progress: 40, meta: '1单超时处理', breakdown: '即时配送 3 · 快递 1', tone: 'warning' },
           { label: '配送中', value: '8', progress: 58, meta: '1单超时处理', breakdown: '即时配送 5 · 快递 3', tone: 'warning' },
           { label: '已送达（当日）', value: '197', progress: 94, meta: '1单配送异常', breakdown: '即时配送 64 · 快递 133', tone: 'success' }
         ],
@@ -146,9 +149,10 @@ const menuData = [
       { id: 'FNL-013', taskId: '013', orderNo: 'SO-240603-135', group: '仓内作业跟踪', type: '已发货', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '陈晨', updatedAt: '2026-06-03 09:52', target: 'warehouse-operation-track-list', customer: '联系人 LEE', addressCode: '47100', distance: '14.20km', goodsCount: '5', createdAt: '2026-06-03 08:36:00', promiseTime: '2026-06-03 10:00', summary: '订单已完成全流程发货，作业节点已闭环。' },
       { id: 'FNL-008', orderNo: 'EX-240603-015', group: '物流跟踪', type: '待接单', warehouse: '2号仓库', room: '综合库房', channel: '即时配送', statusText: '已超时', waitMinutes: 132, owner: '陈晨', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 CUI', addressCode: '43300', distance: '12.39km', goodsCount: '12', createdAt: '2026-06-01 15:16:36', promiseTime: '2026-06-03 09:20', summary: '履约单待接单超时，需人工跟进承运商。' },
       { id: 'FNL-009', orderNo: 'SO-240603-205', group: '物流跟踪', type: '重新派单', warehouse: '1号仓库', room: '常温主库', channel: '即时配送', statusText: '待处理', waitMinutes: 22, owner: '赵川', updatedAt: '2026-06-03 10:11', target: 'shipment-track', customer: '联系人 FONG', addressCode: '42800', distance: '9.62km', goodsCount: '3', createdAt: '2026-06-03 09:48:11', promiseTime: '2026-06-03 10:20', summary: '首位骑手拒单后待重新派单。' },
-      { id: 'FNL-010', orderNo: 'SO-240603-221', group: '物流跟踪', type: '已取货', warehouse: '1号仓库', room: '冷藏专区', channel: '即时配送', statusText: '待处理', waitMinutes: 46, owner: '赵川', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 GOH', addressCode: '47800', distance: '6.15km', goodsCount: '4', createdAt: '2026-06-03 09:39:26', promiseTime: '2026-06-03 10:25', summary: '骑手已取货，待进入配送中状态。' },
+      { id: 'FNL-010', orderNo: 'SO-240603-221', group: '物流跟踪', type: '已接单', warehouse: '1号仓库', room: '冷藏专区', channel: '即时配送', statusText: '待处理', waitMinutes: 46, owner: '赵川', updatedAt: '2026-06-03 10:30', target: 'shipment-track', customer: '联系人 GOH', addressCode: '47800', distance: '6.15km', goodsCount: '4', createdAt: '2026-06-03 09:39:26', promiseTime: '2026-06-03 10:25', summary: '骑手已接单，正在前往仓库取货。' },
       { id: 'FNL-011', orderNo: 'SO-240603-245', group: '物流跟踪', type: '配送中', warehouse: '2号仓库', room: '综合库房', channel: '快递', statusText: '待处理', waitMinutes: 38, owner: '王敏', updatedAt: '2026-06-03 10:28', target: 'shipment-track', customer: '联系人 ONG', addressCode: '40200', distance: '18.86km', goodsCount: '2', createdAt: '2026-06-03 09:54:42', promiseTime: '2026-06-03 10:50', summary: '包裹已出仓，配送轨迹未回传签收状态。' },
-      { id: 'FNL-012', orderNo: 'SO-240603-268', group: '物流跟踪', type: '已送达（当日）', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '周璇', updatedAt: '2026-06-03 10:29', target: 'shipment-track', customer: '联系人 TAN', addressCode: '46100', distance: '14.02km', goodsCount: '5', createdAt: '2026-06-03 08:36:20', promiseTime: '2026-06-03 10:10', summary: '已送达当日订单，保留用于查看异常签收反馈。' }
+      { id: 'FNL-014', orderNo: 'SO-240603-259', group: '物流跟踪', type: '物流异常', warehouse: '2号仓库', room: '综合库房', channel: '即时配送', statusText: '已超时', waitMinutes: 58, owner: '陈晨', updatedAt: '2026-06-03 10:27', target: 'shipment-track', customer: '联系人 LIM', addressCode: '41200', distance: '11.30km', goodsCount: '3', createdAt: '2026-06-03 09:12:40', promiseTime: '2026-06-03 10:05', summary: '配送途中未联系到客户，产生物流异常，待人工介入处理。' },
+      { id: 'FNL-012', orderNo: 'SO-240603-268', group: '物流跟踪', type: '已送达', warehouse: '1号仓库', room: '常温主库', channel: '快递', statusText: '已完成', waitMinutes: 12, owner: '周璇', updatedAt: '2026-06-03 10:29', target: 'shipment-track', customer: '联系人 TAN', addressCode: '46100', distance: '14.02km', goodsCount: '5', createdAt: '2026-06-03 08:36:20', promiseTime: '2026-06-03 10:10', summary: '已送达当日订单，保留用于查看异常签收反馈。' }
     ];
     const inventoryQueryRows = [
       { id: 'IQ-001', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', category: '生鲜禽蛋', warehouse: '2号仓库', room: '综合库房', physical: 15, available: 9, locked: 0, frozen: 0, inTransit: 4, batchCount: 2, locationCount: 3, unit: '托', updatedAt: '2026-06-03 10:30' },
@@ -160,16 +164,16 @@ const menuData = [
       { id: 'IQ-007', skuCode: 'DETERGENT-2L', skuName: '洗衣液 2L', barcode: '6935000100428', spec: '2L*6瓶', category: '日化', warehouse: '1号仓库', room: '常温主库', physical: 18, available: 9, locked: 0, frozen: 2, inTransit: 5, batchCount: 2, locationCount: 2, unit: '箱', updatedAt: '2026-06-03 10:30' }
     ];
     const inventoryDetailRows = [
-      { id: 'ID-001', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', warehouse: '2号仓库', room: '综合库房', zone: '常温区A', location: 'A01-01-02', batchNo: 'EG240601A', stockStatus: '可售', physical: 6, available: 6, locked: 0, frozen: 0, unit: '托', updatedAt: '2026-06-03 10:20', productionDate: '2026-05-30', expiryDate: '2026-06-30', containerCode: '5748754866', lastOrderNo: 'SO-240603-118', operator: '周璇' },
-      { id: 'ID-002', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', warehouse: '2号仓库', room: '综合库房', zone: '常温区A', location: 'A01-01-03', batchNo: 'EG240601A', stockStatus: '可售', physical: 3, available: 3, locked: 0, frozen: 0, unit: '托', updatedAt: '2026-06-03 10:18', productionDate: '2026-05-30', expiryDate: '2026-06-30', containerCode: '5748754867', lastOrderNo: 'SO-240603-118', operator: '周璇' },
-      { id: 'ID-003', skuCode: 'TISSUE-24', skuName: '纸巾 家庭装 24 包', barcode: '6935000100046', spec: '24包*1提', warehouse: '1号仓库', room: '常温主库', zone: '常温区B', location: 'B02-01-03', batchNo: 'TS240518B', stockStatus: '可售', physical: 8, available: 8, locked: 0, frozen: 0, unit: '提', updatedAt: '2026-06-03 10:19', productionDate: '2026-05-18', expiryDate: '2028-05-18', containerCode: '7481123001', lastOrderNo: 'SO-240603-102', operator: '赵川' },
-      { id: 'ID-004', skuCode: 'TISSUE-24', skuName: '纸巾 家庭装 24 包', barcode: '6935000100046', spec: '24包*1提', warehouse: '1号仓库', room: '常温主库', zone: '常温区B', location: 'B02-01-04', batchNo: 'TS240518B', stockStatus: '锁定', physical: 4, available: 0, locked: 4, frozen: 0, unit: '提', updatedAt: '2026-06-03 10:15', productionDate: '2026-05-18', expiryDate: '2028-05-18', containerCode: '7481123002', lastOrderNo: 'SO-240603-102', operator: '赵川' },
-      { id: 'ID-005', skuCode: 'WATER-550', skuName: '矿泉水 550ml', barcode: '6935000100138', spec: '550ml*24瓶', warehouse: '2号仓库', room: '综合库房', zone: '常温区C', location: 'C03-04-01', batchNo: 'WT240520A', stockStatus: '锁定', physical: 36, available: 0, locked: 36, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:28', productionDate: '2026-05-20', expiryDate: '2027-05-20', containerCode: '7481123010', lastOrderNo: 'SO-240603-205', operator: '王敏' },
-      { id: 'ID-006', skuCode: 'WATER-550', skuName: '矿泉水 550ml', barcode: '6935000100138', spec: '550ml*24瓶', warehouse: '2号仓库', room: '综合库房', zone: '常温区C', location: 'C03-04-02', batchNo: 'WT240520A', stockStatus: '可售', physical: 15, available: 15, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:27', productionDate: '2026-05-20', expiryDate: '2027-05-20', containerCode: '7481123011', lastOrderNo: '--', operator: '王敏' },
-      { id: 'ID-007', skuCode: 'MILK-250', skuName: '牛奶 250ml', barcode: '6935000100206', spec: '250ml*12盒', warehouse: '1号仓库', room: '冷藏专区', zone: '冷藏区A', location: 'R01-01-02', batchNo: 'MK240529A', stockStatus: '可售', physical: 20, available: 20, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:23', productionDate: '2026-05-29', expiryDate: '2026-06-12', containerCode: '7481123021', lastOrderNo: '--', operator: '陈晨' },
-      { id: 'ID-008', skuCode: 'MILK-250', skuName: '牛奶 250ml', barcode: '6935000100206', spec: '250ml*12盒', warehouse: '1号仓库', room: '冷藏专区', zone: '冷藏区A', location: 'R01-01-03', batchNo: 'MK240529A', stockStatus: '锁定', physical: 18, available: 0, locked: 18, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:21', productionDate: '2026-05-29', expiryDate: '2026-06-12', containerCode: '7481123022', lastOrderNo: 'SO-240603-221', operator: '陈晨' },
-      { id: 'ID-009', skuCode: 'COLA-330', skuName: '可乐 330ml', barcode: '6935000100305', spec: '330ml*24听', warehouse: '2号仓库', room: '综合库房', zone: '常温区C', location: 'C02-03-01', batchNo: 'CL240522C', stockStatus: '可售', physical: 10, available: 10, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:16', productionDate: '2026-05-22', expiryDate: '2027-05-22', containerCode: '7481123030', lastOrderNo: '--', operator: '王敏' },
-      { id: 'ID-010', skuCode: 'COLA-330', skuName: '可乐 330ml', barcode: '6935000100305', spec: '330ml*24听', warehouse: '2号仓库', room: '综合库房', zone: '常温区C', location: 'C02-03-02', batchNo: 'CL240522C', stockStatus: '冻结', physical: 1, available: 0, locked: 0, frozen: 1, unit: '箱', updatedAt: '2026-06-03 10:14', productionDate: '2026-05-22', expiryDate: '2027-05-22', containerCode: '7481123031', lastOrderNo: 'EX-240603-015', operator: '王敏' }
+      { id: 'ID-001', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', warehouse: '2号仓库', room: '综合库房', location: 'A01-01-02', batchNo: 'EG240601A', stockStatus: '可售', physical: 6, available: 6, locked: 0, frozen: 0, unit: '托', updatedAt: '2026-06-03 10:20', productionDate: '2026-05-30', expiryDate: '2026-06-30', containerCode: '5748754866', lastOrderNo: 'SO-240603-118', operator: '周璇' },
+      { id: 'ID-002', skuCode: 'EGG-30', skuName: '鸡蛋 30 枚装', barcode: '6935000100012', spec: '30枚*1托', warehouse: '2号仓库', room: '综合库房', location: 'A01-01-03', batchNo: 'EG240601A', stockStatus: '可售', physical: 3, available: 3, locked: 0, frozen: 0, unit: '托', updatedAt: '2026-06-03 10:18', productionDate: '2026-05-30', expiryDate: '2026-06-30', containerCode: '5748754867', lastOrderNo: 'SO-240603-118', operator: '周璇' },
+      { id: 'ID-003', skuCode: 'TISSUE-24', skuName: '纸巾 家庭装 24 包', barcode: '6935000100046', spec: '24包*1提', warehouse: '1号仓库', room: '常温主库', location: 'B02-01-03', batchNo: 'TS240518B', stockStatus: '可售', physical: 8, available: 8, locked: 0, frozen: 0, unit: '提', updatedAt: '2026-06-03 10:19', productionDate: '2026-05-18', expiryDate: '2028-05-18', containerCode: '7481123001', lastOrderNo: 'SO-240603-102', operator: '赵川' },
+      { id: 'ID-004', skuCode: 'TISSUE-24', skuName: '纸巾 家庭装 24 包', barcode: '6935000100046', spec: '24包*1提', warehouse: '1号仓库', room: '常温主库', location: 'B02-01-04', batchNo: 'TS240518B', stockStatus: '锁定', physical: 4, available: 0, locked: 4, frozen: 0, unit: '提', updatedAt: '2026-06-03 10:15', productionDate: '2026-05-18', expiryDate: '2028-05-18', containerCode: '7481123002', lastOrderNo: 'SO-240603-102', operator: '赵川' },
+      { id: 'ID-005', skuCode: 'WATER-550', skuName: '矿泉水 550ml', barcode: '6935000100138', spec: '550ml*24瓶', warehouse: '2号仓库', room: '综合库房', location: 'C03-04-01', batchNo: 'WT240520A', stockStatus: '锁定', physical: 36, available: 0, locked: 36, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:28', productionDate: '2026-05-20', expiryDate: '2027-05-20', containerCode: '7481123010', lastOrderNo: 'SO-240603-205', operator: '王敏' },
+      { id: 'ID-006', skuCode: 'WATER-550', skuName: '矿泉水 550ml', barcode: '6935000100138', spec: '550ml*24瓶', warehouse: '2号仓库', room: '综合库房', location: 'C03-04-02', batchNo: 'WT240520A', stockStatus: '可售', physical: 15, available: 15, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:27', productionDate: '2026-05-20', expiryDate: '2027-05-20', containerCode: '7481123011', lastOrderNo: '--', operator: '王敏' },
+      { id: 'ID-007', skuCode: 'MILK-250', skuName: '牛奶 250ml', barcode: '6935000100206', spec: '250ml*12盒', warehouse: '1号仓库', room: '冷藏专区', location: 'R01-01-02', batchNo: 'MK240529A', stockStatus: '可售', physical: 20, available: 20, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:23', productionDate: '2026-05-29', expiryDate: '2026-06-12', containerCode: '7481123021', lastOrderNo: '--', operator: '陈晨' },
+      { id: 'ID-008', skuCode: 'MILK-250', skuName: '牛奶 250ml', barcode: '6935000100206', spec: '250ml*12盒', warehouse: '1号仓库', room: '冷藏专区', location: 'R01-01-03', batchNo: 'MK240529A', stockStatus: '锁定', physical: 18, available: 0, locked: 18, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:21', productionDate: '2026-05-29', expiryDate: '2026-06-12', containerCode: '7481123022', lastOrderNo: 'SO-240603-221', operator: '陈晨' },
+      { id: 'ID-009', skuCode: 'COLA-330', skuName: '可乐 330ml', barcode: '6935000100305', spec: '330ml*24听', warehouse: '2号仓库', room: '综合库房', location: 'C02-03-01', batchNo: 'CL240522C', stockStatus: '可售', physical: 10, available: 10, locked: 0, frozen: 0, unit: '箱', updatedAt: '2026-06-03 10:16', productionDate: '2026-05-22', expiryDate: '2027-05-22', containerCode: '7481123030', lastOrderNo: '--', operator: '王敏' },
+      { id: 'ID-010', skuCode: 'COLA-330', skuName: '可乐 330ml', barcode: '6935000100305', spec: '330ml*24听', warehouse: '2号仓库', room: '综合库房', location: 'C02-03-02', batchNo: 'CL240522C', stockStatus: '冻结', physical: 1, available: 0, locked: 0, frozen: 1, unit: '箱', updatedAt: '2026-06-03 10:14', productionDate: '2026-05-22', expiryDate: '2027-05-22', containerCode: '7481123031', lastOrderNo: 'EX-240603-015', operator: '王敏' }
     ];
     const warehouseOperationDetailMap = {
       'FNL-001': {
@@ -504,16 +508,11 @@ const menuData = [
       { id: 'WH-002', code: 'WH-002', name: '2号仓库', shortName: '2号仓', owner: 'easy大马云', type: '前置仓', contact: '李思敏', phone: '13800002222', city: '槟城', area: '乔治市', address: 'George Town 66 号', status: '启用', capacity: '4,800 m²', serviceTags: ['常温', '门店履约'], updatedAt: '2026-05-18 08:45' },
       { id: 'WH-003', code: 'WH-003', name: '盒马共享仓', shortName: '盒马仓', owner: '盒马', type: '共享仓', contact: '周文凯', phone: '13800003333', city: '吉隆坡', area: '蕉赖', address: 'Cheras 101 号', status: '停用', capacity: '3,200 m²', serviceTags: ['冷冻', '冷藏'], updatedAt: '2026-05-17 18:10' }
     ];
-    const zoneRows = [
-      { id: 'Z-001', warehouse: '1号仓库', room: '常温主库', code: 'Z-A01', name: '常温拣选区', type: '备货区', floor: '1F', sort: 10, status: '启用', areaSize: '860 ㎡', channelRules: [{ name: 'A01', columnCount: '6', rowCount: '4', columnRange: '01-06', rowRange: '01-04' }, { name: 'A02', columnCount: '6', rowCount: '4', columnRange: '01-06', rowRange: '01-04' }, { name: 'A03', columnCount: '4', rowCount: '4', columnRange: '01-04', rowRange: '01-04' }], autoUpdate: true, singleOrderSingleSlot: false, remark: '用于常温快动品拣货与补货。', updatedAt: '2026-05-20 10:25' },
-      { id: 'Z-002', warehouse: '1号仓库', room: '冷藏专区', code: 'Z-B01', name: '冷藏暂存区', type: '暂存区', floor: '1F', sort: 20, status: '启用', areaSize: '260 ㎡', channelRules: [{ name: 'B01', columnCount: '3', rowCount: '3', columnRange: '01-03', rowRange: '01-03' }], autoUpdate: true, singleOrderSingleSlot: true, remark: '用于冷藏波次集货临时暂存。', updatedAt: '2026-05-20 09:18' },
-      { id: 'Z-003', warehouse: '2号仓库', room: '综合库房', code: 'Z-C01', name: '次品处理区', type: '次品区', floor: '2F', sort: 30, status: '停用', areaSize: '180 ㎡', channelRules: [{ name: 'C01', columnCount: '2', rowCount: '4', columnRange: '01-02', rowRange: '01-04' }], autoUpdate: false, singleOrderSingleSlot: false, remark: '用于质检异常与次品暂存。', updatedAt: '2026-05-18 15:40' }
-    ];
     const locationRows = [
-      { id: 'L-001', warehouse: '1号仓库', room: '常温主库', zone: '常温拣选区', zoneCode: 'Z-A01', type: '拣货货位', code: 'A01-01-01', channel: 'A01', rowNo: '01', columnNo: '01', layerNo: '01', status: '启用', usageStatus: '空', weightLimit: '120', qtyLimit: '30', volumeLimit: '0.80', sizeL: '120', sizeW: '100', sizeH: '180', abc: 'A', skuLimit: '1', forbidShelfLife: false, forbidBatchMix: true, routeClass: '不季节性化', owner: 'easy大马云', sort: 10, remark: '快动品黄金货位。', updatedAt: '2026-05-20 10:48', logs: [{ time: '2026-05-20 10:48', type: '配置更新', content: '调整为 A 类拣货货位，开启禁止批次混放。' }, { time: '2026-05-20 09:10', type: '初始化', content: '系统生成货位编码并完成启用。' }] },
-      { id: 'L-002', warehouse: '1号仓库', room: '常温主库', zone: '常温拣选区', zoneCode: 'Z-A01', type: '备货货位', code: 'A01-03-02', channel: 'A01', rowNo: '03', columnNo: '02', layerNo: '02', status: '启用', usageStatus: '占用', weightLimit: '200', qtyLimit: '60', volumeLimit: '1.20', sizeL: '120', sizeW: '120', sizeH: '200', abc: 'B', skuLimit: '2', forbidShelfLife: false, forbidBatchMix: false, routeClass: '季节性化', owner: 'easy大马云', sort: 20, remark: '当前承载啤酒备货库存。', updatedAt: '2026-05-20 10:12', logs: [{ time: '2026-05-20 10:12', type: '库存占用', content: '货位已有 2 个 SKU、48 件库存，占用状态生效。' }, { time: '2026-05-20 08:42', type: '补货任务', content: '系统下发补货任务至该货位。' }] },
-      { id: 'L-003', warehouse: '1号仓库', room: '冷藏专区', zone: '冷藏暂存区', zoneCode: 'Z-B01', type: '暂存货位', code: 'B01-02-01', channel: 'B01', rowNo: '02', columnNo: '01', layerNo: '01', status: '启用', usageStatus: '锁定', weightLimit: '80', qtyLimit: '20', volumeLimit: '0.60', sizeL: '100', sizeW: '80', sizeH: '160', abc: 'C', skuLimit: '1', forbidShelfLife: true, forbidBatchMix: true, routeClass: '不季节性化', owner: '', sort: 30, remark: '盘点中暂不允许上架。', updatedAt: '2026-05-20 09:36', logs: [{ time: '2026-05-20 09:36', type: '人工锁定', content: '仓内主管发起盘点，货位进入锁定状态。' }] },
-      { id: 'L-004', warehouse: '2号仓库', room: '综合库房', zone: '次品处理区', zoneCode: 'Z-C01', type: '次品货位', code: 'C01-01-01', channel: 'C01', rowNo: '01', columnNo: '01', layerNo: '01', status: '停用', usageStatus: '空', weightLimit: '100', qtyLimit: '25', volumeLimit: '0.70', sizeL: '100', sizeW: '100', sizeH: '180', abc: 'C', skuLimit: '1', forbidShelfLife: false, forbidBatchMix: false, routeClass: '不季节性化', owner: '盒马', sort: 10, remark: '历史次品位，当前停用。', updatedAt: '2026-05-18 16:05', logs: [{ time: '2026-05-18 16:05', type: '状态调整', content: '库区停用后同步停止新业务使用。' }] }
+      { id: 'L-001', warehouse: '1号仓库', room: '常温主库', type: '拣货货位', code: 'A01-01-01', channel: 'A01', rowNo: '01', columnNo: '01', layerNo: '01', status: '启用', usageStatus: '空', weightLimit: '120', qtyLimit: '30', volumeLimit: '0.80', sizeL: '120', sizeW: '100', sizeH: '180', abc: 'A', skuLimit: '1', forbidShelfLife: false, forbidBatchMix: true, routeClass: '不季节性化', owner: 'easy大马云', sort: 10, remark: '快动品黄金货位。', updatedAt: '2026-05-20 10:48', logs: [{ time: '2026-05-20 10:48', type: '配置更新', content: '调整为 A 类拣货货位，开启禁止批次混放。' }, { time: '2026-05-20 09:10', type: '初始化', content: '系统生成货位编码并完成启用。' }] },
+      { id: 'L-002', warehouse: '1号仓库', room: '常温主库', type: '备货货位', code: 'A01-03-02', channel: 'A01', rowNo: '03', columnNo: '02', layerNo: '02', status: '启用', usageStatus: '占用', weightLimit: '200', qtyLimit: '60', volumeLimit: '1.20', sizeL: '120', sizeW: '120', sizeH: '200', abc: 'B', skuLimit: '2', forbidShelfLife: false, forbidBatchMix: false, routeClass: '季节性化', owner: 'easy大马云', sort: 20, remark: '当前承载啤酒备货库存。', updatedAt: '2026-05-20 10:12', logs: [{ time: '2026-05-20 10:12', type: '库存占用', content: '货位已有 2 个 SKU、48 件库存，占用状态生效。' }, { time: '2026-05-20 08:42', type: '补货任务', content: '系统下发补货任务至该货位。' }] },
+      { id: 'L-003', warehouse: '1号仓库', room: '冷藏专区', type: '暂存货位', code: 'B01-02-01', channel: 'B01', rowNo: '02', columnNo: '01', layerNo: '01', status: '启用', usageStatus: '锁定', weightLimit: '80', qtyLimit: '20', volumeLimit: '0.60', sizeL: '100', sizeW: '80', sizeH: '160', abc: 'C', skuLimit: '1', forbidShelfLife: true, forbidBatchMix: true, routeClass: '不季节性化', owner: '', sort: 30, remark: '盘点中暂不允许上架。', updatedAt: '2026-05-20 09:36', logs: [{ time: '2026-05-20 09:36', type: '人工锁定', content: '仓内主管发起盘点，货位进入锁定状态。' }] },
+      { id: 'L-004', warehouse: '2号仓库', room: '综合库房', type: '次品货位', code: 'C01-01-01', channel: 'C01', rowNo: '01', columnNo: '01', layerNo: '01', status: '停用', usageStatus: '空', weightLimit: '100', qtyLimit: '25', volumeLimit: '0.70', sizeL: '100', sizeW: '100', sizeH: '180', abc: 'C', skuLimit: '1', forbidShelfLife: false, forbidBatchMix: false, routeClass: '不季节性化', owner: '盒马', sort: 10, remark: '历史次品位，当前停用。', updatedAt: '2026-05-18 16:05', logs: [{ time: '2026-05-18 16:05', type: '状态调整', content: '货位停用后同步停止新业务使用。' }] }
     ];
     const warehouseStaffRows = [
       { id: 'WSP-001', employeeNo: 'EMP-001', name: '王敏', loginPhone: '60123680011', accountName: 'wangmin', loginName: 'wangmin', accountMode: '已有账号绑定', accountStatus: '启用', personnelType: '仓库管理人员', warehouses: ['1号仓库', '2号仓库'], defaultWarehouse: '1号仓库', groups: ['收货组A', '仓库作业组A'], roles: ['仓库主管'], taskScope: '本组任务', appPermissions: ['我的任务', '库存查询', '异常上报'], employmentStatus: '在职', status: '启用', contactPhone: '60123681234', remark: '负责 1 号仓与 2 号仓班次排班、人员授权与异常处理。', bindTime: '2026-05-12 10:22', lastLoginAt: '2026-05-27 09:18', updatedAt: '2026-05-27 09:20', ongoingTasks: 0, logs: [{ time: '2026-05-27 09:20', type: '角色授权', content: '新增 2 号仓仓库主管权限，并同步开放人员管理与派单能力。' }, { time: '2026-05-22 17:42', type: '账号绑定', content: '绑定统一账号 wangmin，启用 APP 与 WEB 双端登录。' }] },
@@ -755,7 +754,6 @@ const menuData = [
       'logistics-track-list': { featureName: '物流跟踪明细列表' },
       warehouse: { featureName: '仓库管理' },
       owner: { featureName: '租户目录' },
-      zone: { featureName: '库区管理' },
       location: { featureName: '货位管理' },
       inbound: { featureName: '入库管理' },
       'product-listing-log': { featureName: '接口上下架日志' }
@@ -778,7 +776,7 @@ const menuData = [
         title: '物流跟踪',
         group: '物流跟踪',
         entity: 'fulfillment-link-funnel',
-        typeOptions: ['待接单', '重新派单', '已取货', '配送中', '已送达（当日）'],
+        typeOptions: ['待接单', '重新派单', '物流异常', '已接单', '配送中', '已送达'],
         subtitle: '',
         totalNote: '承接所选履约节点的单据明细',
         processingNote: '用于跟踪履约节点的责任人与推进进度',
@@ -927,7 +925,6 @@ const menuData = [
     let selectedWarehouseIds = new Set();
     let selectedWarehouseStaffIds = new Set();
     let selectedOwnerIds = new Set();
-    let selectedZoneIds = new Set();
     let selectedLocationIds = new Set();
     let selectedSkuIds = new Set();
     let selectedRecognitionId = '';
@@ -1808,7 +1805,7 @@ const menuData = [
     function getInventoryDetailStats(rows = getInventoryDetailRows()) {
       return {
         rowCount: rows.length,
-        locationCount: new Set(rows.map((row) => `${row.warehouse}-${row.zone}-${row.location}`)).size,
+        locationCount: new Set(rows.map((row) => `${row.warehouse}-${row.location}`)).size,
         available: rows.reduce((sum, row) => sum + Number(row.available || 0), 0),
         frozen: rows.reduce((sum, row) => sum + Number(row.frozen || 0), 0)
       };
@@ -1918,22 +1915,27 @@ const menuData = [
     function getOperationFunnelSuggestion(row) {
       if (row.type === '待入库') return '建议优先确认到仓时间、月台资源和收货校验进度，避免影响后续上架。';
       if (row.group === '仓内作业跟踪') return '建议核查仓内波次、揽货或复核分配是否均衡，并及时调整处理人。';
-      if (row.type === '已送达（当日）') return '建议关注签收异常与回传状态，确认是否存在异常闭环任务。';
+      if (row.type === '已送达' || row.type === '已送达（当日）') return '建议关注签收异常与回传状态，确认是否存在异常闭环任务。';
+      if (row.type === '物流异常') return '建议联系骑手与客户核实异常原因（如未找到客户），必要时重新派单或安排二次配送。';
       return '建议进入履约执行跟踪继续定位节点卡点，确认责任人和下一步动作。';
     }
 
-    function renderFunnelProgress(item, groupTotal) {
+    function renderFunnelProgress(item, groupTotal, options = {}) {
+      const showOverdue = options.showOverdue !== false;
       const total = Math.max(groupTotal, 0);
       const currentValue = Math.max(parseNumericValue(item.value), 0);
-      const overdueValue = Math.min(getOverdueCount(item), currentValue);
+      const overdueValue = showOverdue ? Math.min(getOverdueCount(item), currentValue) : 0;
       const pendingValue = Math.max(currentValue - overdueValue, 0);
       const overdueWidth = total > 0 ? (overdueValue / total) * 100 : 0;
       const pendingWidth = total > 0 ? (pendingValue / total) * 100 : 0;
+      const title = showOverdue
+        ? `超时 ${overdueValue} 单 / 待处理 ${currentValue} 单 / 分组总量 ${total} 单`
+        : `待处理 ${currentValue} 单 / 分组总量 ${total} 单`;
       return `
-        <div class="progress funnel-progress" title="超时 ${overdueValue} 单 / 待处理 ${currentValue} 单 / 分组总量 ${total} 单">
+        <div class="progress funnel-progress" title="${title}">
           <span class="funnel-progress-segment funnel-progress-total"></span>
           <span class="funnel-progress-segment funnel-progress-pending" style="left:${overdueWidth}%; width:${pendingWidth}%"></span>
-          <span class="funnel-progress-segment funnel-progress-overdue" style="left:0; width:${overdueWidth}%"></span>
+          ${showOverdue ? `<span class="funnel-progress-segment funnel-progress-overdue" style="left:0; width:${overdueWidth}%"></span>` : ''}
         </div>
       `;
     }
@@ -2009,8 +2011,8 @@ const menuData = [
                 <div class="title-tip-bubble">
                   <div class="title-tip-bubble-title">健康度说明</div>
                   <div class="title-tip-bubble-text">进度条改为三段展示，不表示完成率。</div>
-                  <div class="title-tip-bubble-text">红色：当前节点超时处理单量；黄色：当前节点待处理单量；灰色：当前分组待处理总量底座。</div>
-                  <div class="title-tip-bubble-text">履约链路中仅待接单、重新派单、已取货、配送中计入待处理总量；已送达单独展示绿色进度。</div>
+                  <div class="title-tip-bubble-text">仓内作业跟踪——红色：当前节点超时处理单量；黄色：当前节点待处理单量；灰色：当前分组待处理总量底座。</div>
+                  <div class="title-tip-bubble-text">物流跟踪中仅待接单、重新派单、物流异常、已接单、配送中计入待处理总量，暂不统计是否超时；已送达单独展示绿色进度。</div>
                 </div>
               </div>
               <div class="cockpit-funnel-actions">
@@ -2038,7 +2040,7 @@ const menuData = [
               <div class="funnel-group">
                 <div class="funnel-group-title">物流跟踪</div>
                 ${fulfillmentPendingRows.map((item) => `
-                  <article class="funnel-item is-key" data-action="funnel-open" data-group="物流跟踪" data-type="${item.label}" style="cursor:pointer;">
+                  <article class="funnel-item is-key" data-action="funnel-open" data-group="物流跟踪" data-type="${item.label}" style="cursor:pointer;height:auto !important;min-height:auto;">
                     <div class="funnel-head">
                       <div class="funnel-title-group">
                         <span class="funnel-label">${item.label}</span>
@@ -2046,8 +2048,7 @@ const menuData = [
                       </div>
                       <span class="funnel-value">${item.value}</span>
                     </div>
-                    <div class="funnel-meta">${item.meta}</div>
-                    ${renderFunnelProgress(item, fulfillmentLinkTotal)}
+                    ${renderFunnelProgress(item, fulfillmentLinkTotal, { showOverdue: false })}
                   </article>
                 `).join('')}
                 ${fulfillmentDeliveredRows.map((item) => `
@@ -2394,17 +2395,6 @@ const menuData = [
       return warehouseRows.find((item) => item.id === id);
     }
 
-    function getZoneRows() {
-      return zoneRows.filter((row) => {
-        const warehouseMatched = warehouseName() === '全部仓库' || row.warehouse === warehouseName();
-        return warehouseMatched;
-      });
-    }
-
-    function getZoneById(id) {
-      return zoneRows.find((item) => item.id === id);
-    }
-
     function getLocationRows() {
       return locationRows.filter((row) => {
         const warehouseMatched = warehouseName() === '全部仓库' || row.warehouse === warehouseName();
@@ -2414,11 +2404,6 @@ const menuData = [
         const rightWarehouseIndex = warehouseRows.findIndex((item) => item.name === right.warehouse);
         if (leftWarehouseIndex !== rightWarehouseIndex) {
           return leftWarehouseIndex - rightWarehouseIndex;
-        }
-        const leftZoneSort = (getZoneById(left.zoneCode) || {}).sort || 0;
-        const rightZoneSort = (getZoneById(right.zoneCode) || {}).sort || 0;
-        if (leftZoneSort !== rightZoneSort) {
-          return rightZoneSort - leftZoneSort;
         }
         return Number(right.sort || 0) - Number(left.sort || 0);
       });
@@ -2706,141 +2691,6 @@ const menuData = [
       `;
     }
 
-    function renderZonePage() {
-      const rows = getZoneRows();
-      const selectedCount = rows.filter((row) => selectedZoneIds.has(row.id)).length;
-      const allSelected = rows.length > 0 && selectedCount === rows.length;
-      const activeCount = rows.filter((row) => row.status === '启用').length;
-      const channelCount = rows.reduce((sum, row) => sum + row.channelRules.length, 0);
-      const singleOrderCount = rows.filter((row) => row.singleOrderSingleSlot).length;
-      return `
-        <div class="page-stack">
-          <section class="list-surface">
-            <div class="surface-head">
-              <div class="surface-title-wrap">
-                <h1 class="surface-title">库区管理</h1>
-                <div class="surface-subtitle">维护仓库下的库区主数据、通道结构与启停状态，并支持在原型内直接挂接与编辑简易需求文档。</div>
-              </div>
-              ${renderRequirementAnchor()}
-            </div>
-
-            <div class="surface-controls">
-              <div class="filters-row is-quarter">
-                <select class="filter-ctrl">
-                  <option selected>全部仓库</option>
-                  <option>1号仓库</option>
-                  <option>2号仓库</option>
-                </select>
-                <select class="filter-ctrl">
-                  <option selected>全部库房</option>
-                  <option>常温主库</option>
-                  <option>冷藏专区</option>
-                  <option>综合库房</option>
-                </select>
-                <select class="filter-ctrl">
-                  <option selected>全部库区类型</option>
-                  <option>备货区</option>
-                  <option>暂存区</option>
-                  <option>次品区</option>
-                  <option>长期区</option>
-                  <option>中转区</option>
-                  <option>系统区</option>
-                </select>
-                <input class="filter-ctrl" type="text" placeholder="请输入库区编码 / 名称" />
-              </div>
-              <div class="filters-row is-quarter">
-                <select class="filter-ctrl">
-                  <option>全部状态</option>
-                  <option selected>启用</option>
-                  <option>停用</option>
-                </select>
-                <div class="filters-actions is-unit">
-                  <button class="accent-btn" data-action="zone-query">查询</button>
-                  <button class="neutral-btn" data-action="zone-reset">重置</button>
-                </div>
-                <div></div>
-                <div></div>
-              </div>
-
-              <div class="toolbar-row">
-                <div class="toolbar-left">
-                  <button class="accent-btn" data-action="zone-create">+ 新建库区</button>
-                  <button class="neutral-btn">导出</button>
-                </div>
-                <div class="toolbar-right">
-                  <div class="tool-search">
-                    <input placeholder="搜索关键字" />
-                    <span>⌕</span>
-                  </div>
-                  <button class="icon-mini" aria-label="刷新">⟳</button>
-                  <button class="icon-mini" aria-label="列设置">☰</button>
-                  <button class="icon-mini" aria-label="设置">⚙</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="surface-table">
-              <div class="table-wrap flat">
-                <table class="table-dense">
-                  <thead>
-                    <tr>
-                      <th class="check-cell"><input class="table-check" type="checkbox" data-action="zone-select-all" ${allSelected ? 'checked' : ''} /></th>
-                      <th>所属仓库</th>
-                      <th>所属库房</th>
-                      <th>库区编码</th>
-                      <th>库区名称</th>
-                      <th>库区类型</th>
-                      <th>楼层</th>
-                      <th>排序</th>
-                      <th>状态</th>
-                      <th>创建时间</th>
-                      <th style="text-align:right;">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${rows.map((row) => `
-                      <tr>
-                        <td class="check-cell"><input class="table-check" type="checkbox" data-action="zone-select" data-id="${row.id}" ${selectedZoneIds.has(row.id) ? 'checked' : ''} /></td>
-                        <td>${row.warehouse}</td>
-                        <td>${row.room}</td>
-                        <td>${row.code}</td>
-                        <td>${row.name}</td>
-                        <td>${row.type}</td>
-                        <td>${row.floor}</td>
-                        <td>${row.sort}</td>
-                        <td><span class="status-dot ${row.status === '启用' ? 'on' : 'off'}"></span>${row.status}</td>
-                        <td>${row.updatedAt}</td>
-                        <td style="text-align:right;">
-                          <div class="row-actions">
-                            <button class="row-action-btn primary" data-action="zone-view" data-id="${row.id}">查看</button>
-                            <button class="row-action-btn" data-action="zone-edit" data-id="${row.id}">编辑</button>
-                            <button class="row-action-btn ${row.status === '启用' ? 'danger' : 'primary'}" data-action="zone-toggle" data-id="${row.id}">${row.status === '启用' ? '停用' : '启用'}</button>
-                            <button class="row-action-btn">更多 ▾</button>
-                          </div>
-                        </td>
-                      </tr>
-                    `).join('') || `<tr><td colspan="11" class="table-empty">当前筛选条件下暂无库区数据</td></tr>`}
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="table-footer">
-                <div>已选择 ${selectedCount} 项</div>
-                <div class="pager">
-                  <span>共 ${rows.length} 条</span>
-                  <button class="pager-btn">‹</button>
-                  <button class="pager-btn active">1</button>
-                  <button class="pager-btn">2</button>
-                  <button class="pager-btn">›</button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-        </div>
-      `;
-    }
-
     function renderLocationPage() {
       const rows = getLocationRows();
       const selectedCount = rows.filter((row) => selectedLocationIds.has(row.id)).length;
@@ -2854,7 +2704,7 @@ const menuData = [
             <div class="surface-head">
               <div class="surface-title-wrap">
                 <h1 class="surface-title">货位管理</h1>
-                <div class="surface-subtitle">维护库区下的货位主数据、容量规则、货品ABC分类与使用状态，并支持在原型内直接挂接与编辑简易需求文档。</div>
+                <div class="surface-subtitle">维护库房下的货位主数据、容量规则、货品ABC分类与使用状态，并支持在原型内直接挂接与编辑简易需求文档。</div>
               </div>
               ${renderRequirementAnchor()}
             </div>
@@ -2871,12 +2721,6 @@ const menuData = [
                   <option>常温主库</option>
                   <option>冷藏专区</option>
                   <option>综合库房</option>
-                </select>
-                <select class="filter-ctrl">
-                  <option selected>全部库区</option>
-                  <option>常温拣选区</option>
-                  <option>冷藏暂存区</option>
-                  <option>次品处理区</option>
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部货位类型</option>
@@ -2943,7 +2787,6 @@ const menuData = [
                       <th class="check-cell"><input class="table-check" type="checkbox" data-action="location-select-all" ${allSelected ? 'checked' : ''} /></th>
                       <th>仓库</th>
                       <th>库房</th>
-                      <th>库区</th>
                       <th>货位类型</th>
                       <th>货位编码</th>
                       <th>使用状态</th>
@@ -2965,7 +2808,6 @@ const menuData = [
                         <td class="check-cell"><input class="table-check" type="checkbox" data-action="location-select" data-id="${row.id}" ${selectedLocationIds.has(row.id) ? 'checked' : ''} /></td>
                         <td>${row.warehouse}</td>
                         <td>${row.room}</td>
-                        <td>${row.zone}</td>
                         <td>${row.type}</td>
                         <td>${row.code}</td>
                         <td><span class="status-pill ${row.usageStatus === '空' ? 'success' : row.usageStatus === '锁定' ? 'warning' : ''}">${row.usageStatus}</span></td>
@@ -2988,7 +2830,7 @@ const menuData = [
                           </div>
                         </td>
                       </tr>
-                    `).join('') || `<tr><td colspan="17" class="table-empty">当前筛选条件下暂无货位数据</td></tr>`}
+                    `).join('') || `<tr><td colspan="16" class="table-empty">当前筛选条件下暂无货位数据</td></tr>`}
                   </tbody>
                 </table>
               </div>
@@ -3896,16 +3738,16 @@ const menuData = [
 
     /* ─── 接口上下架日志 Mock Data ─── */
     const listingLogRows = [
-      { id: 'LOG-001', triggeredAt: '2026-06-09 10:42:18', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '下架', event: '出库发货', docNo: 'CK-240609-031', stockBefore: 1,  stockAfter: 0,  result: '成功', failReason: '' },
-      { id: 'LOG-002', triggeredAt: '2026-06-09 10:15:03', skuCode: 'EGG-30',      skuName: '鸡蛋 30 枚装',      category: '食品',   action: '上架', event: '入库上架', docNo: 'RK-240609-018', stockBefore: 0,  stockAfter: 12, result: '成功', failReason: '' },
-      { id: 'LOG-003', triggeredAt: '2026-06-09 09:58:44', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '下架', event: '库存冻结', docNo: 'KS-240609-005', stockBefore: 2,  stockAfter: 0,  result: '失败', failReason: 'SKU不存在于电商系统，请确认商品是否已同步' },
-      { id: 'LOG-004', triggeredAt: '2026-06-09 09:30:27', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '上架', event: '退货解冻', docNo: 'TH-240609-009', stockBefore: 0,  stockAfter: 8,  result: '成功', failReason: '' },
-      { id: 'LOG-005', triggeredAt: '2026-06-09 08:51:11', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '下架', event: '库存调整', docNo: 'KS-240609-002', stockBefore: 3,  stockAfter: 0,  result: '成功', failReason: '' },
-      { id: 'LOG-006', triggeredAt: '2026-06-08 17:22:39', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '上架', event: '入库上架', docNo: 'RK-240608-041', stockBefore: 0,  stockAfter: 24, result: '成功', failReason: '' },
-      { id: 'LOG-007', triggeredAt: '2026-06-08 16:04:55', skuCode: 'CHICKEN-1KG', skuName: '鸡胸肉 冷鲜 1kg',  category: '生鲜',   action: '下架', event: '出库发货', docNo: 'CK-240608-029', stockBefore: 1,  stockAfter: 0,  result: '失败', failReason: '接口请求超时（5003ms > 5000ms），已触发重试，重试3次后仍失败' },
-      { id: 'LOG-008', triggeredAt: '2026-06-08 14:38:02', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '上架', event: '退货解冻', docNo: 'TH-240608-012', stockBefore: 0,  stockAfter: 5,  result: '成功', failReason: '' },
-      { id: 'LOG-009', triggeredAt: '2026-06-08 11:19:28', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '上架', event: '入库上架', docNo: 'RK-240608-033', stockBefore: 0,  stockAfter: 36, result: '成功', failReason: '' },
-      { id: 'LOG-010', triggeredAt: '2026-06-07 15:44:17', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '下架', event: '出库发货', docNo: 'CK-240607-018', stockBefore: 2,  stockAfter: 0,  result: '成功', failReason: '' }
+      { id: 'LOG-001', triggeredAt: '2026-06-09 10:42:18', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '下架', event: '出库发货', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-002', triggeredAt: '2026-06-09 10:15:03', skuCode: 'EGG-30',      skuName: '鸡蛋 30 枚装',      category: '食品',   action: '上架', event: '入库上架', channel: '槟城门店',   stockBefore: 0,  stockAfter: 12, result: '成功', failReason: '' },
+      { id: 'LOG-003', triggeredAt: '2026-06-09 09:58:44', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '下架', event: '库存冻结', channel: '吉隆坡门店', stockBefore: 2,  stockAfter: 0,  result: '失败', failReason: 'SKU不存在于电商系统，请确认商品是否已同步' },
+      { id: 'LOG-004', triggeredAt: '2026-06-09 09:30:27', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '上架', event: '退货解冻', channel: '槟城门店',   stockBefore: 0,  stockAfter: 8,  result: '成功', failReason: '' },
+      { id: 'LOG-005', triggeredAt: '2026-06-09 08:51:11', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '下架', event: '库存调整', channel: '吉隆坡门店', stockBefore: 3,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-006', triggeredAt: '2026-06-08 17:22:39', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '上架', event: '入库上架', channel: '槟城门店',   stockBefore: 0,  stockAfter: 24, result: '成功', failReason: '' },
+      { id: 'LOG-007', triggeredAt: '2026-06-08 16:04:55', skuCode: 'CHICKEN-1KG', skuName: '鸡胸肉 冷鲜 1kg',  category: '生鲜',   action: '下架', event: '出库发货', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '失败', failReason: '接口请求超时（5003ms > 5000ms），已触发重试，重试3次后仍失败' },
+      { id: 'LOG-008', triggeredAt: '2026-06-08 14:38:02', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '上架', event: '退货解冻', channel: '槟城门店',   stockBefore: 0,  stockAfter: 5,  result: '成功', failReason: '' },
+      { id: 'LOG-009', triggeredAt: '2026-06-08 11:19:28', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '上架', event: '入库上架', channel: '吉隆坡门店', stockBefore: 0,  stockAfter: 36, result: '成功', failReason: '' },
+      { id: 'LOG-010', triggeredAt: '2026-06-07 15:44:17', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '下架', event: '出库发货', channel: '槟城门店',   stockBefore: 2,  stockAfter: 0,  result: '成功', failReason: '' }
     ];
 
     function getListingLogById(id) {
@@ -3961,15 +3803,37 @@ const menuData = [
                   <option>成功</option>
                   <option>失败</option>
                 </select>
+                <details class="filter-ctrl" style="position:relative;overflow:visible;padding:0;cursor:pointer;" id="ch-details">
+                  <summary style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 12px;list-style:none;-webkit-appearance:none;gap:6px;">
+                    <span id="ch-label" style="font-size:13px;color:var(--subtext);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">全部关联渠道</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" style="flex-shrink:0;"><path d="M2 4l4 4 4-4"/></svg>
+                  </summary>
+                  <div style="position:absolute;top:calc(100% + 4px);left:0;min-width:200px;z-index:300;background:#fff;border:1px solid rgba(29,29,31,0.12);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.1);padding-bottom:6px;">
+                    <div style="padding:8px 8px 4px;">
+                      <input type="text" placeholder="搜索渠道…" onclick="event.stopPropagation()"
+                             oninput="[].forEach.call(this.closest('details').querySelectorAll('.ch-opt'),function(l){l.style.display=l.dataset.v.indexOf(this.value)>-1?'flex':'none'}.bind(this))"
+                             style="width:100%;height:32px;border:1px solid rgba(29,29,31,0.12);border-radius:8px;padding:0 10px;font-size:12px;outline:none;box-sizing:border-box;color:var(--text);" />
+                    </div>
+                    <div style="max-height:150px;overflow-y:auto;padding:0 6px;">
+                      ${['吉隆坡门店','槟城门店'].map((ch) => `
+                        <label class="ch-opt" data-v="${ch}" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px;">
+                          <input type="checkbox" value="${ch}" onclick="event.stopPropagation()"
+                                 onchange="(function(el){var sel=[].map.call(el.closest('details').querySelectorAll('input[type=checkbox]:checked'),function(i){return i.value});var lb=document.getElementById('ch-label');lb.textContent=sel.length?sel.join('、'):'全部关联渠道';lb.style.color=sel.length?'var(--text)':'var(--subtext)'})(this)"
+                                 style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;"> ${ch}
+                        </label>
+                      `).join('')}
+                    </div>
+                  </div>
+                </details>
                 <div class="filter-ctrl date-range-display" style="grid-column: span 2; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #fff; border: 1px solid rgba(29,29,31,0.12); border-radius: 10px; font-size: 13px; color: var(--subtext);">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="14" height="13" rx="2"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>
                   <span>2026-06-03 ~ 2026-06-09</span>
                 </div>
-                <div class="filters-actions is-unit">
-                  <button class="accent-btn" data-action="listing-log-query">查询</button>
-                  <button class="neutral-btn" data-action="listing-log-reset">重置</button>
-                  <button class="neutral-btn" data-action="listing-log-export">导出</button>
-                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:2px;">
+                <button class="accent-btn" data-action="listing-log-query">查询</button>
+                <button class="neutral-btn" data-action="listing-log-reset">重置</button>
+                <button class="neutral-btn" data-action="listing-log-export">导出</button>
               </div>
 
               <div class="mini-grid is-four">
@@ -4014,7 +3878,7 @@ const menuData = [
                       <th style="width:88px;">所属分类</th>
                       <th style="width:80px;">上下架动作</th>
                       <th style="width:96px;">触发事件</th>
-                      <th style="width:148px;">关联单据号</th>
+                      <th style="width:120px;">关联渠道</th>
                       <th style="width:96px;">触发时可售库存</th>
                       <th style="width:72px;">调用结果</th>
                       <th style="min-width:160px;">失败原因</th>
@@ -4030,7 +3894,7 @@ const menuData = [
                         <td><span class="status-pill neutral">${row.category}</span></td>
                         <td><span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span></td>
                         <td><span style="font-size:12px;color:var(--subtext);">${row.event}</span></td>
-                        <td><span class="product-cell-text" style="font-size:12px;font-family:monospace;">${row.docNo}</span></td>
+                        <td><span style="font-size:12px;">${row.channel}</span></td>
                         <td style="text-align:right;font-variant-numeric:tabular-nums;">${row.stockBefore}</td>
                         <td><span class="status-pill ${row.result === '成功' ? 'on' : 'danger'}">${row.result}</span></td>
                         <td style="max-width:200px;">
@@ -4070,7 +3934,7 @@ const menuData = [
         skuCode: row.skuCode,
         action: row.action === '上架' ? 'ON_SHELF' : 'OFF_SHELF',
         triggerEvent: row.event,
-        docNo: row.docNo,
+        channel: row.channel,
         stockBefore: row.stockBefore,
         stockAfter: row.stockAfter,
         timestamp: row.triggeredAt
@@ -4104,7 +3968,7 @@ const menuData = [
                     ['所属分类', `<span class="status-pill neutral">${row.category}</span>`],
                     ['上下架动作', `<span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span>`],
                     ['触发事件', row.event],
-                    ['关联单据号', `<span style="font-family:monospace;font-size:13px;">${row.docNo}</span>`],
+                    ['关联渠道', row.channel],
                     ['触发时可售库存', `${row.stockBefore} 件`],
                     ['调用结果', `<span class="status-pill ${row.result === '成功' ? 'on' : 'danger'}">${row.result}</span>`],
                     ['触发时间', row.triggeredAt],
@@ -4298,6 +4162,7 @@ const menuData = [
       const overdueCount = rows.filter((row) => row.statusText === '已超时').length;
       const pendingCount = rows.filter((row) => row.statusText === '待处理').length;
       const completedCount = rows.filter((row) => row.statusText === '已完成').length;
+      const isLogistics = pageKey === 'logistics-track-list';
       if (!config) return '';
       return `
         <div class="page-stack">
@@ -4343,14 +4208,26 @@ const menuData = [
                 </select>
               </div>
               <div class="filters-row is-one">
-                <input class="filter-ctrl" type="text" placeholder="请输入任务ID / 原始单号 / 联系人 / 地址编码" />
+                <input class="filter-ctrl" type="text" placeholder="${isLogistics ? '请输入发货单号 / 关联单号 / 联系人 / 地址编码' : '请输入任务ID / 原始单号 / 联系人 / 地址编码'}" />
                 <div class="filters-actions is-unit">
                   <button class="accent-btn" data-action="operation-funnel-query">查询</button>
                   <button class="neutral-btn" data-action="operation-funnel-reset">重置</button>
                   <button class="neutral-btn" data-action="operation-funnel-export">导出列表</button>
                 </div>
               </div>
-              <div class="mini-grid">
+              <div class="mini-grid"${isLogistics ? ' style="grid-template-columns:repeat(6, minmax(0,1fr));"' : ''}>
+                ${isLogistics ? [
+                  { name: '待接单', icon: 'callback' },
+                  { name: '重新派单', icon: 'operation' },
+                  { name: '物流异常', icon: 'warning' },
+                  { name: '已接单', icon: 'owner' },
+                  { name: '配送中', icon: 'fulfillment' },
+                  { name: '已送达', icon: 'coverage' }
+                ].map((card) => `
+                <article class="mini-card compact">
+                  <div class="mini-top"><span>${card.name}</span><span class="mini-icon">${iconSvg(card.icon)}</span></div>
+                  <div class="mini-value">${rows.filter((row) => row.type === card.name).length}</div>
+                </article>`).join('') : `
                 <article class="mini-card compact">
                   <div class="mini-top"><span>当前节点总量</span><span class="mini-icon">${iconSvg('operation')}</span></div>
                   <div class="mini-value">${rows.length}</div>
@@ -4365,7 +4242,7 @@ const menuData = [
                   <div class="mini-top"><span>处理中</span><span class="mini-icon">${iconSvg('callback')}</span></div>
                   <div class="mini-value">${pendingCount + completedCount}</div>
                   <div class="mini-note">${config.processingNote}</div>
-                </article>
+                </article>`}
               </div>
             </div>
 
@@ -4374,13 +4251,13 @@ const menuData = [
                 <table class="table-dense">
                   <thead>
                     <tr>
-                      <th>任务ID</th>
-                      <th>原始单号</th>
-                      <th>作业节点</th>
+                      <th>${isLogistics ? '发货单号' : '任务ID'}</th>
+                      <th>${isLogistics ? '关联单号' : '原始单号'}</th>
+                      <th>${isLogistics ? '状态' : '作业节点'}</th>
                       <th>仓库</th>
                       ${pageKey === 'warehouse-operation-track-list' ? '<th>库房</th>' : ''}
                       <th>渠道类型</th>
-                      <th>当前状态</th>
+                      ${isLogistics ? '' : '<th>当前状态</th>'}
                       <th>等待时长</th>
                       <th>处理人</th>
                       <th>更新时间</th>
@@ -4396,13 +4273,13 @@ const menuData = [
                         <td>${row.warehouse}</td>
                         ${pageKey === 'warehouse-operation-track-list' ? `<td>${row.room||'--'}</td>` : ''}
                         <td>${row.channel}</td>
-                        <td>${row.statusText === '已超时' ? '<span class="status-pill danger">已超时</span>' : row.statusText === '已完成' ? '<span class="status-pill success">已完成</span>' : '<span class="status-pill warning">待处理</span>'}</td>
+                        ${isLogistics ? '' : `<td>${row.statusText === '已超时' ? '<span class="status-pill danger">已超时</span>' : row.statusText === '已完成' ? '<span class="status-pill success">已完成</span>' : '<span class="status-pill warning">待处理</span>'}</td>`}
                         <td>${row.waitMinutes} 分钟</td>
                         <td>${row.owner}</td>
                         <td>${row.updatedAt}</td>
                         <td style="text-align:right;"><button class="row-action-btn primary" data-action="operation-funnel-view" data-id="${row.id}">查看详情</button></td>
                       </tr>
-                    `).join('') || `<tr><td colspan="${pageKey === 'warehouse-operation-track-list' ? 11 : 10}" class="table-empty">${config.emptyText}</td></tr>`}
+                    `).join('') || `<tr><td colspan="${pageKey === 'warehouse-operation-track-list' ? 11 : isLogistics ? 9 : 10}" class="table-empty">${config.emptyText}</td></tr>`}
                   </tbody>
                 </table>
               </div>
@@ -4638,16 +4515,16 @@ const menuData = [
     }
 
     function renderFulfillmentLinkDetail(record) {
-      const STEPS = ['待接单', '已接单', '已取货', '配送中', '已送达'];
-      const typeToStep = { '重新派单': -1, '待接单': 0, '已接单': 1, '已取货': 2, '配送中': 3, '已送达（当日）': 4 };
+      const STEPS = ['待接单', '已接单', '配送中', '已送达'];
+      const typeToStep = { '重新派单': -1, '物流异常': -1, '待接单': 0, '已接单': 1, '配送中': 2, '已送达': 3 };
       const currentStep = typeToStep[record.type] ?? 0;
-      const isRedispath = record.type === '重新派单';
-      const hasRider = ['已接单', '已取货', '配送中', '已送达（当日）'].includes(record.type);
-      const pickupDone = ['已取货', '配送中', '已送达（当日）'].includes(record.type);
-      const stop1Done = ['配送中', '已送达（当日）'].includes(record.type);
-      const allDone = record.type === '已送达（当日）';
+      const isRedispath = record.type === '重新派单' || record.type === '物流异常';
+      const hasRider = ['已接单', '配送中', '已送达', '物流异常'].includes(record.type);
+      const pickupDone = ['配送中', '已送达', '物流异常'].includes(record.type);
+      const stop1Done = ['配送中', '已送达'].includes(record.type);
+      const allDone = record.type === '已送达';
 
-      const timeLabels = { '待接单': '派单时间', '已接单': '接单时间', '已取货': '取货时间', '配送中': '配送时间', '已送达（当日）': '送达时间' };
+      const timeLabels = { '待接单': '派单时间', '已接单': '接单时间', '配送中': '配送时间', '已送达': '送达时间', '物流异常': '异常上报时间' };
       const timeLabel = timeLabels[record.type] || '派单时间';
       const stepBar = isRedispath ? '' : `
         <div style="background:rgba(0,171,149,0.05);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
@@ -4735,14 +4612,24 @@ const menuData = [
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px;">承诺送达</div><div style="font-size:13px;">${record.promiseTime}</div></div>
           </div>
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">节点摘要</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${record.type === '物流异常' ? '物流异常原因' : '节点摘要'}</div>
             <div style="font-size:13px;line-height:1.7;color:var(--subtext);">${record.summary}</div>
           </div>
+          ${record.type === '已送达' ? `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">送达图</div>
+            <div style="display:flex;gap:8px;">
+              ${[1, 2].map(() => `
+              <div style="width:96px;height:96px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(160deg, rgba(0,171,149,0.08), rgba(29,29,31,0.04));display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:rgba(29,29,31,0.35);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5 17 4.5-4.5 3 3L16 12l3 3"/></svg>
+              </div>`).join('')}
+            </div>
+          </div>` : ''}
         </div>`;
 
       const footBtn = `<button class="ghost-btn" data-action="drawer-close">关闭</button>`;
 
-      return { body: `${stepBar}${riderBlock}${routeBlock}${feeBlock}${metaBlock}`, foot: footBtn };
+      return { body: `<div style="align-self:start;">${stepBar}${riderBlock}${routeBlock}${feeBlock}${metaBlock}</div>`, foot: footBtn };
     }
 
     function renderFunnelTrackingDrawer() {
@@ -5012,13 +4899,6 @@ const menuData = [
                   <option>综合库房</option>
                 </select>
                 <select class="filter-ctrl">
-                  <option selected>全部库区</option>
-                  <option>常温区A</option>
-                  <option>常温区B</option>
-                  <option>常温区C</option>
-                  <option>冷藏区A</option>
-                </select>
-                <select class="filter-ctrl">
                   <option selected>全部库存状态</option>
                   <option>可售</option>
                   <option>锁定</option>
@@ -5069,7 +4949,6 @@ const menuData = [
                     <tr>
                       <th>仓库</th>
                       <th>库房</th>
-                      <th>库区</th>
                       <th>货位</th>
                       <th>SKU编码</th>
                       <th>商品名称</th>
@@ -5088,7 +4967,6 @@ const menuData = [
                       <tr style="${selectedInventoryDetailId === row.id ? 'background: rgba(0,171,149,0.05);' : ''}">
                         <td>${row.warehouse}</td>
                         <td>${row.room}</td>
-                        <td>${row.zone}</td>
                         <td>${row.location}</td>
                         <td>${row.skuCode}</td>
                         <td>
@@ -5163,10 +5041,6 @@ const menuData = [
                   <div class="field-static">${record.room || '--'}</div>
                 </div>
                 <div class="field">
-                  <label><span class="field-label">库区</span></label>
-                  <div class="field-static">${record.zone}</div>
-                </div>
-                <div class="field">
                   <label><span class="field-label">货位</span></label>
                   <div class="field-static">${record.location}</div>
                 </div>
@@ -5221,7 +5095,7 @@ const menuData = [
               </div>
               <div class="field">
                 <label><span class="field-label">库存摘要</span></label>
-                <div class="field-static" style="align-items:flex-start;padding-top:12px;padding-bottom:12px;line-height:1.7;">当前库存位于 ${record.warehouse} · ${record.zone} · ${record.location}，批次 ${record.batchNo}，当前状态为 ${record.stockStatus}。</div>
+                <div class="field-static" style="align-items:flex-start;padding-top:12px;padding-bottom:12px;line-height:1.7;">当前库存位于 ${record.warehouse} · ${record.location}，批次 ${record.batchNo}，当前状态为 ${record.stockStatus}。</div>
               </div>
             </div>
             <div class="drawer-foot">
@@ -5932,143 +5806,12 @@ const menuData = [
       `;
     }
 
-    function renderZoneDrawer() {
-      if (!drawerState || drawerState.entity !== 'zone') return '';
-      const record = drawerState.id ? getZoneById(drawerState.id) : null;
-      const draft = record || {
-        warehouse: warehouseName() === '全部仓库' ? '1号仓库' : warehouseName(),
-        room: '常温主库',
-        code: '系统自动生成',
-        name: '',
-        type: '备货区',
-        floor: '1F',
-        areaSize: '',
-        sort: 10,
-        status: '启用',
-        channelRules: [{ name: 'A01', columnCount: '6', rowCount: '4', columnRange: '01-06', rowRange: '01-04' }],
-        autoUpdate: true,
-        singleOrderSingleSlot: false,
-        remark: ''
-      };
-      const readOnly = drawerState.mode === 'view';
-      const titleMap = { create: '新建库区', edit: '编辑库区', view: '库区详情' };
-      return `
-        <div class="drawer-mask" data-action="drawer-mask-close">
-          <aside class="drawer">
-            <div class="drawer-head">
-              <div>
-                <h2 class="drawer-title">${titleMap[drawerState.mode]}</h2>
-                <div class="drawer-subtitle">维护库区归属、通道结构与作业属性，供货位规划、上架规则与波次拣选引用。</div>
-              </div>
-              <button class="drawer-close" data-action="drawer-close" aria-label="关闭抽屉">
-                <svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
-              </button>
-            </div>
-            <div class="drawer-body">
-              ${readOnly ? '' : `
-                <div class="drawer-note">
-                  库区名称、类型、所属仓库、排序为必填；同一仓库下库区编码与名称需唯一。编辑模式默认不允许修改所属仓库，避免下挂货位归属混乱。
-                </div>
-              `}
-              <section class="form-section">
-                <h3>基础信息</h3>
-                <div class="form-grid is-three">
-                  <div class="field">
-                    <label><span class="field-label">所属仓库<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.warehouse}</div>` : `<select class="form-select"><option ${draft.warehouse === '1号仓库' ? 'selected' : ''}>1号仓库</option><option ${draft.warehouse === '2号仓库' ? 'selected' : ''}>2号仓库</option><option ${draft.warehouse === '盒马共享仓' ? 'selected' : ''}>盒马共享仓</option></select>`}
-                  </div>
-                  <div class="field">
-                    <label><span class="field-label">所属库房<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.room || '--'}</div>` : `<select class="form-select"><option ${draft.room === '常温主库' ? 'selected' : ''}>常温主库</option><option ${draft.room === '冷藏专区' ? 'selected' : ''}>冷藏专区</option><option ${draft.room === '综合库房' ? 'selected' : ''}>综合库房</option></select>`}
-                  </div>
-                  <div class="field">
-                    <label>库区编码</label>
-                    ${readOnly ? `<div class="field-static">${draft.code}</div>` : `<input class="form-input" value="${draft.code}" />`}
-                  </div>
-                  <div class="field">
-                    <label><span class="field-label">库区名称<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.name || '--'}</div>` : `<input class="form-input" value="${draft.name}" placeholder="请输入库区名称" />`}
-                  </div>
-                  <div class="field">
-                    <label><span class="field-label">库区类型<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.type}</div>` : `<select class="form-select"><option ${draft.type === '备货区' ? 'selected' : ''}>备货区</option><option ${draft.type === '暂存区' ? 'selected' : ''}>暂存区</option><option ${draft.type === '次品区' ? 'selected' : ''}>次品区</option><option ${draft.type === '长期区' ? 'selected' : ''}>长期区</option><option ${draft.type === '中转区' ? 'selected' : ''}>中转区</option><option ${draft.type === '系统区' ? 'selected' : ''}>系统区</option></select>`}
-                  </div>
-                  <div class="field">
-                    <label>楼层</label>
-                    ${readOnly ? `<div class="field-static">${draft.floor || '--'}</div>` : `<input class="form-input" value="${draft.floor}" placeholder="例如 1F" />`}
-                  </div>
-                  <div class="field">
-                    <label>面积(㎡)</label>
-                    ${readOnly ? `<div class="field-static">${draft.areaSize || '--'}</div>` : `<input class="form-input" value="${draft.areaSize}" placeholder="例如 860 ㎡" />`}
-                  </div>
-                  <div class="field">
-                    <label><span class="field-label">排序<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.sort}</div>` : `<input class="form-input" value="${draft.sort}" placeholder="请输入排序" />`}
-                  </div>
-                  <div class="field">
-                    <label><span class="field-label">状态<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.status}</div>` : `<select class="form-select"><option ${draft.status === '启用' ? 'selected' : ''}>启用</option><option ${draft.status === '停用' ? 'selected' : ''}>停用</option></select>`}
-                  </div>
-                </div>
-              </section>
-              <section class="form-section">
-                <h3>下辖通道</h3>
-                <div class="mini-table">
-                  <table class="table-dense">
-                    <thead>
-                      <tr><th>通道名称</th><th>列</th><th>排</th><th>列范围</th><th>排范围</th><th style="text-align:right;">操作</th></tr>
-                    </thead>
-                    <tbody>
-                      ${draft.channelRules.map((item) => `
-                        <tr>
-                          <td>${readOnly ? item.name : `<input class="form-input" value="${item.name}" />`}</td>
-                          <td>${readOnly ? item.columnCount : `<input class="form-input" value="${item.columnCount}" />`}</td>
-                          <td>${readOnly ? item.rowCount : `<input class="form-input" value="${item.rowCount}" />`}</td>
-                          <td>${readOnly ? item.columnRange : `<input class="form-input" value="${item.columnRange}" />`}</td>
-                          <td>${readOnly ? item.rowRange : `<input class="form-input" value="${item.rowRange}" />`}</td>
-                          <td style="text-align:right;">${readOnly ? '--' : `<button class="row-action-btn">删除</button>`}</td>
-                        </tr>
-                      `).join('')}
-                    </tbody>
-                  </table>
-                </div>
-                ${readOnly ? '' : `<div class="page-actions"><button class="ghost-btn" type="button">+ 新增通道</button></div>`}
-              </section>
-              <section class="form-section">
-                <h3>库区属性</h3>
-                ${readOnly ? `
-                  <div class="tag-row">
-                    ${draft.autoUpdate ? '<span class="form-tag">库存自动精确更新</span>' : '<span class="status-pill">未开启自动更新</span>'}
-                    ${draft.singleOrderSingleSlot ? '<span class="form-tag">只允许一单一位</span>' : '<span class="status-pill">允许共享作业位</span>'}
-                  </div>
-                ` : `
-                  <div class="inline-checks">
-                    <label class="inline-check"><input type="checkbox" ${draft.autoUpdate ? 'checked' : ''} />库存自动精确更新</label>
-                    <label class="inline-check"><input type="checkbox" ${draft.singleOrderSingleSlot ? 'checked' : ''} />只允许一单一位</label>
-                  </div>
-                `}
-                <div class="field">
-                  <label>备注</label>
-                  ${readOnly ? `<div class="field-static">${draft.remark || '--'}</div>` : `<textarea class="form-textarea" placeholder="请输入补充说明">${draft.remark || ''}</textarea>`}
-                </div>
-              </section>
-            </div>
-            <div class="drawer-foot">
-              <button class="ghost-btn" data-action="drawer-close">取消</button>
-              ${readOnly ? '' : `<button class="primary-btn" data-action="zone-save" data-id="${drawerState.id || ''}">保存</button>`}
-            </div>
-          </aside>
-        </div>
-      `;
-    }
-
     function renderLocationDrawer() {
       if (!drawerState || drawerState.entity !== 'location') return '';
       const record = drawerState.id ? getLocationById(drawerState.id) : null;
       const draft = record || {
         warehouse: warehouseName() === '全部仓库' ? '1号仓库' : warehouseName(),
         room: '常温主库',
-        zone: '常温拣选区',
         type: '拣货货位',
         code: '系统自动生成',
         channel: 'A01',
@@ -6119,10 +5862,6 @@ const menuData = [
                     ${readOnly ? `<div class="field-static">${draft.room || '--'}</div>` : `<select class="form-select"><option ${draft.room === '常温主库' ? 'selected' : ''}>常温主库</option><option ${draft.room === '冷藏专区' ? 'selected' : ''}>冷藏专区</option><option ${draft.room === '综合库房' ? 'selected' : ''}>综合库房</option></select>`}
                   </div>
                   <div class="field">
-                    <label><span class="field-label">所属库区<span class="required-mark">*</span></span></label>
-                    ${readOnly ? `<div class="field-static">${draft.zone}</div>` : `<select class="form-select"><option ${draft.zone === '常温拣选区' ? 'selected' : ''}>常温拣选区</option><option ${draft.zone === '冷藏暂存区' ? 'selected' : ''}>冷藏暂存区</option><option ${draft.zone === '次品处理区' ? 'selected' : ''}>次品处理区</option></select>`}
-                  </div>
-                  <div class="field">
                     <label>货位编码</label>
                     ${readOnly ? `<div class="field-static">${draft.code}</div>` : `<input class="form-input" value="${draft.code}" />`}
                   </div>
@@ -6168,7 +5907,7 @@ const menuData = [
                       ${readOnly ? '' : `
                         <span class="field-help">
                           <span class="field-help-icon">?</span>
-                          <span class="field-help-bubble">同仓库、同库区下按排序值倒序展示，数值越大越靠前。</span>
+                          <span class="field-help-bubble">同仓库、同库房下按排序值倒序展示，数值越大越靠前。</span>
                         </span>
                       `}
                     </label>
@@ -6777,7 +6516,7 @@ const menuData = [
     }
 
     function renderOverlay() {
-      overlayRoot.innerHTML = `${renderRequirementDrawer()}${renderUrgentTodoDrawer()}${renderInventoryRiskDrawer()}${renderInventoryDetailDrawer()}${renderFunnelTrackingDrawer()}${renderOwnerDrawer()}${renderWarehouseDrawer()}${renderWarehouseStaffDrawer()}${renderZoneDrawer()}${renderLocationDrawer()}${renderSkuDrawer()}${renderListingLogDetailDrawer()}${renderCenterModal()}`;
+      overlayRoot.innerHTML = `${renderRequirementDrawer()}${renderUrgentTodoDrawer()}${renderInventoryRiskDrawer()}${renderInventoryDetailDrawer()}${renderFunnelTrackingDrawer()}${renderOwnerDrawer()}${renderWarehouseDrawer()}${renderWarehouseStaffDrawer()}${renderLocationDrawer()}${renderSkuDrawer()}${renderListingLogDetailDrawer()}${renderCenterModal()}`;
       syncRequirementStatusUi();
       syncAutoResizeTextareas();
     }
@@ -6802,12 +6541,6 @@ const menuData = [
       } else if (currentItem.key === 'owner') {
         drawerState = {
           entity: 'owner',
-          mode,
-          id: id || null
-        };
-      } else if (currentItem.key === 'zone') {
-        drawerState = {
-          entity: 'zone',
           mode,
           id: id || null
         };
@@ -7500,8 +7233,6 @@ const menuData = [
         canvas.innerHTML = renderOwnerPage();
       } else if (item.key === 'warehouse') {
         canvas.innerHTML = renderWarehousePage();
-      } else if (item.key === 'zone') {
-        canvas.innerHTML = renderZonePage();
       } else if (item.key === 'location') {
         canvas.innerHTML = renderLocationPage();
       } else if (item.key === 'warehouse-staff') {
@@ -7723,7 +7454,7 @@ const menuData = [
         if (!pageKey) return;
         setFunnelPageState(pageKey, {
           selectedId: '',
-          type: target.dataset.type || '全部类型'
+          type: (target.dataset.type || '全部类型').replace('（当日）', '')
         });
         navigateToItem(pageKey);
         return;
@@ -7909,9 +7640,6 @@ const menuData = [
       if (action === 'warehouse-query') {
         return;
       }
-      if (action === 'zone-query') {
-        return;
-      }
       if (action === 'location-query') {
         return;
       }
@@ -7971,34 +7699,6 @@ const menuData = [
           selectedWarehouseIds.delete(id);
         } else {
           selectedWarehouseIds.add(id);
-        }
-        renderPage(currentItem, currentGroup);
-        return;
-      }
-      if (action === 'zone-reset') {
-        selectedZoneIds = new Set();
-        renderPage(currentItem, currentGroup);
-        return;
-      }
-      if (action === 'zone-select-all') {
-        event.preventDefault();
-        const rows = getZoneRows();
-        const selectedCount = rows.filter((row) => selectedZoneIds.has(row.id)).length;
-        const allSelected = rows.length > 0 && selectedCount === rows.length;
-        if (allSelected) {
-          rows.forEach((row) => selectedZoneIds.delete(row.id));
-        } else {
-          rows.forEach((row) => selectedZoneIds.add(row.id));
-        }
-        renderPage(currentItem, currentGroup);
-        return;
-      }
-      if (action === 'zone-select') {
-        event.preventDefault();
-        if (selectedZoneIds.has(id)) {
-          selectedZoneIds.delete(id);
-        } else {
-          selectedZoneIds.add(id);
         }
         renderPage(currentItem, currentGroup);
         return;
@@ -8188,34 +7888,6 @@ const menuData = [
         renderPage(currentItem, currentGroup);
         return;
       }
-      if (action === 'zone-create') {
-        openDrawer('create');
-        return;
-      }
-      if (action === 'zone-view') {
-        openDrawer('view', id);
-        return;
-      }
-      if (action === 'zone-edit') {
-        openDrawer('edit', id);
-        return;
-      }
-      if (action === 'zone-toggle') {
-        const row = getZoneById(id);
-        const nextStatus = row && row.status === '启用' ? '停用' : '启用';
-        openModal({
-          title: `${nextStatus}库区`,
-          message: `确认将“${row.name}”调整为${nextStatus}状态吗？停用后该库区不会出现在新增货位与新作业可选范围内。`,
-          cancelText: '取消',
-          confirmText: `确认${nextStatus}`,
-          onConfirm: () => {
-            if (row) row.status = nextStatus;
-            closeModal();
-            renderPage(currentItem, currentGroup);
-          }
-        });
-        return;
-      }
       if (action === 'location-create') {
         openDrawer('create');
         return;
@@ -8282,7 +7954,7 @@ const menuData = [
         });
         return;
       }
-      if (action === 'zone-save' || action === 'location-save') {
+      if (action === 'location-save') {
         closeDrawer();
         renderPage(currentItem, currentGroup);
         return;
@@ -8721,7 +8393,7 @@ const menuData = [
         renderPage(currentItem, currentGroup);
         return;
       }
-      if (action === 'owner-save' || action === 'zone-save' || action === 'location-save' || action === 'sku-save') {
+      if (action === 'owner-save' || action === 'location-save' || action === 'sku-save') {
         closeDrawer();
         renderPage(currentItem, currentGroup);
         return;

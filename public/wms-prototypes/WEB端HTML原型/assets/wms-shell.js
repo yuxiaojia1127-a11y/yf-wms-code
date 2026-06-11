@@ -17,7 +17,7 @@ const menuData = [
     "key": "storage",
     "icon": "warehouse",
     "name": "仓储管理",
-    "meta": "仓库 / 库房 / 库区 / 货位 / 人员",
+    "meta": "仓库 / 库房 / 货位 / 人员",
     "items": [
       {
         "key": "warehouse",
@@ -28,11 +28,6 @@ const menuData = [
         "key": "warehouse-room",
         "name": "库房管理",
         "page": "WMS-WEB-W07"
-      },
-      {
-        "key": "zone",
-        "name": "库区管理",
-        "page": "WMS-WEB-W02"
       },
       {
         "key": "location",

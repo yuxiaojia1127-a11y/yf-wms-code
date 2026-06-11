@@ -640,14 +640,14 @@
   },
   "inventory-detail": {
     "title": "库存明细简易需求文档",
-    "businessDescription": "在库存中心提供以仓库、库区、货位为主视角的库存明细查询页。页面承接库存查询页的下钻查看场景，用于定位某个 SKU 当前具体存放在哪些货位、属于哪个批次、库存状态如何，以及各货位的实物、可售、锁定和冻结数量。",
+    "businessDescription": "在库存中心提供以仓库、货位为主视角的库存明细查询页。页面承接库存查询页的下钻查看场景，用于定位某个 SKU 当前具体存放在哪些货位、属于哪个批次、库存状态如何，以及各货位的实物、可售、锁定和冻结数量。",
     "rolePermissions": [
       {
         "roleType": "管理角色",
         "role": "仓库管理员 / 仓内主管",
         "actionPermission": "查询、导出、查看详情",
         "dataPermission": "可查看所属权限仓库内的库存明细",
-        "description": "用于定位库存在哪个库区和货位"
+        "description": "用于定位库存在哪个货位"
       },
       {
         "roleType": "协同角色",
@@ -660,8 +660,8 @@
     "featureDescription": [
       "支持作为库存查询页的下钻页查看货位明细。",
       "支持在库存中心菜单下新增“库存明细”入口。",
-      "支持按仓库、库区、库存状态、批次属性和关键词查询。",
-      "支持展示仓库、库区、货位、SKU、批次、库存状态、数量信息。",
+      "支持按仓库、库存状态、批次属性和关键词查询。",
+      "支持展示仓库、货位、SKU、批次、库存状态、数量信息。",
       "支持点击“查看详情”后从右侧抽屉查看库存明细详情。"
     ],
     "listQuery": [
@@ -670,12 +670,6 @@
         "fieldType": "下拉单选",
         "queryMethod": "精确筛选",
         "placeholder": "默认全部授权仓库"
-      },
-      {
-        "fieldName": "库区",
-        "fieldType": "下拉单选",
-        "queryMethod": "精确筛选",
-        "placeholder": "默认全部库区"
       },
       {
         "fieldName": "库存状态",
@@ -704,14 +698,6 @@
         "required": "是",
         "example": "2号仓库",
         "description": "展示库存所在仓库。"
-      },
-      {
-        "fieldName": "库区",
-        "fieldType": "文本",
-        "fieldLength": "20",
-        "required": "是",
-        "example": "常温区A",
-        "description": "展示库存所在库区。"
       },
       {
         "fieldName": "货位",
@@ -798,7 +784,7 @@
       "默认按更新时间倒序展示。",
       "默认每页展示 10 条。",
       "当前筛选条件下无数据时保留查询条件并展示空态。",
-      "列表唯一性口径为 SKU + 仓库 + 库区 + 货位 + 批次 + 库存状态。"
+      "列表唯一性口径为 SKU + 仓库 + 货位 + 批次 + 库存状态。"
     ],
     "formFields": [
       {
@@ -853,7 +839,7 @@
         "roleType": "管理角色",
         "role": "仓内主管",
         "actionPermission": "查询、关闭预警",
-        "dataPermission": "可查看所属仓库或库区范围内的数据",
+        "dataPermission": "可查看所属仓库范围内的数据",
         "description": "重点关注高预警库存与高锁定风险"
       }
     ],
@@ -1171,7 +1157,7 @@
   },
   "logistics-track-list": {
     "title": "物流跟踪明细列表简易需求文档",
-    "businessDescription": "承接驾驶舱“今日作业漏斗”中物流跟踪分组的节点下钻查看需求，在物流中心下提供独立明细列表页。用户点击待接单、重新派单、已取货、配送中、已送达（当日）任一节点时，进入本页面并自动带入对应节点筛选。",
+    "businessDescription": "承接驾驶舱“今日作业漏斗”中物流跟踪分组的节点下钻查看需求，在物流中心下提供独立明细列表页。用户点击待接单、重新派单、物流异常、已接单、配送中、已送达任一节点时，进入本页面并自动带入对应节点筛选。",
     "rolePermissions": [
       {
         "roleType": "管理角色",
@@ -1191,8 +1177,9 @@
     "featureDescription": [
       "支持从驾驶舱“今日作业漏斗”中的物流跟踪节点点击进入独立明细列表页。",
       "支持在物流中心菜单下新增“物流跟踪明细列表”入口。",
-      "支持自动带入作业节点筛选。",
-      "支持按仓库、作业节点、渠道类型、处理状态、关键词查询。",
+      "支持自动带入状态节点筛选。",
+      "支持按仓库、状态节点、渠道类型、处理状态、关键词查询。",
+      "筛选区下方展示 6 张统计卡片（待接单 / 重新派单 / 物流异常 / 已接单 / 配送中 / 已送达），按当前查询结果实时统计。",
       "支持导出当前筛选结果。",
       "支持点击“查看详情”后从右侧抽屉查看单据详情。"
     ],
@@ -1204,7 +1191,7 @@
         "placeholder": "默认当前驾驶舱所选仓库"
       },
       {
-        "fieldName": "作业节点",
+        "fieldName": "节点",
         "fieldType": "下拉单选",
         "queryMethod": "精确筛选",
         "placeholder": "支持自动带入漏斗节点"
@@ -1225,25 +1212,33 @@
         "fieldName": "关键词",
         "fieldType": "输入框",
         "queryMethod": "模糊查询",
-        "placeholder": "支持单号 / 联系人 / 地址编码"
+        "placeholder": "支持发货单号 / 关联单号 / 联系人 / 地址编码"
       }
     ],
     "listFields": [
       {
-        "fieldName": "单号",
+        "fieldName": "发货单号",
+        "fieldType": "文本",
+        "fieldLength": "32",
+        "required": "是",
+        "example": "FNL-011",
+        "description": "展示物流发货单号。"
+      },
+      {
+        "fieldName": "关联单号",
         "fieldType": "文本",
         "fieldLength": "32",
         "required": "是",
         "example": "SO-240603-245",
-        "description": "展示当前节点对应的业务单号。"
+        "description": "展示关联的订单号。"
       },
       {
-        "fieldName": "作业节点",
+        "fieldName": "状态",
         "fieldType": "标签",
         "fieldLength": "20",
         "required": "是",
         "example": "配送中",
-        "description": "展示当前单据所在的履约链路节点。"
+        "description": "待接单 / 重新派单 / 物流异常 / 已接单 / 配送中 / 已送达。"
       },
       {
         "fieldName": "仓库",
@@ -1260,14 +1255,6 @@
         "required": "否",
         "example": "即时配送",
         "description": "展示当前单据的渠道分类。"
-      },
-      {
-        "fieldName": "当前状态",
-        "fieldType": "标签",
-        "fieldLength": "20",
-        "required": "是",
-        "example": "已超时 / 待处理 / 已完成",
-        "description": "用于标识当前节点处理状态。"
       },
       {
         "fieldName": "等待时长",
@@ -1877,311 +1864,9 @@
       }
     ]
   },
-  "zone": {
-    "title": "库区管理简易需求文档",
-    "businessDescription": "维护仓库下的库区主数据，支持库区查询、查看、新建、编辑、启停及通道结构配置，作为货位、上下架策略、波次拣选、盘点分区等业务的库区基础资料来源。",
-    "rolePermissions": [
-      {
-        "roleType": "管理角色",
-        "role": "仓库管理员",
-        "actionPermission": "查询、查看、新建、编辑、启用、停用、导出",
-        "dataPermission": "可查看并维护所属权限范围内的库区数据",
-        "description": "当前页面主操作角色"
-      },
-      {
-        "roleType": "管理角色",
-        "role": "仓内主管",
-        "actionPermission": "查询、查看、导出",
-        "dataPermission": "可查看所属仓库下的库区数据",
-        "description": "以查看和管理协同为主，不直接维护主数据"
-      },
-      {
-        "roleType": "平台角色",
-        "role": "平台运营/配置人员",
-        "actionPermission": "查询、查看、新建、编辑、启用、停用、导出",
-        "dataPermission": "可查看并维护全量仓库的库区数据",
-        "description": "负责基础资料配置与平台级管理"
-      }
-    ],
-    "featureDescription": [
-      "支持按所属仓库、库区类型、库区编码/名称、状态查询库区。",
-      "支持查看库区列表及分页浏览。",
-      "支持新建、编辑、查看库区详情。",
-      "支持单个库区启用/停用。",
-      "支持维护下辖通道。"
-    ],
-    "listQuery": [
-      {
-        "fieldName": "所属仓库",
-        "fieldType": "下拉单选",
-        "queryMethod": "精确筛选",
-        "placeholder": "请选择所属仓库"
-      },
-      {
-        "fieldName": "库区类型",
-        "fieldType": "下拉单选",
-        "queryMethod": "精确筛选",
-        "placeholder": "请选择库区类型"
-      },
-      {
-        "fieldName": "库区编码/名称",
-        "fieldType": "单行输入框",
-        "queryMethod": "模糊查询",
-        "placeholder": "请输入库区编码 / 名称"
-      },
-      {
-        "fieldName": "状态",
-        "fieldType": "下拉单选",
-        "queryMethod": "精确筛选",
-        "placeholder": "默认选中启用"
-      }
-    ],
-    "listFields": [
-      {
-        "fieldName": "仓库",
-        "fieldType": "文本",
-        "fieldLength": "30",
-        "required": "是",
-        "example": "吉隆坡中心仓",
-        "description": "库区所属仓库。"
-      },
-      {
-        "fieldName": "库区编码",
-        "fieldType": "文本",
-        "fieldLength": "20",
-        "required": "是",
-        "example": "Z-01",
-        "description": "库区唯一编码。"
-      },
-      {
-        "fieldName": "库区名称",
-        "fieldType": "文本",
-        "fieldLength": "50",
-        "required": "是",
-        "example": "一层备货区",
-        "description": "库区正式名称。"
-      },
-      {
-        "fieldName": "库区类型",
-        "fieldType": "枚举文本",
-        "fieldLength": "20",
-        "required": "是",
-        "example": "备货区",
-        "description": "当前库区业务类型。"
-      },
-      {
-        "fieldName": "楼层",
-        "fieldType": "文本",
-        "fieldLength": "10",
-        "required": "否",
-        "example": "1F",
-        "description": "库区所在楼层。"
-      },
-      {
-        "fieldName": "排序",
-        "fieldType": "数字",
-        "fieldLength": "10",
-        "required": "是",
-        "example": "30",
-        "description": "同仓库内库区显示顺序。"
-      },
-      {
-        "fieldName": "状态",
-        "fieldType": "状态枚举",
-        "fieldLength": "10",
-        "required": "是",
-        "example": "启用",
-        "description": "库区当前是否可参与业务。"
-      },
-      {
-        "fieldName": "创建时间",
-        "fieldType": "日期时间",
-        "fieldLength": "20",
-        "required": "否",
-        "example": "2026-05-25 10:20",
-        "description": "创建或最近更新时间。"
-      },
-      {
-        "fieldName": "操作",
-        "fieldType": "操作按钮组",
-        "fieldLength": "-",
-        "required": "否",
-        "example": "查看/编辑/停用/更多",
-        "description": "行内操作入口。"
-      }
-    ],
-    "paginationRequirement": [
-      "列表默认按所属仓库和排序升序展示。",
-      "分页区需展示总条数、当前页码、上一页、下一页、页码快速切换。",
-      "翻页后保留当前查询条件。",
-      "当查询结果为空时，列表区展示空态提示。"
-    ],
-    "formFields": [
-      {
-        "fieldName": "所属仓库",
-        "fieldType": "下拉单选",
-        "fieldLength": "30",
-        "required": "是",
-        "example": "吉隆坡中心仓",
-        "description": "仅可选状态为启用的仓库。"
-      },
-      {
-        "fieldName": "库区编码",
-        "fieldType": "文本/系统生成",
-        "fieldLength": "20",
-        "required": "否",
-        "example": "Z-01",
-        "description": "新建时系统生成，编辑时回显。"
-      },
-      {
-        "fieldName": "库区名称",
-        "fieldType": "单行输入框",
-        "fieldLength": "50",
-        "required": "是",
-        "example": "一层备货区",
-        "description": "库区正式名称。"
-      },
-      {
-        "fieldName": "库区类型",
-        "fieldType": "下拉单选",
-        "fieldLength": "20",
-        "required": "是",
-        "example": "备货区",
-        "description": "选择当前库区业务类型。"
-      },
-      {
-        "fieldName": "楼层",
-        "fieldType": "单行输入框",
-        "fieldLength": "10",
-        "required": "否",
-        "example": "1F",
-        "description": "库区所在楼层。"
-      },
-      {
-        "fieldName": "面积(㎡)",
-        "fieldType": "单行输入框",
-        "fieldLength": "10",
-        "required": "否",
-        "example": "1800",
-        "description": "库区面积。"
-      },
-      {
-        "fieldName": "排序",
-        "fieldType": "单行输入框",
-        "fieldLength": "10",
-        "required": "是",
-        "example": "30",
-        "description": "同仓库下库区显示顺序。"
-      },
-      {
-        "fieldName": "状态",
-        "fieldType": "下拉单选",
-        "fieldLength": "10",
-        "required": "是",
-        "example": "启用",
-        "description": "设置库区是否可用。"
-      },
-      {
-        "fieldName": "通道名称",
-        "fieldType": "单行输入框",
-        "fieldLength": "30",
-        "required": "是",
-        "example": "A 通道",
-        "description": "库区下辖通道列表，支持多行维护。"
-      },
-      {
-        "fieldName": "列",
-        "fieldType": "单行输入框",
-        "fieldLength": "10",
-        "required": "否",
-        "example": "8",
-        "description": "通道默认列数。"
-      },
-      {
-        "fieldName": "排",
-        "fieldType": "单行输入框",
-        "fieldLength": "10",
-        "required": "否",
-        "example": "6",
-        "description": "通道默认排数。"
-      },
-      {
-        "fieldName": "列范围",
-        "fieldType": "单行输入框",
-        "fieldLength": "20",
-        "required": "否",
-        "example": "01-08",
-        "description": "通道内列编号范围。"
-      },
-      {
-        "fieldName": "排范围",
-        "fieldType": "单行输入框",
-        "fieldLength": "20",
-        "required": "否",
-        "example": "01-06",
-        "description": "通道内排编号范围。"
-      },
-      {
-        "fieldName": "库存自动精确更新",
-        "fieldType": "勾选框",
-        "fieldLength": "-",
-        "required": "否",
-        "example": "已勾选",
-        "description": "勾选后该库区货位库存按作业实时更新。"
-      },
-      {
-        "fieldName": "只允许一单一位",
-        "fieldType": "勾选框",
-        "fieldLength": "-",
-        "required": "否",
-        "example": "已勾选",
-        "description": "勾选后一个货位仅承载一个订单或任务。"
-      },
-      {
-        "fieldName": "备注",
-        "fieldType": "多行输入框",
-        "fieldLength": "500",
-        "required": "否",
-        "example": "用于高频拣选作业",
-        "description": "补充说明。"
-      }
-    ],
-    "formActions": [
-      "保存：校验必填项和重复编码/名称后提交保存，保存成功后关闭抽屉并刷新列表。",
-      "取消：关闭抽屉；如存在未保存修改，建议增加二次确认提示。",
-      "关闭：点击右上角关闭或遮罩空白处时关闭抽屉，但点击抽屉内部不应误关闭。",
-      "启用/停用：弹出居中确认弹框，确认后切换状态。"
-    ],
-    "keyRules": [
-      "列表默认按“所属仓库 + 排序”升序展示，分页区展示总条数、页码、上一页、下一页。",
-      "翻页后保留当前查询条件。",
-      "当前筛选结果为空时，展示空态提示。",
-      "页面初始查询条件中“状态”默认选中“启用”。",
-      "点击“新建库区”打开新建抽屉；点击“查看/编辑”打开对应模式抽屉。",
-      "新建/编辑抽屉中“所属仓库”在编辑模式下默认不可修改，避免造成库区下挂数据归属错乱。",
-      "同一仓库下“库区名称”和“库区编码”均不可重复。",
-      "下辖通道支持新增/删除行，行内编辑；保存时若通道名称重复，提示错误并定位到第一条冲突行。",
-      "点击抽屉右上角关闭、取消、遮罩空白处时关闭抽屉；点击抽屉内部非关闭区域不应误关闭。",
-      "点击“保存”时校验必填字段，保存成功后关闭抽屉并刷新列表。",
-      "点击“启用/停用”时弹出居中确认框，确认后切换状态。",
-      "库区被停用后，其下辖货位的可用性由货位侧规则继续控制，本页面不级联修改。"
-    ],
-    "statusRules": [
-      {
-        "status": "启用",
-        "meaning": "库区可参与业务",
-        "rule": "可在货位、上架、拣选、盘点等业务中被引用"
-      },
-      {
-        "status": "停用",
-        "meaning": "库区不可参与新业务",
-        "rule": "默认不出现在新增可选范围内，历史数据保留，已有任务可继续完成"
-      }
-    ]
-  },
   "location": {
     "title": "货位管理简易需求文档",
-    "businessDescription": "维护库区下的货位主数据，支持货位查询、查看、新建、编辑、启停及容量与上下架规则配置，作为上架、拣选、补货、盘点、移库等业务的最小存放单位。",
+    "businessDescription": "维护库房下的货位主数据，支持货位查询、查看、新建、编辑、启停及容量与上下架规则配置，作为上架、拣选、补货、盘点、移库等业务的最小存放单位。",
     "rolePermissions": [
       {
         "roleType": "管理角色",
@@ -2194,7 +1879,7 @@
         "roleType": "管理角色",
         "role": "仓内主管",
         "actionPermission": "查询、查看、导出",
-        "dataPermission": "可查看所属仓库/库区下的货位数据",
+        "dataPermission": "可查看所属仓库下的货位数据",
         "description": "以查看和现场管理协同为主，不直接维护主数据"
       },
       {
@@ -2206,7 +1891,7 @@
       }
     ],
     "featureDescription": [
-      "支持按所属仓库、所属库区、货位类型、货位编码、使用状态查询货位。",
+      "支持按所属仓库、货位类型、货位编码、使用状态查询货位。",
       "支持查看货位列表及分页浏览。",
       "支持新建、编辑、查看货位详情。",
       "支持单个货位启用/停用。",
@@ -2218,12 +1903,6 @@
         "fieldType": "下拉单选",
         "queryMethod": "精确筛选",
         "placeholder": "请选择所属仓库"
-      },
-      {
-        "fieldName": "所属库区",
-        "fieldType": "下拉单选",
-        "queryMethod": "精确筛选",
-        "placeholder": "请选择所属库区"
       },
       {
         "fieldName": "货位类型",
@@ -2252,14 +1931,6 @@
         "required": "是",
         "example": "吉隆坡中心仓",
         "description": "货位所属仓库。"
-      },
-      {
-        "fieldName": "库区",
-        "fieldType": "文本",
-        "fieldLength": "30",
-        "required": "是",
-        "example": "一层备货区",
-        "description": "货位所属库区。"
       },
       {
         "fieldName": "货位类型",
@@ -2291,7 +1962,7 @@
         "fieldLength": "10",
         "required": "是",
         "example": "90",
-        "description": "同库区内货位显示顺序，数值越大越靠前。"
+        "description": "同库房内货位显示顺序，数值越大越靠前。"
       },
       {
         "fieldName": "通道",
@@ -2367,7 +2038,7 @@
       }
     ],
     "paginationRequirement": [
-      "列表默认按所属仓库顺序、所属库区排序值倒序、货位排序值倒序展示。",
+      "列表默认按所属仓库顺序、货位排序值倒序展示。",
       "分页区需展示总条数、当前页码、上一页、下一页、页码快速切换。",
       "翻页后保留当前查询条件。",
       "当查询结果为空时，列表区展示空态提示。"
@@ -2380,14 +2051,6 @@
         "required": "是",
         "example": "吉隆坡中心仓",
         "description": "仅可选状态为启用的仓库。"
-      },
-      {
-        "fieldName": "所属库区",
-        "fieldType": "下拉单选",
-        "fieldLength": "30",
-        "required": "是",
-        "example": "一层备货区",
-        "description": "仅可选所选仓库下状态为启用的库区。"
       },
       {
         "fieldName": "货位编码",
@@ -2459,7 +2122,7 @@
         "fieldLength": "10",
         "required": "是",
         "example": "90",
-        "description": "同仓库、同库区下按排序值倒序展示，数值越大越靠前。"
+        "description": "同仓库、同库房下按排序值倒序展示，数值越大越靠前。"
       },
       {
         "fieldName": "使用状态",
@@ -2558,11 +2221,10 @@
       "删除：占用或锁定状态下不允许删除，需先解除占用或锁定。"
     ],
     "keyRules": [
-      "列表默认按“所属仓库顺序 + 所属库区排序值倒序 + 货位排序值倒序”展示，分页区展示总条数、页码、上一页、下一页。",
+      "列表默认按“所属仓库顺序 + 货位排序值倒序”展示，分页区展示总条数、页码、上一页、下一页。",
       "翻页后保留当前查询条件。",
       "当前筛选结果为空时，展示空态提示。",
-      "抽屉中“所属仓库”切换后联动可选“所属库区”范围。",
-      "同一库区下“货位编码”不可重复。",
+      "同一库房下“货位编码”不可重复。",
       "上下架规则中“禁止批次混放”“禁止生产年限货”“货主限定”可独立勾选/选择。",
       "容量字段（重量/数量/体积/尺寸）允许为空，但填写后必须为大于 0 的数字。",
       "点击抽屉右上角关闭、取消、遮罩空白处时关闭抽屉；点击抽屉内部非关闭区域不应误关闭。",

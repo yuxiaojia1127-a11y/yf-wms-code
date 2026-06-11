@@ -275,6 +275,10 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
 .cascade-item:hover{background:rgba(0,171,149,0.07);}
 .cascade-item.active{background:rgba(0,171,149,0.10);color:var(--accent);}
 .cascade-divider{height:1px;background:rgba(29,29,31,0.07);margin:4px 0;}
+/* 三列并排级联：一级 | 二级 | 三级 */
+.cascade-cols{display:flex;align-items:stretch;}
+.cascade-col{min-width:150px;max-height:260px;overflow-y:auto;padding:4px 0;}
+.cascade-col+.cascade-col{border-left:1px solid rgba(29,29,31,0.07);}
 .cascade-search{padding:8px 10px 6px;}
 .cascade-search input{height:34px;border-radius:10px;width:100%;}
 .cascade-empty{padding:14px;text-align:center;color:var(--muted);font-size:12px;}
@@ -383,10 +387,10 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
         <div class="cascade-panel" id="cascade-panel" onclick="event.stopPropagation()">
           <div class="cascade-search"><input type="text" class="filter-ctrl" id="casc-search" placeholder="搜索分类关键词" autocomplete="off" oninput="cascSearch(this.value)"/></div>
           <div id="casc-flat" style="display:none;"></div>
-          <div id="casc-levels">
-            <div id="casc-l1"></div>
-            <div id="casc-l2" style="display:none;"><div class="cascade-divider"></div></div>
-            <div id="casc-l3" style="display:none;"><div class="cascade-divider"></div></div>
+          <div class="cascade-cols" id="casc-levels">
+            <div class="cascade-col" id="casc-l1"></div>
+            <div class="cascade-col" id="casc-l2" style="display:none;"></div>
+            <div class="cascade-col" id="casc-l3" style="display:none;"></div>
           </div>
         </div>
       </div>
@@ -511,7 +515,6 @@ thead th:last-child,tbody td:last-child{border-left:1px solid rgba(29,29,31,0.07
         <div class="drawer-field"><span class="drawer-field-label">发生时间</span><span class="drawer-field-value" id="d-time">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">仓库</span><span class="drawer-field-value" id="d-warehouse">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">库房</span><span class="drawer-field-value" id="d-room">—</span></div>
-        <div class="drawer-field"><span class="drawer-field-label">库区</span><span class="drawer-field-value" id="d-zone">—</span></div>
         <div class="drawer-field"><span class="drawer-field-label">货位</span><span class="drawer-field-value" id="d-loc">—</span></div>
       </div>
     </div>
@@ -677,7 +680,7 @@ function flatCats(){
 function cascSearch(kw){
   const flat=document.getElementById('casc-flat'),levels=document.getElementById('casc-levels');
   const k=(kw||'').trim().toLowerCase();
-  if(!k){flat.style.display='none';levels.style.display='block';return;}
+  if(!k){flat.style.display='none';levels.style.display='';return;}
   const hits=flatCats().filter(p=>p.toLowerCase().includes(k));
   flat.innerHTML=hits.length
     ?hits.map(p=>`<div class="cascade-item" onclick="event.stopPropagation();setCascVal('${p}');document.getElementById('cascade-panel').style.display='none';">${p}</div>`).join('')
@@ -783,7 +786,6 @@ const SKUS=[
 const WHS=['1号仓库','2号仓库','华南仓'];
 const ROOMS={'1号仓库':['常温主库','冷藏专区'],'2号仓库':['综合库房'],'华南仓':['主库房']};
 const OPS=['张三','李四','王五','赵六'];
-const ZONES=['A区','B区','C区'];
 const LOCS=['A-01-01','A-02-03','B-01-02','C-02-01'];
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(a){return a[rnd(0,a.length-1)];}
@@ -804,7 +806,7 @@ function genRow(i,daysAgo){
     refType:isSales?'销售订单':'-',
     batch:rnd(0,3)>0?'BN-'+nd+'-'+pad2(rnd(1,20)):'-',
     qty,
-    op:isSales?'系统':pick(OPS), zone:pick(ZONES), loc:pick(LOCS),
+    op:isSales?'系统':pick(OPS), loc:pick(LOCS),
     remark:rnd(0,5)===0?'客户急单':rnd(0,5)===1?'批量操作':'-',
   };
 }
@@ -908,7 +910,6 @@ function openDrawer(idx){
   document.getElementById('d-time').textContent=r.time;
   document.getElementById('d-warehouse').textContent=r.warehouse;
   document.getElementById('d-room').textContent=r.room||'--';
-  document.getElementById('d-zone').textContent=r.zone;
   document.getElementById('d-loc').textContent=r.loc;
   document.getElementById('d-sku-name').textContent=r.sku.name;
   document.getElementById('d-sku-code').textContent=r.sku.code;
