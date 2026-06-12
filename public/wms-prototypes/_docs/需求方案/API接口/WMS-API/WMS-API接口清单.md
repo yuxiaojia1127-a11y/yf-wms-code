@@ -94,7 +94,7 @@
 | API 名称   | 方法     | 建议路径                                      | 用途                | 优先级 |
 | -------- | ------ | ----------------------------------------- | ----------------- | --- |
 | 查询库存汇总   | `GET`  | `/openapi/v1/inventory/summary`           | 查询 SKU 维度库存汇总     | P0  |
-| 查询库存明细   | `GET`  | `/openapi/v1/inventory/details`           | 查询仓库、库区、货位、批次维度库存 | P0  |
+| 查询库存明细   | `GET`  | `/openapi/v1/inventory/details`           | 查询仓库、货位、批次维度库存 | P0  |
 | 查询可用库存   | `GET`  | `/openapi/v1/inventory/available`         | 查询可用于发货的库存        | P0  |
 | 查询规则可售库存 | `POST` | `/openapi/v1/inventory/rule-saleable/query` | 按渠道、履约规则和仓配路由查询 SKU 可售库存 | P0  |
 | 查询批次库存   | `GET`  | `/openapi/v1/inventory/batches`           | 查询批次库存            | P0  |

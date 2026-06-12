@@ -269,7 +269,7 @@
       enabled.has("shipping_redispatch") ||
       enabled.has("shipping_wait_order") ||
       enabled.has("shipping_accepted") ||
-      enabled.has("shipping_picked") ||
+      enabled.has("shipping_exception") ||
       enabled.has("shipping_delivering") ||
       enabled.has("shipping_delivered_today")
     ) {
@@ -281,10 +281,10 @@
           </div>
           <div class="replica-metric-grid cols-4">
             ${metricItem("shipping_pending", t.metrics.shipping_pending, getCount(counts, "shipping_pending"))}
-            ${metricItem("shipping_redispatch", t.metrics.shipping_redispatch, getCount(counts, "shipping_redispatch"))}
             ${metricItem("shipping_wait_order", t.metrics.shipping_wait_order, getCount(counts, "shipping_wait_order"))}
+            ${metricItem("shipping_redispatch", t.metrics.shipping_redispatch, getCount(counts, "shipping_redispatch"))}
+            ${metricItem("shipping_exception", t.metrics.shipping_exception, getCount(counts, "shipping_exception"))}
             ${metricItem("shipping_accepted", t.metrics.shipping_accepted, getCount(counts, "shipping_accepted"))}
-            ${metricItem("shipping_picked", t.metrics.shipping_picked, getCount(counts, "shipping_picked"))}
             ${metricItem("shipping_delivering", t.metrics.shipping_delivering, getCount(counts, "shipping_delivering"))}
             ${metricItem("shipping_delivered_today", t.metrics.shipping_delivered_today, getCount(counts, "shipping_delivered_today"))}
           </div>

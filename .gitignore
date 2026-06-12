@@ -38,3 +38,4 @@ public/wms-prototypes/_docs/**/*.zip
 
 # 历史重写前的安全备份（确认无误后可删除）
 .git-backup-pre-rewrite.bundle
+.fuse_hidden*
