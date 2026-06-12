@@ -3736,18 +3736,89 @@ const menuData = [
       `;
     }
 
+    /* ─── 接口上下架日志 级联分类 ─── */
+    const LOG_CATS = [
+      {id:'c1',name:'日化',ch:[
+        {id:'c11',name:'洗护',ch:[{id:'c111',name:'洗衣液'},{id:'c112',name:'洗发水'},{id:'c113',name:'沐浴露'}]},
+        {id:'c12',name:'清洁',ch:[{id:'c121',name:'洗洁精'},{id:'c122',name:'消毒液'}]},
+        {id:'c13',name:'护肤',ch:[{id:'c131',name:'面霜'},{id:'c132',name:'精华'}]}]},
+      {id:'c2',name:'食品',ch:[
+        {id:'c21',name:'零食',ch:[{id:'c211',name:'饼干'},{id:'c212',name:'糖果'},{id:'c213',name:'坚果'}]},
+        {id:'c22',name:'饮料',ch:[{id:'c221',name:'碳酸饮料'},{id:'c222',name:'茶饮'}]},
+        {id:'c23',name:'冲调',ch:[{id:'c231',name:'咖啡'},{id:'c232',name:'奶粉'}]}]},
+      {id:'c3',name:'家居',ch:[
+        {id:'c31',name:'厨具',ch:[{id:'c311',name:'锅具'},{id:'c312',name:'刀具'}]},
+        {id:'c32',name:'床品',ch:[{id:'c321',name:'被芯'},{id:'c322',name:'枕头'}]}]}
+    ];
+    let logCascSel={l1:null,l2:null,l3:null}, logCascPath='';
+    function logCascFlat(){const o=[];(function w(ns,p){ns.forEach(n=>{const np=p?p+' > '+n.name:n.name;o.push(np);if(n.ch)w(n.ch,np);});})(LOG_CATS,'');return o;}
+    function logCascSearch(kw){
+      const flat=document.getElementById('log-casc-flat'),levels=document.getElementById('log-casc-levels');
+      if(!flat||!levels)return;
+      const k=(kw||'').trim().toLowerCase();
+      if(!k){flat.style.display='none';levels.style.display='';return;}
+      const hits=logCascFlat().filter(p=>p.toLowerCase().includes(k));
+      const IS='padding:7px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;border-radius:6px;';
+      flat.innerHTML=hits.length?hits.map(p=>`<div style="${IS}" onmouseover="this.style.background='rgba(0,171,149,0.07)'" onmouseout="this.style.background=''" onclick="event.stopPropagation();logCascSetVal('${p.replace(/'/g,"\\'")}');document.getElementById('log-casc-panel').style.display='none';">${p}</div>`).join(''):`<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;">无匹配分类</div>`;
+      flat.style.display='block';levels.style.display='none';
+    }
+    function logCascBuildL(elId,items,level,parentPath){
+      const el=document.getElementById(elId);if(!el)return;el.innerHTML='';
+      const IS='padding:7px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:6px;';
+      items.forEach(c=>{
+        const d=document.createElement('div');
+        const active=logCascSel['l'+level]===c.id;
+        d.style.cssText=IS+(active?'background:rgba(0,171,149,0.10);color:var(--accent);':'color:var(--text);');
+        d.innerHTML=`<span>${c.name}</span>${c.ch?'<span style="font-size:10px;opacity:.45;">▶</span>':''}`;
+        d.onmouseover=()=>{if(!active)d.style.background='rgba(0,171,149,0.07)';};
+        d.onmouseout=()=>{if(!active)d.style.background='';};
+        d.onclick=(e)=>{e.stopPropagation();logCascSelect(c,level,parentPath);};
+        el.appendChild(d);
+      });
+    }
+    function logCascSelect(c,level,parentPath){
+      const path=parentPath?parentPath+' > '+c.name:c.name;
+      logCascSel['l'+level]=c.id;
+      if(level===1){logCascSel.l2=null;logCascSel.l3=null;}
+      if(level===2){logCascSel.l3=null;}
+      logCascSetVal(path);
+      if(c.ch&&c.ch.length){
+        logCascBuildL('log-casc-l'+(level+1),c.ch,level+1,path);
+        const nl=document.getElementById('log-casc-l'+(level+1));if(nl)nl.style.display='block';
+        if(level<2){const l3=document.getElementById('log-casc-l3');if(l3)l3.style.display='none';}
+        logCascBuildL('log-casc-l'+level,level===1?LOG_CATS:(LOG_CATS.find(x=>x.id===logCascSel.l1)?.ch||[]),level,parentPath);
+      } else {
+        const p=document.getElementById('log-casc-panel');if(p)p.style.display='none';
+      }
+    }
+    function logCascSetVal(label){
+      const lbl=document.getElementById('log-casc-label');if(!lbl)return;
+      lbl.textContent=label;lbl.style.color='var(--text)';logCascPath=label;
+    }
+    function logCascToggle(e){
+      e.stopPropagation();
+      const panel=document.getElementById('log-casc-panel');if(!panel)return;
+      if(panel.style.display==='none'||!panel.style.display){
+        logCascBuildL('log-casc-l1',LOG_CATS,1,'');
+        ['log-casc-l2','log-casc-l3'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+        const inp=document.getElementById('log-casc-search');if(inp){inp.value='';logCascSearch('');}
+        panel.style.display='block';
+      } else { panel.style.display='none'; }
+    }
+    document.addEventListener('click',()=>{const p=document.getElementById('log-casc-panel');if(p)p.style.display='none';});
+
     /* ─── 接口上下架日志 Mock Data ─── */
     const listingLogRows = [
-      { id: 'LOG-001', triggeredAt: '2026-06-09 10:42:18', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '下架', event: '出库发货', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '成功', failReason: '' },
-      { id: 'LOG-002', triggeredAt: '2026-06-09 10:15:03', skuCode: 'EGG-30',      skuName: '鸡蛋 30 枚装',      category: '食品',   action: '上架', event: '入库上架', channel: '槟城门店',   stockBefore: 0,  stockAfter: 12, result: '成功', failReason: '' },
-      { id: 'LOG-003', triggeredAt: '2026-06-09 09:58:44', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '下架', event: '库存冻结', channel: '吉隆坡门店', stockBefore: 2,  stockAfter: 0,  result: '失败', failReason: 'SKU不存在于电商系统，请确认商品是否已同步' },
-      { id: 'LOG-004', triggeredAt: '2026-06-09 09:30:27', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '上架', event: '退货解冻', channel: '槟城门店',   stockBefore: 0,  stockAfter: 8,  result: '成功', failReason: '' },
-      { id: 'LOG-005', triggeredAt: '2026-06-09 08:51:11', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '下架', event: '库存调整', channel: '吉隆坡门店', stockBefore: 3,  stockAfter: 0,  result: '成功', failReason: '' },
-      { id: 'LOG-006', triggeredAt: '2026-06-08 17:22:39', skuCode: 'COLA-330',    skuName: '可乐 330ml',        category: '饮料',   action: '上架', event: '入库上架', channel: '槟城门店',   stockBefore: 0,  stockAfter: 24, result: '成功', failReason: '' },
-      { id: 'LOG-007', triggeredAt: '2026-06-08 16:04:55', skuCode: 'CHICKEN-1KG', skuName: '鸡胸肉 冷鲜 1kg',  category: '生鲜',   action: '下架', event: '出库发货', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '失败', failReason: '接口请求超时（5003ms > 5000ms），已触发重试，重试3次后仍失败' },
-      { id: 'LOG-008', triggeredAt: '2026-06-08 14:38:02', skuCode: 'MILK-250',    skuName: '牛奶 250ml',        category: '乳制品', action: '上架', event: '退货解冻', channel: '槟城门店',   stockBefore: 0,  stockAfter: 5,  result: '成功', failReason: '' },
-      { id: 'LOG-009', triggeredAt: '2026-06-08 11:19:28', skuCode: 'WATER-550',   skuName: '矿泉水 550ml',      category: '饮料',   action: '上架', event: '入库上架', channel: '吉隆坡门店', stockBefore: 0,  stockAfter: 36, result: '成功', failReason: '' },
-      { id: 'LOG-010', triggeredAt: '2026-06-07 15:44:17', skuCode: 'TISSUE-24',   skuName: '纸巾 家庭装 24 包', category: '生活用品', action: '下架', event: '出库发货', channel: '槟城门店',   stockBefore: 2,  stockAfter: 0,  result: '成功', failReason: '' }
+      { id: 'LOG-001', triggeredAt: '2026-06-09 10:42:18', skuCode: 'DETERGENT-2L',  skuName: '洗衣液 2L',        barcode: '6901234567890', category: '日化 > 洗护 > 洗衣液',   action: '下架', event: '销售出库', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-002', triggeredAt: '2026-06-09 10:15:03', skuCode: 'OREO-97G',       skuName: '奥利奥饼干 97g',   barcode: '6902265916978', category: '食品 > 零食 > 饼干',     action: '上架', event: '采购入库', channel: '槟城门店',   stockBefore: 0,  stockAfter: 36, result: '成功', failReason: '' },
+      { id: 'LOG-003', triggeredAt: '2026-06-09 09:58:44', skuCode: 'SERUM-30ML',     skuName: '护肤精华 30ml',    barcode: '6901234500001', category: '日化 > 护肤 > 精华',     action: '下架', event: '调拨出库', channel: '吉隆坡门店', stockBefore: 2,  stockAfter: 0,  result: '失败', failReason: 'SKU不存在于电商系统，请确认商品是否已同步' },
+      { id: 'LOG-004', triggeredAt: '2026-06-09 09:30:27', skuCode: 'SHAMPOO-400ML',  skuName: '洗发水 400ml',     barcode: '6901234567891', category: '日化 > 洗护 > 洗发水',   action: '上架', event: '退货入库', channel: '槟城门店',   stockBefore: 0,  stockAfter: 8,  result: '成功', failReason: '' },
+      { id: 'LOG-005', triggeredAt: '2026-06-09 08:51:11', skuCode: 'PAN-SS-32',      skuName: '不锈钢炒锅 32cm', barcode: '6901111222333', category: '家居 > 厨具 > 锅具',     action: '下架', event: '报损出库', channel: '吉隆坡门店', stockBefore: 3,  stockAfter: 0,  result: '成功', failReason: '' },
+      { id: 'LOG-006', triggeredAt: '2026-06-08 17:22:39', skuCode: 'COKE-330ML',     skuName: '可口可乐 330ml',   barcode: '6902083886448', category: '食品 > 饮料 > 碳酸饮料', action: '上架', event: '采购入库', channel: '槟城门店',   stockBefore: 0,  stockAfter: 24, result: '成功', failReason: '' },
+      { id: 'LOG-007', triggeredAt: '2026-06-08 16:04:55', skuCode: 'DETERGENT-2L',  skuName: '洗衣液 2L',        barcode: '6901234567890', category: '日化 > 洗护 > 洗衣液',   action: '下架', event: '其他出库', channel: '吉隆坡门店', stockBefore: 1,  stockAfter: 0,  result: '失败', failReason: '接口请求超时（5003ms > 5000ms），已触发重试，重试3次后仍失败' },
+      { id: 'LOG-008', triggeredAt: '2026-06-08 14:38:02', skuCode: 'OREO-97G',       skuName: '奥利奥饼干 97g',   barcode: '6902265916978', category: '食品 > 零食 > 饼干',     action: '上架', event: '调拨入库', channel: '槟城门店',   stockBefore: 0,  stockAfter: 5,  result: '成功', failReason: '' },
+      { id: 'LOG-009', triggeredAt: '2026-06-08 11:19:28', skuCode: 'SERUM-30ML',     skuName: '护肤精华 30ml',    barcode: '6901234500001', category: '日化 > 护肤 > 精华',     action: '上架', event: '其他入库', channel: '吉隆坡门店', stockBefore: 0,  stockAfter: 12, result: '成功', failReason: '' },
+      { id: 'LOG-010', triggeredAt: '2026-06-07 15:44:17', skuCode: 'SHAMPOO-400ML',  skuName: '洗发水 400ml',     barcode: '6901234567891', category: '日化 > 洗护 > 洗发水',   action: '下架', event: '销售出库', channel: '槟城门店',   stockBefore: 2,  stockAfter: 0,  result: '成功', failReason: '' }
     ];
 
     function getListingLogById(id) {
@@ -3774,14 +3845,25 @@ const menuData = [
 
             <div class="surface-controls">
               <div class="filters-row is-quarter">
-                <select class="filter-ctrl">
-                  <option selected>全部所属分类</option>
-                  <option>饮料</option>
-                  <option>乳制品</option>
-                  <option>生活用品</option>
-                  <option>食品</option>
-                  <option>生鲜</option>
-                </select>
+                <div class="filter-ctrl" style="position:relative;padding:0;overflow:visible;" onclick="logCascToggle(event)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 12px;cursor:pointer;gap:6px;">
+                    <span id="log-casc-label" style="font-size:13px;color:var(--subtext);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">全部所属分类</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" style="flex-shrink:0;"><path d="M2 4l4 4 4-4"/></svg>
+                  </div>
+                  <div id="log-casc-panel" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:300;background:#fff;border:1px solid rgba(29,29,31,0.10);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.10);min-width:220px;overflow:hidden;" onclick="event.stopPropagation()">
+                    <div style="padding:8px 10px 6px;">
+                      <input id="log-casc-search" type="text" class="filter-ctrl" placeholder="搜索分类关键词" autocomplete="off"
+                             style="height:34px;border-radius:10px;width:100%;box-sizing:border-box;"
+                             oninput="logCascSearch(this.value)" onclick="event.stopPropagation()" />
+                    </div>
+                    <div id="log-casc-flat" style="display:none;max-height:220px;overflow-y:auto;padding:4px 0;"></div>
+                    <div id="log-casc-levels" style="display:flex;align-items:stretch;">
+                      <div id="log-casc-l1" style="min-width:120px;max-height:240px;overflow-y:auto;padding:4px 0;border-right:1px solid rgba(29,29,31,0.07);"></div>
+                      <div id="log-casc-l2" style="display:none;min-width:110px;max-height:240px;overflow-y:auto;padding:4px 0;border-right:1px solid rgba(29,29,31,0.07);"></div>
+                      <div id="log-casc-l3" style="display:none;min-width:100px;max-height:240px;overflow-y:auto;padding:4px 0;"></div>
+                    </div>
+                  </div>
+                </div>
                 <input class="filter-ctrl" type="text" placeholder="请输入 SKU 编码" />
                 <select class="filter-ctrl">
                   <option selected>全部上下架动作</option>
@@ -3790,11 +3872,18 @@ const menuData = [
                 </select>
                 <select class="filter-ctrl">
                   <option selected>全部触发事件</option>
-                  <option>入库上架</option>
-                  <option>退货解冻</option>
-                  <option>出库发货</option>
-                  <option>库存调整</option>
-                  <option>库存冻结</option>
+                  <optgroup label="入库（触发上架）">
+                    <option>采购入库</option>
+                    <option>退货入库</option>
+                    <option>调拨入库</option>
+                    <option>其他入库</option>
+                  </optgroup>
+                  <optgroup label="出库（触发下架）">
+                    <option>销售出库</option>
+                    <option>调拨出库</option>
+                    <option>报损出库</option>
+                    <option>其他出库</option>
+                  </optgroup>
                 </select>
               </div>
               <div class="filters-row is-quarter">
@@ -3873,13 +3962,13 @@ const menuData = [
                   <thead>
                     <tr>
                       <th style="width:148px;">触发时间</th>
-                      <th style="width:110px;">SKU编码</th>
-                      <th style="min-width:140px;">SKU名称</th>
-                      <th style="width:88px;">所属分类</th>
+                      <th style="min-width:180px;">商品信息</th>
+                      <th style="width:140px;">条码</th>
+                      <th style="min-width:140px;">所属分类</th>
                       <th style="width:80px;">上下架动作</th>
                       <th style="width:96px;">触发事件</th>
                       <th style="width:120px;">关联渠道</th>
-                      <th style="width:96px;">触发时可售库存</th>
+                      <th style="width:80px;">触发时可售库存</th>
                       <th style="width:72px;">调用结果</th>
                       <th style="min-width:160px;">失败原因</th>
                       <th style="width:72px;text-align:right;">操作</th>
@@ -3889,9 +3978,12 @@ const menuData = [
                     ${rows.map((row) => `
                       <tr style="${row.result === '失败' ? 'background: rgba(217,45,32,0.035);' : ''}${listingLogDetailId === row.id ? 'background: rgba(0,171,149,0.06);' : ''}">
                         <td style="font-size:12px;color:var(--subtext);">${row.triggeredAt}</td>
-                        <td><span class="product-cell-text" style="font-size:12px;font-family:monospace;">${row.skuCode}</span></td>
-                        <td><div style="font-size:13px;font-weight:500;">${row.skuName}</div></td>
-                        <td><span class="status-pill neutral">${row.category}</span></td>
+                        <td>
+                          <div style="font-size:13px;font-weight:500;line-height:1.3;">${row.skuName}</div>
+                          <div style="font-size:11px;color:var(--muted);font-family:monospace;margin-top:2px;">${row.skuCode}</div>
+                        </td>
+                        <td style="font-size:12px;font-family:monospace;color:var(--subtext);">${row.barcode}</td>
+                        <td style="font-size:12px;color:var(--subtext);">${row.category}</td>
                         <td><span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span></td>
                         <td><span style="font-size:12px;color:var(--subtext);">${row.event}</span></td>
                         <td><span style="font-size:12px;">${row.channel}</span></td>
@@ -3963,9 +4055,10 @@ const menuData = [
                 <div class="section-head"><h3 class="section-title" style="font-size:16px;">基本信息</h3></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;">
                   ${[
+                    ['商品名称', row.skuName],
                     ['SKU编码', `<span style="font-family:monospace;font-size:13px;">${row.skuCode}</span>`],
-                    ['SKU名称', row.skuName],
-                    ['所属分类', `<span class="status-pill neutral">${row.category}</span>`],
+                    ['条码', `<span style="font-family:monospace;font-size:13px;">${row.barcode}</span>`],
+                    ['所属分类', row.category],
                     ['上下架动作', `<span class="status-pill ${row.action === '上架' ? 'on' : 'warning'}">${row.action}</span>`],
                     ['触发事件', row.event],
                     ['关联渠道', row.channel],
