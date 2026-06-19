@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>完成揽货</title>
+<style>
+/* ── Design Tokens ── */
+:root{
+  --app-primary:#43B8A8;
+  --app-primary-press:#2FAE9D;
+  --app-warning:#D99A19;
+  --app-danger:#E85B4A;
+  --app-text:#1F2329;
+  --app-text-secondary:#646A73;
+  --app-text-muted:#8F959E;
+  --app-bg:#F5F7F8;
+  --app-bg-soft:#F7F8FA;
+  --app-card:#FFFFFF;
+  --app-border:#E8EAEC;
+  --app-scan-btn:#1F2329;
+  --radius-card:12px;
+  --radius-btn:22px;
+  --radius-tag:6px;
+  --bottom-bar-h:56px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+
+/* ── Reset ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;
+  background:var(--app-bg);color:var(--app-text);font-size:14px;line-height:1.5;}
+
+/* ── Phone frame ── */
+.phone-frame{
+  width:375px;min-height:100vh;margin:0 auto;
+  background:var(--app-bg);position:relative;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ── Nav bar ── */
+.nav-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  height:44px;padding:0 16px;background:var(--app-card);
+  border-bottom:1px solid var(--app-border);flex-shrink:0;position:relative;
+  z-index:10;
+}
+.nav-back{display:flex;align-items:center;gap:4px;color:var(--app-text);
+  font-size:14px;cursor:pointer;min-width:60px;}
+.nav-back svg{width:18px;height:18px;}
+.nav-title{position:absolute;left:50%;transform:translateX(-50%);
+  font-size:16px;font-weight:600;white-space:nowrap;}
+.lang-btn{font-size:12px;color:var(--app-primary);cursor:pointer;
+  border:1px solid var(--app-primary);border-radius:4px;padding:2px 6px;}
+
+/* ── Scroll content ── */
+.scroll-content{
+  flex:1;overflow-y:auto;padding-bottom:calc(var(--bottom-bar-h) + var(--safe-bottom) + 24px);
+}
+
+/* ── Status banner ── */
+.status-banner{
+  background:var(--app-card);padding:12px 16px 14px;
+  border-bottom:1px solid var(--app-border);
+}
+.status-title{font-size:18px;font-weight:700;color:var(--app-text);margin-bottom:6px;}
+.status-meta{display:flex;flex-wrap:wrap;gap:6px 16px;}
+.meta-item{font-size:12px;color:var(--app-text-secondary);}
+.meta-item span{color:var(--app-text);font-weight:500;}
+
+/* ── Section card ── */
+.section-card{background:var(--app-card);margin:8px 12px;border-radius:var(--radius-card);
+  padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.section-title{font-size:13px;font-weight:600;color:var(--app-text-secondary);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.section-title-icon{width:3px;height:13px;background:var(--app-primary);border-radius:2px;display:inline-block;}
+
+/* ── Info rows ── */
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;
+  font-size:12px;padding:3px 0;}
+.info-label{color:var(--app-text-secondary);flex-shrink:0;margin-right:8px;}
+.info-value{color:var(--app-text);text-align:right;word-break:break-all;}
+
+/* ── Expand toggle ── */
+.expand-toggle{display:flex;align-items:center;justify-content:center;gap:4px;
+  font-size:12px;color:var(--app-primary);cursor:pointer;padding-top:8px;margin-top:8px;
+  border-top:1px solid var(--app-border);}
+.expand-toggle svg{width:14px;height:14px;transition:transform .2s;}
+.expand-toggle.open svg{transform:rotate(180deg);}
+.expand-extra{display:none;}
+.expand-extra.open{display:block;}
+
+/* ── Goods section ── */
+.goods-section{margin:8px 12px;}
+.goods-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;
+}
+.goods-title{font-size:14px;font-weight:600;color:var(--app-text);}
+.goods-count{font-size:13px;color:var(--app-text-secondary);font-weight:400;}
+
+/* 整单揽货标记按钮 */
+.whole-order-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;color:var(--app-warning);
+  background:rgba(217,154,25,.1);border:1px solid rgba(217,154,25,.3);
+  border-radius:20px;padding:3px 10px;cursor:pointer;white-space:nowrap;
+}
+.whole-order-btn.done{
+  color:var(--app-text-muted);background:#F0F1F2;border-color:var(--app-border);cursor:default;
+}
+
+/* ── Batch label ── */
+.batch-label{
+  font-size:12px;color:var(--app-text-secondary);padding:4px 0 8px;
+}
+.batch-label em{color:var(--app-primary);font-style:normal;font-weight:600;}
+
+/* ── SKU item ── */
+.sku-item{
+  background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:8px;
+}
+
+/* 货位 + 条码 标签行 */
+.sku-loc-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.loc-tag,.barcode-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:11px;color:var(--app-text-secondary);
+  background:var(--app-card);border-radius:4px;padding:2px 6px;
+  border:1px solid var(--app-border);
+}
+.loc-tag svg,.barcode-tag svg{width:12px;height:12px;color:var(--app-primary);}
+
+/* 商品主体行 */
+.sku-main{display:flex;gap:10px;margin-bottom:10px;}
+.sku-img{width:56px;height:56px;border-radius:6px;object-fit:cover;
+  background:#E8EAEC;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--app-text-muted);}
+.sku-info{flex:1;min-width:0;}
+.sku-name{font-size:13px;font-weight:500;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:3px;}
+.sku-spec{font-size:11px;color:var(--app-text-muted);margin-bottom:4px;}
+.sku-prices{display:flex;align-items:center;gap:8px;}
+.sku-price{font-size:13px;font-weight:600;color:var(--app-danger);}
+.sku-cost{font-size:12px;color:var(--app-text-secondary);}
+.sku-qty-tag{margin-left:auto;font-size:13px;font-weight:700;color:var(--app-danger);}
+
+/* 操作按钮组 */
+.sku-ops{display:flex;gap:6px;margin-bottom:10px;}
+.op-btn{
+  flex:1;height:28px;border-radius:var(--radius-tag);border:1px solid var(--app-border);
+  background:var(--app-card);color:var(--app-text);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.op-btn.active{background:var(--app-primary);border-color:var(--app-primary);color:#fff;}
+
+/* 步进行 */
+.sku-stepper{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--app-text-secondary);}
+.stepper-wrap{display:flex;align-items:center;gap:0;}
+.step-btn{
+  width:28px;height:28px;border-radius:50%;border:1px solid var(--app-border);
+  background:var(--app-card);color:var(--app-text);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.step-val{width:32px;text-align:center;font-size:14px;font-weight:600;color:var(--app-text);}
+.return-qty{font-size:12px;color:var(--app-warning);font-weight:500;margin-left:8px;}
+
+/* 换货展开区 */
+.exchange-zone{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--app-border);}
+.exchange-zone.open{display:block;}
+.exchange-hint{font-size:12px;color:var(--app-warning);margin-bottom:8px;}
+.exchange-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--app-card);border-radius:6px;padding:7px 8px;
+  margin-bottom:6px;font-size:12px;
+}
+.exchange-item-info{flex:1;min-width:0;}
+.exchange-item-code{color:var(--app-text-muted);font-size:11px;margin-bottom:1px;}
+.exchange-item-name{color:var(--app-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exchange-item-qty{color:var(--app-text-secondary);flex-shrink:0;margin:0 4px;}
+.exchange-item-del{color:var(--app-text-muted);cursor:pointer;font-size:16px;padding:2px 4px;}
+.scan-exchange-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;color:var(--app-primary);
+  border:1px solid var(--app-primary);background:transparent;
+  border-radius:20px;padding:4px 12px;cursor:pointer;margin-top:4px;
+}
+
+/* ── Bottom bar ── */
+.bottom-bar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:375px;height:calc(var(--bottom-bar-h) + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:var(--app-card);border-top:1px solid var(--app-border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding-left:16px;padding-right:16px;z-index:20;
+}
+.bar-assign{
+  height:36px;padding:0 14px;border-radius:20px;
+  border:1px solid var(--app-border);background:var(--app-bg);
+  color:var(--app-text);font-size:13px;cursor:pointer;
+}
+.bar-scan{
+  width:48px;height:48px;border-radius:50%;background:var(--app-scan-btn);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;top:-8px;cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.bar-scan svg{width:24px;height:24px;color:#fff;}
+.bar-finish{
+  height:40px;padding:0 18px;border-radius:var(--radius-btn);
+  background:var(--app-primary);color:#fff;font-size:14px;font-weight:500;
+  border:none;cursor:pointer;
+}
+.bar-finish:active{background:var(--app-primary-press);}
+
+/* ── Modals ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:100;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  width:300px;background:var(--app-card);border-radius:16px;
+  padding:20px 20px 16px;
+}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:10px;color:var(--app-text);}
+.modal-title.danger{color:var(--app-danger);}
+.modal-body{font-size:12px;color:var(--app-text-secondary);line-height:1.7;margin-bottom:18px;}
+.modal-footer{display:flex;gap:10px;}
+.modal-footer button{flex:1;height:36px;border-radius:20px;font-size:13px;cursor:pointer;border:none;}
+.modal-cancel{background:var(--app-bg);color:var(--app-text);}
+.modal-confirm{background:var(--app-primary);color:#fff;}
+
+/* ── Delivery tags ── */
+.delivery-tags{display:flex;align-items:center;gap:0;margin-top:6px;font-size:11px;color:var(--app-text-secondary);}
+.delivery-tags span{padding:0 6px;border-right:1px solid var(--app-border);}
+.delivery-tags span:first-child{padding-left:0;}
+.delivery-tags span:last-child{border-right:none;}
+
+/* ── Contact block ── */
+.contact-block{
+  background:var(--app-card);margin:8px 12px 0;border-radius:var(--radius-card);
+  padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.contact-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.contact-avatar{width:28px;height:28px;border-radius:50%;background:rgba(67,184,168,.15);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.contact-avatar svg{width:15px;height:15px;color:var(--app-primary);}
+.contact-name{font-size:13px;font-weight:600;color:var(--app-text);flex:1;}
+.contact-phone{font-size:12px;color:var(--app-text-secondary);}
+.contact-call{width:28px;height:28px;border-radius:50%;background:rgba(67,184,168,.15);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.contact-call svg{width:14px;height:14px;color:var(--app-primary);}
+.contact-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.contact-zip{font-size:12px;color:var(--app-text-secondary);}
+.contact-detail-toggle{font-size:12px;color:var(--app-primary);cursor:pointer;
+  display:flex;align-items:center;gap:2px;}
+.contact-detail-toggle svg{width:12px;height:12px;transition:transform .2s;}
+.contact-detail-toggle.open svg{transform:rotate(180deg);}
+.contact-address{
+  font-size:12px;color:var(--app-text-secondary);line-height:1.7;
+  background:var(--app-bg);border-radius:6px;padding:8px 10px;
+  display:none;
+}
+.contact-address.open{display:block;}
+.address-highlight{color:var(--app-primary);font-weight:600;}
+
+/* ── Slip row ── */
+.slip-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;
+}
+.slip-label{font-size:12px;color:var(--app-text-secondary);}
+.slip-label em{color:var(--app-primary);font-style:normal;font-weight:600;}
+.slip-wo-btn{
+  font-size:11px;color:var(--app-warning);
+  background:rgba(217,154,25,.08);border:1px solid rgba(217,154,25,.3);
+  border-radius:12px;padding:2px 8px;cursor:pointer;white-space:nowrap;
+}
+.slip-wo-btn.done{color:var(--app-text-muted);background:#F0F1F2;border-color:var(--app-border);cursor:default;}
+
+/* ── SKU prices revised ── */
+.sku-prices-row{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:2px;}
+.sku-price-lbl{color:var(--app-text-secondary);}
+.sku-price-val{color:var(--app-danger);font-weight:600;}
+.sku-cost-lbl{color:var(--app-text-muted);}
+.sku-cost-val{color:var(--app-text-secondary);}
+.sku-qty-badge{margin-left:auto;font-size:13px;font-weight:700;color:var(--app-danger);}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  background:rgba(31,35,41,.85);color:#fff;font-size:13px;
+  border-radius:8px;padding:8px 16px;z-index:200;
+  opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;
+}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="phone-frame" id="app">
+  <!-- content injected by JS -->
+</div>
+<div class="toast" id="toast"></div>
+<!-- modals -->
+<div class="modal-overlay" id="modal-whole-order">
+  <div class="modal">
+    <div class="modal-title" id="modal-wo-title"></div>
+    <div class="modal-body" id="modal-wo-body"></div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeModal('modal-whole-order')" id="modal-wo-cancel"></button>
+      <button class="modal-confirm" onclick="confirmWholeOrder()" id="modal-wo-confirm"></button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-intercepted">
+  <div class="modal">
+    <div class="modal-title danger" id="modal-int-title"></div>
+    <div class="modal-body" id="modal-int-body"></div>
+    <div class="modal-footer">
+      <button class="modal-confirm" style="flex:1" onclick="closeModal('modal-intercepted')" id="modal-int-btn"></button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-unfinished">
+  <div class="modal">
+    <div class="modal-title" id="modal-uf-title"></div>
+    <div class="modal-body" id="modal-uf-body"></div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeModal('modal-unfinished')" id="modal-uf-cancel"></button>
+      <button class="modal-confirm" onclick="submitPickup()" id="modal-uf-confirm"></button>
+    </div>
+  </div>
+</div>
+<script>
+/* ══ i18n ══ */
+const T = {
+  zh:{
+    pageTitle:"完成揽货",langBtn:"EN",
+    statusAccepted:"已接单",statusPicking:"揽货中",statusDone:"已揽货",
+    taskId:"任务ID",orderNo:"订单号",
+    deliveryType:"配送方式",deliveryTypeHome:"送货上门",deliveryTypePickup:"自提",
+    warehouseLabel:"库房",warehouseInstant:"即采即销仓",warehouseLogistic:"前置仓",
+    appointLabel:"预约送达",stockoutLabel:"缺货处理",stockoutWait:"等待",stockoutCancel:"取消",
+    remarkLabel:"备注",receiverLabel:"收货人",addressLabel:"收货地址",
+    expandMore:"展开更多", collapseMore:"收起",
+    goodsTitle:"揽货商品",
+    wholeOrderBtn:"▲ 标记为整单揽货",wholeOrderDone:"✓ 已标记整单揽货",
+    batchFmt:(n,t)=>`揽货#${n} ｜ 第<em>${n}</em>/${t}张揽货单`,
+    opDone:"完成",opPriceDiff:"退差价",opReturn:"退货",opExchange:"换货",
+    pickQtyLabel:"揽货:",returnQtyLabel:"退货:",
+    scanExchangeBtn:"扫码换货商品",
+    exchangeHint:"原商品没有揽货标记了",
+    assignBtn:"任务指派",finishBtn:"完成揽货",
+    modalWoTitle:"确认标记整单揽货？",
+    modalWoBody:"标记后前置仓将提前收到揽货任务，请确认当前揽货无缺货或换货问题。",
+    modalWoCancel:"取消",modalWoConfirm:"确认标记",
+    modalIntTitle:"无法完成揽货",
+    modalIntBody:"订单已拦截，无法继续揽货，请前往拦截订单处理任务。",
+    modalIntBtn:"去处理",
+    modalUfTitle:"还有商品未标记",
+    modalUfBodyFmt:(n)=>`还有 ${n} 件商品未完成揽货标记，是否确认提交？`,
+    modalUfCancel:"继续揽货",modalUfConfirm:"确认提交",
+    toastWholeDone:"已标记整单揽货",toastSubmitOk:"揽货完成，即将返回",
+    toastScanSim:"扫码成功：",toastScanFail:"未找到匹配商品",
+    back:"返回",imgAlt:"商品图"
+  },
+  en:{
+    pageTitle:"Pick Goods",langBtn:"中文",
+    statusAccepted:"Accepted",statusPicking:"Picking",statusDone:"Picked",
+    taskId:"Task ID",orderNo:"Order No.",
+    deliveryType:"Delivery",deliveryTypeHome:"Home Delivery",deliveryTypePickup:"Pickup",
+    warehouseLabel:"Warehouse",warehouseInstant:"Instant Buy-Sell",warehouseLogistic:"Pre-pos",
+    appointLabel:"Appt. Delivery",stockoutLabel:"Stockout",stockoutWait:"Wait",stockoutCancel:"Cancel",
+    remarkLabel:"Remark",receiverLabel:"Receiver",addressLabel:"Address",
+    expandMore:"More", collapseMore:"Collapse",
+    goodsTitle:"Picking Goods",
+    wholeOrderBtn:"▲ Mark Whole-Order Pick",wholeOrderDone:"✓ Whole-Order Marked",
+    batchFmt:(n,t)=>`Pick #${n} ｜ <em>${n}</em>/${t} slips`,
+    opDone:"Done",opPriceDiff:"Price Diff",opReturn:"Return",opExchange:"Exchange",
+    pickQtyLabel:"Pick:",returnQtyLabel:"Return:",
+    scanExchangeBtn:"Scan Exchange Item",
+    exchangeHint:"Original item has no pick mark",
+    assignBtn:"Assign",finishBtn:"Finish Pick",
+    modalWoTitle:"Confirm Whole-Order Mark?",
+    modalWoBody:"Pre-pos warehouse will receive the pick task early. Confirm no stockout or exchange issue.",
+    modalWoCancel:"Cancel",modalWoConfirm:"Confirm",
+    modalIntTitle:"Cannot Finish Pick",
+    modalIntBody:"Order is intercepted. Please go to the intercepted order task.",
+    modalIntBtn:"Handle",
+    modalUfTitle:"Items Not Marked",
+    modalUfBodyFmt:(n)=>`${n} item(s) not marked. Submit anyway?`,
+    modalUfCancel:"Keep Picking",modalUfConfirm:"Submit",
+    toastWholeDone:"Whole-order marked",toastSubmitOk:"Done! Returning...",
+    toastScanSim:"Scanned: ",toastScanFail:"No matching item",
+    back:"Back",imgAlt:"Product"
+  }
+};
+
+/* ══ URL params ══ */
+const params = new URLSearchParams(location.search);
+let locale = params.get("locale") || "zh";
+const taskId = params.get("taskId") || "14";
+
+/* ══ Mock data ══ */
+const TASKS = {
+  "14":{
+    id:"WMS-14",orderNo:"ORD-20240601-1234",
+    slipNo:"SM2025002140190351",
+    delivery:"home",deliveryMode:"即时配送",deliveryTime:"2小时内送达",deliveryDist:"3.2km",
+    warehouseType:"instant",
+    appoint:"2024-06-02 10:00-12:00",stockout:"wait",
+    remark:"请轻拿轻放",receiver:"林照彬",phone:"+60 123 4567",
+    zip:"50200",address:"Jalan Bukit Bintang 88, Bukit Bintang, 50200 Kuala Lumpur, Malaysia",
+    unit:"Unit 8-3, Bintang Apartment",
+    slipIndex:2,slipTotal:2,
+    intercepted:false,
+    items:[
+      {id:"a1",barcode:"5748754666",loc:"A01-01-1",zone:"常温区",
+       name:"郁美净鲜奶浴后乳液220g",spec:"220g / 有机 / 礼盒装",
+       price:"RM145.00",cost:"RM30.00",targetQty:3,
+       pickQty:0,returnQty:0,state:null,exchangeItems:[]},
+      {id:"a2",barcode:"5748754777",loc:"B02-03-2",zone:"冷藏区",
+       name:"蒙牛纯甄常温酸牛奶200g*12盒",spec:"200g×12 / 礼盒",
+       price:"RM88.00",cost:"RM22.00",targetQty:2,
+       pickQty:0,returnQty:0,state:null,exchangeItems:[]},
+      {id:"a3",barcode:"5748754888",loc:"C03-01-1",zone:"常温区",
+       name:"雀巢咖啡1+2原味三合一30条",spec:"13g×30 / 袋装",
+       price:"RM55.00",cost:"RM18.00",targetQty:1,
+       pickQty:0,returnQty:0,state:null,exchangeItems:[]}
+    ]
+  },
+  "15":{
+    id:"WMS-15",orderNo:"ORD-20240601-1235",
+    slipNo:"SM2025002140190352",
+    delivery:"home",deliveryMode:"即时配送",deliveryTime:"2小时内送达",deliveryDist:"5.1km",
+    warehouseType:"instant",
+    appoint:"2024-06-02 14:00-16:00",stockout:"cancel",
+    remark:"-",receiver:"Siti Aminah",phone:"+60 19-8765432",
+    zip:"47300",address:"No. 5, Jalan SS2/72, Petaling Jaya, 47300 Selangor, Malaysia",
+    unit:"-",
+    slipIndex:1,slipTotal:1,
+    intercepted:false,
+    items:[
+      {id:"b1",barcode:"5748754999",loc:"A02-02-1",zone:"常温区",
+       name:"Gardenia 面包切片400g",spec:"400g / 原味",
+       price:"RM12.50",cost:"RM5.00",targetQty:2,
+       pickQty:0,returnQty:0,state:null,exchangeItems:[]}
+    ]
+  },
+  "16":{
+    id:"WMS-16",orderNo:"ORD-20240601-1236",
+    slipNo:"SM2025002140190353",
+    delivery:"home",deliveryMode:"预约配送",deliveryTime:"次日送达",deliveryDist:"8.8km",
+    warehouseType:"logistic",
+    appoint:"2024-06-03 09:00-11:00",stockout:"wait",
+    remark:"-",receiver:"Wong KM",phone:"+60 12-3456789",
+    zip:"56100",address:"Lot 5, Jalan Cheras KM 10, Cheras, 56100 Kuala Lumpur, Malaysia",
+    unit:"-",
+    slipIndex:1,slipTotal:1,
+    intercepted:false,
+    items:[
+      {id:"c1",barcode:"5748755001",loc:"D01-01-1",zone:"常温区",
+       name:"可口可乐经典款罐装330ml×6",spec:"330ml×6 / 经典",
+       price:"RM18.00",cost:"RM9.00",targetQty:4,
+       pickQty:0,returnQty:0,state:null,exchangeItems:[]}
+    ]
+  }
+};
+
+let task = JSON.parse(JSON.stringify(TASKS[taskId] || TASKS["14"]));
+let wholeOrderMarked = false;
+let expandedDetail = false;
+let hasStarted = false; // 首次操作后状态升级为揽货中
+
+/* ══ i18n helpers ══ */
+const t = () => T[locale];
+
+function warehouseLabel(type){
+  return type==="instant"?t().warehouseInstant:t().warehouseLogistic;
+}
+function deliveryLabel(type){
+  return type==="home"?t().deliveryTypeHome:t().deliveryTypePickup;
+}
+function stockoutLabel(v){
+  return v==="wait"?t().stockoutWait:t().stockoutCancel;
+}
+function statusLabel(){
+  if(hasStarted) return t().statusPicking;
+  return t().statusAccepted;
+}
+
+/* ══ Toast ══ */
+function showToast(msg,dur=2000){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),dur);
+}
+
+/* ══ Modal ══ */
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+
+/* ══ Whole-order modal ══ */
+function openWholeOrder(){
+  if(wholeOrderMarked)return;
+  const tt=t();
+  document.getElementById("modal-wo-title").textContent=tt.modalWoTitle;
+  document.getElementById("modal-wo-body").textContent=tt.modalWoBody;
+  document.getElementById("modal-wo-cancel").textContent=tt.modalWoCancel;
+  document.getElementById("modal-wo-confirm").textContent=tt.modalWoConfirm;
+  openModal("modal-whole-order");
+}
+function confirmWholeOrder(){
+  wholeOrderMarked=true;
+  closeModal("modal-whole-order");
+  showToast(t().toastWholeDone);
+  render();
+}
+
+/* ══ Item state toggle ══ */
+function setItemState(itemId,state){
+  const item=task.items.find(i=>i.id===itemId);
+  if(!item)return;
+  if(item.state===state){item.state=null;}
+  else{
+    item.state=state;
+    if(state==="done"){item.pickQty=item.targetQty;}
+    if(state!=="exchange"){item.exchangeItems=[];}
+  }
+  hasStarted=true;
+  render();
+}
+
+function stepQty(itemId,delta){
+  const item=task.items.find(i=>i.id===itemId);
+  if(!item)return;
+  if(item.state==="return"){
+    item.returnQty=Math.max(0,item.returnQty+delta);
+  } else {
+    item.pickQty=Math.max(0,item.pickQty+delta);
+    if(item.pickQty>=item.targetQty && item.state===null){
+      item.state="done";
+    }
+  }
+  hasStarted=true;
+  render();
+}
+
+function removeExchangeItem(itemId,idx){
+  const item=task.items.find(i=>i.id===itemId);
+  if(!item)return;
+  item.exchangeItems.splice(idx,1);
+  render();
+}
+
+/* ══ Simulate scan ══ */
+function simulateScan(){
+  // Find first item without done/pricediff/return/exchange
+  const pending=task.items.find(i=>!i.state || i.state==="exchange");
+  if(!pending){showToast(t().toastScanFail);return;}
+  if(pending.state==="exchange"){
+    // add exchange item
+    pending.exchangeItems.push({barcode:"EX"+Date.now().toString().slice(-6),
+      name:"换货商品×"+Math.ceil(Math.random()*3)});
+    showToast(t().toastScanSim+"EX"+Date.now().toString().slice(-6));
+  } else {
+    pending.pickQty=Math.min(pending.pickQty+1,pending.targetQty);
+    if(pending.pickQty>=pending.targetQty) pending.state="done";
+    showToast(t().toastScanSim+pending.barcode);
+  }
+  hasStarted=true;
+  render();
+}
+
+/* ══ Finish pickup ══ */
+function finishPickup(){
+  const tt=t();
+  if(task.intercepted){
+    document.getElementById("modal-int-title").textContent=tt.modalIntTitle;
+    document.getElementById("modal-int-body").textContent=tt.modalIntBody;
+    document.getElementById("modal-int-btn").textContent=tt.modalIntBtn;
+    openModal("modal-intercepted");
+    return;
+  }
+  const unmarked=task.items.filter(i=>!i.state).length;
+  if(unmarked>0){
+    document.getElementById("modal-uf-title").textContent=tt.modalUfTitle;
+    document.getElementById("modal-uf-body").textContent=tt.modalUfBodyFmt(unmarked);
+    document.getElementById("modal-uf-cancel").textContent=tt.modalUfCancel;
+    document.getElementById("modal-uf-confirm").textContent=tt.modalUfConfirm;
+    openModal("modal-unfinished");
+    return;
+  }
+  submitPickup();
+}
+
+function submitPickup(){
+  closeModal("modal-unfinished");
+  showToast(t().toastSubmitOk,2200);
+  setTimeout(()=>goBack(),2200);
+}
+
+/* ══ Navigation ══ */
+function goBack(){
+  if(window.parent!==window){
+    window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");
+  } else if(document.referrer){
+    history.back();
+  } else {
+    location.href=`../workbench.html?locale=${locale}`;
+  }
+}
+
+function toggleLocale(){
+  locale=locale==="zh"?"en":"zh";
+  render();
+}
+
+function toggleDetail(){
+  expandedDetail=!expandedDetail;
+  render();
+}
+
+/* ══ Render ══ */
+/* ── SVG helpers ── */
+function svgBack(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;}
+function svgScan(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><line x1="16" y1="16" x2="21" y2="16"/><line x1="21" y1="16" x2="21" y2="21"/><line x1="16" y1="21" x2="21" y2="21"/></svg>`;}
+function svgBarcode(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14M7 5v14M11 5v14M15 5v10M19 5v14"/></svg>`;}
+function svgChev(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;}
+function svgPerson(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;}
+function svgPhone(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13 1 .37 1.97.72 2.9a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.93.35 1.9.59 2.9.72A2 2 0 0 1 22 16.92z"/></svg>`;}
+function svgLeaf(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8C8 10 5.9 16.17 3.82 19.34A1 1 0 0 0 5 21C21 21 22 3 22 3c-2.67 4-8 5-10 2"/><path d="M3.82 19.34C4.87 18.29 7 17 9 17"/></svg>`;}
+
+function renderItem(item){
+  const tt=t();
+  const ops=[
+    {key:"done",label:tt.opDone},
+    {key:"pricediff",label:tt.opPriceDiff},
+    {key:"return",label:tt.opReturn},
+    {key:"exchange",label:tt.opExchange}
+  ];
+  const opBtns=ops.map(o=>`<button class="op-btn${item.state===o.key?" active":""}" onclick="setItemState('${item.id}','${o.key}')">${o.label}</button>`).join("");
+
+  const stepVal=item.state==="return"?item.returnQty:item.pickQty;
+  const returnExtra=item.state==="return"?`<span class="return-qty">${tt.returnQtyLabel} ${item.returnQty}</span>`:"";
+
+  const exchangeZone=item.state==="exchange"?`
+    <div class="exchange-zone open">
+      ${item.exchangeItems.length===0?`<div class="exchange-hint">${tt.exchangeHint}</div>`:""}
+      ${item.exchangeItems.map((ei,idx)=>`
+        <div class="exchange-item">
+          <div class="exchange-item-info">
+            <div class="exchange-item-code">${ei.barcode}</div>
+            <div class="exchange-item-name">${ei.name}</div>
+          </div>
+          <span class="exchange-item-qty">×1</span>
+          <span class="exchange-item-del" onclick="removeExchangeItem('${item.id}',${idx})">×</span>
+        </div>`).join("")}
+      <button class="scan-exchange-btn" onclick="simulateScan()">${svgBarcode()} ${tt.scanExchangeBtn}</button>
+    </div>`:"";
+
+  return `
+    <div class="sku-item" id="sku-${item.id}">
+      <div class="sku-loc-row">
+        <span class="loc-tag" style="color:var(--app-primary)">${svgLeaf()} ${item.zone} ${item.loc}</span>
+        <span class="barcode-tag">${svgBarcode()} ${item.barcode}</span>
+      </div>
+      <div class="sku-main">
+        <div class="sku-img">${tt.imgAlt}</div>
+        <div class="sku-info">
+          <div class="sku-name">${item.name}</div>
+          <div class="sku-spec">${item.spec}</div>
+          <div class="sku-prices-row">
+            <span class="sku-price-lbl">${locale==="zh"?"售价:":"Price:"}</span>
+            <span class="sku-price-val">${item.price}</span>
+            <span class="sku-cost-lbl">${locale==="zh"?"成本价:":"Cost:"}</span>
+            <span class="sku-cost-val">${item.cost}</span>
+            <span class="sku-qty-badge">×${item.targetQty}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sku-ops">${opBtns}</div>
+      <div class="sku-stepper">
+        <span>${tt.pickQtyLabel}</span>
+        <div class="stepper-wrap">
+          <button class="step-btn" onclick="stepQty('${item.id}',-1)">−</button>
+          <span class="step-val">${stepVal}</span>
+          <button class="step-btn" onclick="stepQty('${item.id}',1)">+</button>
+        </div>
+        ${returnExtra}
+      </div>
+      ${exchangeZone}
+    </div>`;
+}
+
+function render(){
+  const tt=t();
+  const isInstant=task.warehouseType==="instant";
+  const totalQty=task.items.reduce((s,i)=>s+i.targetQty,0);
+
+  const woBtn=isInstant?`
+    <button class="whole-order-btn${wholeOrderMarked?" done":""}" onclick="${wholeOrderMarked?"void(0)":"openWholeOrder()"}">
+      ${wholeOrderMarked?tt.wholeOrderDone:tt.wholeOrderBtn}
+    </button>`:"";
+
+  const slipWoBtn=isInstant&&task.slipTotal>1?`
+    <button class="slip-wo-btn${wholeOrderMarked?" done":""}" onclick="${wholeOrderMarked?"void(0)":"openWholeOrder()}"}">
+      ${wholeOrderMarked?(locale==="zh"?"✓ 已标记":"✓ Marked"):tt.wholeOrderBtn}
+    </button>`:"";
+
+  const itemsHtml=task.items.map(renderItem).join("");
+
+  const html=`
+    <div class="nav-bar">
+      <div class="nav-back" onclick="goBack()">${svgBack()}</div>
+      <div class="nav-title">${tt.pageTitle}</div>
+      <button class="lang-btn" onclick="toggleLocale()">${tt.langBtn}</button>
+    </div>
+    <div class="scroll-content">
+      <div class="status-banner">
+        <div class="status-title">${statusLabel()}</div>
+        <div style="font-size:13px;color:var(--app-text-secondary);margin:2px 0 6px;">${task.slipNo}</div>
+        <div style="font-size:12px;color:var(--app-text-secondary);margin-bottom:6px;">
+          ${tt.taskId}: <strong style="color:var(--app-text)">${task.id}</strong>
+        </div>
+        <div class="delivery-tags">
+          <span>${task.deliveryMode}</span>
+          <span>${task.deliveryTime}</span>
+          <span>${task.deliveryDist}</span>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="info-row"><span class="info-label">${tt.warehouseLabel}</span><span class="info-value">${warehouseLabel(task.warehouseType)}</span></div>
+        <div class="info-row"><span class="info-label">${tt.appointLabel}</span><span class="info-value">${task.appoint}</span></div>
+        <div class="info-row">
+          <span class="info-label">${tt.stockoutLabel}</span>
+          <span class="info-value" style="color:var(--app-warning)">${stockoutLabel(task.stockout)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">${tt.remarkLabel}</span>
+          <span class="info-value" style="color:var(--app-warning)">${task.remark}</span>
+        </div>
+      </div>
+
+      <div class="contact-block">
+        <div class="contact-row">
+          <div class="contact-avatar">${svgPerson()}</div>
+          <span class="contact-name">${task.receiver}</span>
+          <span class="contact-phone">${task.phone}</span>
+          <div class="contact-call">${svgPhone()}</div>
+        </div>
+        <div class="contact-meta">
+          <span class="contact-zip">${locale==="zh"?"邮编:":"ZIP:"} ${task.zip}</span>
+          <div class="contact-detail-toggle ${expandedDetail?"open":""}" onclick="toggleDetail()">
+            ${locale==="zh"?"收货详情":"Details"} ${svgChev()}
+          </div>
+        </div>
+        <div class="contact-address ${expandedDetail?"open":""}">
+          <div>${task.address}</div>
+          ${task.unit&&task.unit!=="-"?`<div class="address-highlight" style="margin-top:4px">${task.unit}</div>`:""}
+        </div>
+      </div>
+
+      <div class="goods-section" style="padding:0 12px;margin-top:8px;">
+        <div class="goods-header">
+          <div>
+            <span class="goods-title">${tt.goodsTitle}</span>
+            <span class="goods-count">: ${task.items.length}（${locale==="zh"?"共":"Total "}${totalQty}${locale==="zh"?"件":"pcs"}）</span>
+          </div>
+          ${woBtn}
+        </div>
+        ${task.slipTotal>1?`
+          <div class="slip-row">
+            <span class="slip-label">${tt.batchFmt(task.slipIndex,task.slipTotal)}</span>
+            ${slipWoBtn}
+          </div>`:""}
+        ${itemsHtml}
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="bar-assign">${tt.assignBtn}</button>
+      <div class="bar-scan" onclick="simulateScan()">${svgScan()}</div>
+      <button class="bar-finish" onclick="finishPickup()">${tt.finishBtn}</button>
+    </div>`;
+
+  document.getElementById("app").innerHTML=html;
+}
+
+render();
+</script>
+</body>
+</html>

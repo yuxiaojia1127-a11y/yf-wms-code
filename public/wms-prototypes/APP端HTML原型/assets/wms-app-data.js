@@ -566,7 +566,8 @@
           inventory_in_record: "入库记录",
           inventory_count: "库存盘点",
           shipping_tracking: "物流跟踪",
-          create_inbound: "新建入库单"
+          create_inbound: "新建入库单",
+          inbound_order_list: "入库单"
         },
         quickActions: {}
       },
@@ -635,7 +636,8 @@
           inventory_in_record: "Inbound Records",
           inventory_count: "Inventory Counting",
           shipping_tracking: "Logistics Tracking",
-          create_inbound: "Create Inbound Order"
+          create_inbound: "Create Inbound Order",
+          inbound_order_list: "Inbound Orders"
         },
         quickActions: {}
       }

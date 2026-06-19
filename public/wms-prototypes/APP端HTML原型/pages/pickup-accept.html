@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>接单揽货 · Accept Order</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:8px;--app-space-page-x:12px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12)}
+.screen{display:none;min-height:812px;flex-direction:column}
+.screen.active{display:flex}
+.app-nav{height:44px;display:flex;align-items:center;position:relative;padding:0 12px;gap:8px}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--app-text);text-align:left;flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer;flex-shrink:0}
+.lang-btn:active{background:var(--app-primary);color:#fff}
+.page-body{flex:1;overflow-y:auto;padding:0 var(--app-space-page-x) 16px}
+.card{background:var(--app-card);border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);margin-bottom:10px}
+.dashed-divider{border-top:1px dashed var(--app-border);margin:10px 0}
+.btn-primary{background:var(--app-primary);color:#fff;border:none;cursor:pointer;border-radius:8px;font-size:13px;padding:9px 22px}
+.btn-primary:active{background:var(--app-primary-strong)}
+.btn-secondary{background:var(--app-bg-soft);color:var(--app-text);border:none;cursor:pointer;border-radius:8px;font-size:13px;padding:9px 18px}
+.toast{position:absolute;left:50%;top:45%;transform:translateX(-50%);background:rgba(31,35,41,.85);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;white-space:nowrap}
+.toast.show{opacity:1}
+.modal-mask{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:90;display:none;align-items:center;justify-content:center}
+.modal-mask.show{display:flex}
+.modal{width:280px;background:#fff;border-radius:14px;padding:22px 18px 16px;text-align:center}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.modal-desc{font-size:12px;color:var(--app-text-secondary);margin-bottom:18px;line-height:1.6}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button{flex:1;height:38px;border-radius:19px;font-size:14px}
+</style>
+<style>
+.search-row{display:flex;gap:8px;padding:6px 12px 10px}
+.search-box{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:0 12px;height:34px}
+.search-box input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.search-box input::placeholder{color:var(--app-text-muted)}
+.search-btn{border:none;background:var(--app-primary);color:#fff;font-size:13px;border-radius:17px;padding:0 18px;height:34px;cursor:pointer}
+.tab-row{display:flex;align-items:center;padding:0 12px;gap:18px}
+.tab{font-size:15px;color:var(--app-text-secondary);padding:8px 0 10px;cursor:pointer;position:relative}
+.tab.on{color:var(--app-text);font-weight:600;font-size:16px}
+.tab.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:4px;width:24px;height:3px;border-radius:2px;background:var(--app-primary)}
+.sort-toggle{margin-left:auto;font-size:12px;color:var(--app-text-secondary);cursor:pointer;display:flex;align-items:center;gap:2px}
+.sort-toggle .arrow{color:var(--app-primary);font-size:11px}
+.filter-row{display:flex;gap:8px;padding:8px 12px 10px}
+.chip{border:none;cursor:pointer;font-size:12px;padding:7px 16px;border-radius:16px;background:#fff;color:var(--app-text)}
+.chip.on{background:#2B2F36;color:#fff}
+.task-card{padding:12px}
+.task-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.task-name{font-size:14px;font-weight:600;color:#1D3A5F}
+.task-status{font-size:12px;display:flex;align-items:center;gap:4px}
+.task-status .dot{width:6px;height:6px;border-radius:50%}
+.task-status.pending{color:var(--app-success)}.task-status.pending .dot{background:var(--app-success)}
+.task-status.accepted{color:#2AA7C9}.task-status.accepted .dot{background:#2AA7C9}
+.field-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0}
+.field-row .k{color:var(--app-text-secondary)}.field-row .v{color:var(--app-text);text-align:right}
+.task-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:10px}
+.empty-state{text-align:center;color:var(--app-text-muted);font-size:13px;padding:60px 0 40px}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
+</style>
+<style>
+.detail-body{flex:1;overflow-y:auto;padding:0 12px 80px}
+.detail-state{font-size:20px;font-weight:600;margin:4px 0 10px}
+.detail-line{font-size:13px;color:var(--app-text);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.copy-tag{font-size:11px;color:var(--app-info);background:rgba(47,128,237,.1);border-radius:4px;padding:1px 6px;cursor:pointer}
+.detail-meta{font-size:13px;color:var(--app-text);margin-bottom:12px}
+.info-card{padding:12px}
+.info-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0}
+.info-row .k{color:var(--app-text-secondary)}.info-row .v{text-align:right}
+.info-row .v.warn{color:var(--app-warning)}
+.contact-row{display:flex;align-items:center;gap:6px;font-size:13px;padding:8px 0 4px}
+.contact-row .person-icon{color:var(--app-primary)}
+.call-btn{margin-left:auto;width:28px;height:28px;border-radius:50%;cursor:pointer;border:1px solid var(--app-primary);color:var(--app-primary);background:#fff;font-size:13px}
+.postcode-row{display:flex;align-items:center;gap:10px;font-size:12px;padding:4px 0}
+.expand-link{color:var(--app-info);cursor:pointer;font-size:12px}
+.addr-block{background:var(--app-bg-soft);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;margin-top:8px;display:none}
+.addr-block.show{display:block}
+.addr-block .hl{color:var(--app-warning);font-weight:600}
+.addr-block .sep{border-top:1px dashed var(--app-border);margin:8px 0}
+.goods-title{font-size:14px;font-weight:600;margin:12px 0 8px}
+.batch-card{padding:10px 12px}
+.batch-head{font-size:13px;font-weight:600;margin-bottom:8px}
+.batch-head .seq{color:var(--app-primary);font-weight:500;font-size:12px}
+.sku-item{background:var(--app-bg-soft);border-radius:8px;padding:8px;margin-bottom:8px}
+.sku-loc{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--app-text);margin-bottom:6px}
+.sku-loc .zone{color:var(--app-primary)}
+.sku-main{display:flex;gap:8px}
+.sku-img{width:54px;height:54px;border-radius:6px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid var(--app-border)}
+.sku-info{flex:1;min-width:0}
+.sku-name{font-size:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sku-spec{font-size:11px;color:var(--app-text-muted);margin:3px 0}
+.sku-price{font-size:11px}
+.sku-price .sale{color:var(--app-danger)}.sku-price .cost{color:var(--app-text);margin-left:8px}
+.sku-qty{font-size:13px;color:var(--app-danger);flex-shrink:0}
+.amount-card{display:flex;padding:14px 12px;text-align:center}
+.amount-card>div{flex:1}
+.amount-num{font-size:20px;font-weight:600}
+.amount-num .cur{font-size:12px;margin-right:2px}
+.amount-label{font-size:11px;color:var(--app-text-secondary);margin-top:4px}
+.log-card{padding:12px}
+.log-node{display:flex;gap:10px}
+.log-rail{display:flex;flex-direction:column;align-items:center}
+.log-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--app-primary);background:#fff;margin-top:3px}
+.log-line{flex:1;border-left:1px dashed var(--app-border);margin-top:2px}
+.log-title{font-size:13px;font-weight:600;color:var(--app-primary);margin-bottom:6px}
+.log-detail{background:var(--app-bg-soft);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.9;color:var(--app-text-secondary);flex:1}
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:8px 16px calc(8px + 12px);display:none}
+.bottom-bar.show{display:block}
+.bottom-bar .main-btn{width:100%;height:44px;border:none;border-radius:22px;cursor:pointer;background:var(--app-primary);color:#fff;font-size:15px;font-weight:500}
+.bottom-bar .main-btn:active{background:var(--app-primary-strong)}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <!-- 屏1：列表 -->
+  <section class="screen active" id="screen-list" style="background:linear-gradient(180deg,var(--app-primary-soft),var(--app-bg) 18%)">
+    <header class="app-nav">
+      <button class="nav-back" onclick="goWorkbench()">‹</button>
+      <div class="nav-title" id="navTitle">接单揽货</div>
+      <button class="lang-btn" id="langBtn" onclick="toggleLocale()">EN</button>
+    </header>
+    <div class="search-row">
+      <div class="search-box">
+        <span style="color:var(--app-text-muted)">🔍</span>
+        <input id="searchInput" placeholder="请输入订单号/联系人" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <button class="search-btn" id="searchBtn" onclick="doSearch()">搜索</button>
+    </div>
+    <div class="tab-row">
+      <div class="tab on" id="tab-pending" onclick="switchTab('pending')">待接单</div>
+      <div class="tab" id="tab-mine" onclick="switchTab('mine')">我的任务</div>
+      <div class="sort-toggle" onclick="toggleSort()"><span id="sortLabel">时间</span> <span class="arrow" id="sortArrow">▼</span></div>
+    </div>
+    <div class="filter-row">
+      <button class="chip on" data-f="all" id="chip-all" onclick="setFilter('all',this)">全部</button>
+      <button class="chip" data-f="instant" id="chip-instant" onclick="setFilter('instant',this)">即时配送</button>
+      <button class="chip" data-f="logistics" id="chip-logistics" onclick="setFilter('logistics',this)">物流发货</button>
+    </div>
+    <div class="page-body" id="taskList"></div>
+  </section>
+
+  <!-- 屏2：详情 -->
+  <section class="screen" id="screen-detail" style="background:linear-gradient(180deg,#EDEFF1,var(--app-bg) 20%)">
+    <header class="app-nav">
+      <button class="nav-back" onclick="showScreen('list')">‹</button>
+      <div class="nav-title"></div>
+      <button class="lang-btn" onclick="toggleLocale()">EN</button>
+    </header>
+    <div class="detail-body">
+      <div class="detail-state" id="dState">待接单</div>
+      <div class="detail-line"><span id="dOrderNoLabel">订单号</span> <span id="dOrderNo">-</span> <span class="copy-tag" id="dCopyOrder" onclick="copyText('dOrderNo')">复制</span></div>
+      <div class="detail-line"><span id="dTaskIdLabel">任务ID</span> <span id="dTaskId">-</span> <span class="copy-tag" id="dCopyTask" onclick="copyText('dTaskId')">复制</span></div>
+      <div class="detail-meta" id="dDelivery">-</div>
+      <div class="card info-card">
+        <div class="info-row"><span class="k" id="dkWarehouse">库房</span><span class="v" id="dWarehouse">-</span></div>
+        <div class="info-row"><span class="k" id="dkReserve">预约送达时间</span><span class="v" id="dReserve">-</span></div>
+        <div class="dashed-divider"></div>
+        <div class="info-row"><span class="k" id="dkOos">商品缺货时</span><span class="v warn" id="dOos">-</span></div>
+        <div class="info-row"><span class="k" id="dkRemark">订单备注</span><span class="v warn" id="dRemark">-</span></div>
+        <div class="dashed-divider"></div>
+        <div class="contact-row">
+          <span class="person-icon">👤</span>
+          <span id="dContact">-</span>
+          <button class="call-btn" id="callBtn" onclick="toast(T[locale].callDemo)">📞</button>
+        </div>
+        <div class="postcode-row">
+          <span id="dPostcodeLabel">邮编：</span><span id="dPostcode">-</span>
+          <span class="expand-link" id="addrToggle" onclick="toggleAddr()">收货详情 ˅</span>
+        </div>
+        <div class="addr-block" id="addrBlock">
+          <div id="dAddrFull">-</div>
+          <div class="sep"></div>
+          <div><span id="dAddrPointLabel">收货点：</span><span id="dAddrPoint">-</span></div>
+          <div><span id="dAddrFloorLabel">楼层/门牌号：</span><span class="hl" id="dDoor">-</span></div>
+          <div>Wechat：<span id="dWechat">-</span></div>
+          <div>WhatsApp：<span id="dWhatsapp">-</span></div>
+        </div>
+      </div>
+      <div class="goods-title"><span id="dGoodsLabel">揽货商品:</span> <span class="count" id="dSkuCount">-</span></div>
+      <div class="card batch-card">
+        <div class="batch-head" id="dBatch">揽货#1</div>
+        <div id="dSkuList"></div>
+      </div>
+      <div class="card amount-card">
+        <div>
+          <div class="amount-num"><span class="cur">RM</span><span id="dPayAmount">-</span></div>
+          <div class="amount-label" id="dAmountPayLabel">支付金额</div>
+        </div>
+        <div>
+          <div class="amount-num"><span class="cur">RM</span><span id="dCostAmount">-</span></div>
+          <div class="amount-label" id="dAmountCostLabel">总成本价</div>
+        </div>
+      </div>
+      <div class="card log-card">
+        <div class="log-node">
+          <div class="log-rail"><div class="log-dot"></div><div class="log-line"></div></div>
+          <div style="flex:1">
+            <div class="log-title" id="dLogTitle">下单</div>
+            <div class="log-detail" id="dLogDetail">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar" id="detailBar">
+      <button class="main-btn" id="confirmAcceptBtn" onclick="confirmAccept(currentTaskId,true)">确认接单</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  <div class="modal-mask" id="modalMask">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">确认接单</div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modalCancel" onclick="closeModal()">取消</button>
+        <button class="btn-primary" id="modalOk">确认接单</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+/* ===== i18n ===== */
+const T = {
+  zh:{
+    pageTitle:"接单揽货",langBtn:"EN",
+    searchPlaceholder:"请输入订单号/联系人",searchBtn:"搜索",
+    tabPending:"待接单",tabMine:"我的任务",sortTime:"时间",
+    filterAll:"全部",filterInstant:"即时配送",filterLogistics:"物流发货",
+    statusPending:"待接单",statusAccepted:"已接单",
+    fieldTaskId:"任务ID",fieldWarehouse:"库房",fieldDelivery:"配送方式",
+    fieldReserveTime:"送达时间选择",fieldQty:"商品数量",fieldOrderTime:"下单时间",
+    btnDetail:"揽货详情",btnAccept:"接单",btnGoPick:"去揽货",
+    emptyNoTask:"暂无揽货任务",emptyNoResult:"未找到相关任务",
+    detailPending:"待接单",detailAccepted:"已接单",
+    labelOrderNo:"订单号",labelTaskId:"任务ID",copy:"复制",copied:"已复制",
+    fieldWarehouseD:"库房",fieldReserve:"预约送达时间",fieldOos:"商品缺货时",fieldRemark:"订单备注",
+    postcode:"邮编：",addrShow:"收货详情 ˅",addrHide:"收货详情 ˄",
+    addrPoint:"收货点：",addrFloor:"楼层/门牌号：",
+    goodsTitle:"揽货商品:",
+    batchLabel:"揽货",batchNo:"第",batchOf:"张揽货单",
+    saleLabel:"售价:",costLabel:"成本价:",
+    payAmount:"支付金额",totalCost:"总成本价",
+    logOrder:"下单",logBuyer:"下单用户：",logOrderTime:"下单时间：",logPayTime:"付款时间：",
+    confirmBtn:"确认接单",
+    modalTitle:"确认接单",modalCancel:"取消",modalConfirm:"确认接单",
+    modalDescTpl:"接单后任务将进入「我的任务」，请尽快完成揽货。",
+    alreadyAccepted:"任务已被接单",acceptSuccess:"接单成功",
+    callDemo:"唤起系统拨号（演示）",
+    typeInstant:"即时配送",typeLogistics:"物流发货",
+    slaInstant:"2小时内送达",slaLogistics:"48小时内发出",
+    qtyFmt:(k,t)=>`${k} (共${t}件)`,skuCountFmt:(k,t)=>`${k}（共${t}件）`,
+  },
+  en:{
+    pageTitle:"Accept Order",langBtn:"中文",
+    searchPlaceholder:"Order No. / Contact",searchBtn:"Search",
+    tabPending:"Pending",tabMine:"My Tasks",sortTime:"Time",
+    filterAll:"All",filterInstant:"Express",filterLogistics:"Logistics",
+    statusPending:"Pending",statusAccepted:"Accepted",
+    fieldTaskId:"Task ID",fieldWarehouse:"Warehouse",fieldDelivery:"Delivery",
+    fieldReserveTime:"Delivery Time",fieldQty:"Items",fieldOrderTime:"Order Time",
+    btnDetail:"Details",btnAccept:"Accept",btnGoPick:"Pick Now",
+    emptyNoTask:"No picking tasks",emptyNoResult:"No tasks found",
+    detailPending:"Pending",detailAccepted:"Accepted",
+    labelOrderNo:"Order No.",labelTaskId:"Task ID",copy:"Copy",copied:"Copied",
+    fieldWarehouseD:"Warehouse",fieldReserve:"Scheduled Delivery",fieldOos:"Out of Stock",fieldRemark:"Order Note",
+    postcode:"Postcode: ",addrShow:"Address ˅",addrHide:"Address ˄",
+    addrPoint:"Pickup Point: ",addrFloor:"Floor/Unit: ",
+    goodsTitle:"Pick Items:",
+    batchLabel:"Batch",batchNo:"#",batchOf:" picking slip(s)",
+    saleLabel:"Price:",costLabel:"Cost:",
+    payAmount:"Payment",totalCost:"Total Cost",
+    logOrder:"Order Placed",logBuyer:"Buyer: ",logOrderTime:"Order Time: ",logPayTime:"Payment: ",
+    confirmBtn:"Confirm Accept",
+    modalTitle:"Confirm Accept",modalCancel:"Cancel",modalConfirm:"Confirm",
+    modalDescTpl:"After accepting, the task moves to My Tasks. Please complete picking promptly.",
+    alreadyAccepted:"Task already accepted",acceptSuccess:"Accepted successfully",
+    callDemo:"Open dialer (demo)",
+    typeInstant:"Express",typeLogistics:"Logistics",
+    slaInstant:"2hr delivery",slaLogistics:"48hr dispatch",
+    qtyFmt:(k,t)=>`${k} (${t} pcs)`,skuCountFmt:(k,t)=>`${k} (${t} pcs)`,
+  }
+};
+
+/* ===== 数据 ===== */
+const TASKS=[
+  {id:"0000000000014",orderNo:"SM2025002140190351",contact:"linzhaobin",
+   status:"accepted",type:"instant",distance:"3.2km",
+   warehouse:"吉隆坡前置仓",reserveTime:"2025-02-10 14:00-16:00",
+   skuKinds:3,totalQty:10,orderTime:"2025-02-10 12:00:00",payTime:"2025-02-10 12:00:00",
+   oos:"缺货时与我联系，协商替换",remark:"请放前台代收，谢谢",
+   receiver:{name:"Andy",phone:"+60 515533",postcode:"248920",
+     addrFull:"SKY Condominium, Bandar Puchong Jaya, 47100 Puchong, Selangor, Malaysia",
+     addrPoint:"A-21-07, SKY CONDOMINIUM PSN PUCHONG JAYA SELATAN BANDAR PUCHONG JAYA 47170 PUCHONG",
+     door:"BlockA-21-7",wechat:"1591928932",whatsapp:"1591928932"},
+   batch:{no:2,total:2},
+   buyer:"chew | 20341013",payAmount:"523.00",costAmount:"462.00",
+   skus:[
+     {zone:"常温区",loc:"A01-01-2",barcode:"5748754888",img:"🧴",name:"郁美净鲜奶浴后乳液220g身体名称很长换成2行超出再省略",spec:"10斤/有机/礼盒装 | 0.5KG",sale:"RM145.00",cost:"RM30.00",qty:3},
+     {zone:"常温区",loc:"A01-01-2",barcode:"5748754888",img:"📦",name:"佳能Glad锡纸铝箔8m×30cm",spec:"10斤/有机/礼盒装 | 0.5KG",sale:"RM145.00",cost:"RM30.00",qty:3},
+     {zone:"常温区",loc:"A01-01-2",barcode:"5748754888",img:"📦",name:"佳能Glad锡纸铝箔8m×30cm",spec:"10斤/有机/礼盒装 | 0.5KG",sale:"RM145.00",cost:"RM30.00",qty:4}
+   ]},
+  {id:"0000000000015",orderNo:"SM2025002140190377",contact:"Siti Aminah",
+   status:"accepted",type:"instant",distance:"1.8km",
+   warehouse:"吉隆坡前置仓",reserveTime:"2025-02-10 16:00-18:00",
+   skuKinds:2,totalQty:5,orderTime:"2025-02-10 13:20:00",payTime:"2025-02-10 13:21:00",
+   oos:"缺货时直接退款",remark:"—",
+   receiver:{name:"Siti",phone:"+60 162233",postcode:"47100",
+     addrFull:"IOI Boulevard, Jalan Kenari 5, Bandar Puchong Jaya, 47170 Puchong, Selangor, Malaysia",
+     addrPoint:"B-03-12, IOI BOULEVARD PUCHONG JAYA",door:"B-03-12",wechat:"—",whatsapp:"60162233"},
+   batch:{no:1,total:1},
+   buyer:"siti | 20355001",payAmount:"168.00",costAmount:"120.00",
+   skus:[
+     {zone:"冷藏区",loc:"C02-03-1",barcode:"9556001112",img:"🥛",name:"Farm Fresh 鲜牛奶1L",spec:"1L/冷藏 | 1.05KG",sale:"RM12.00",cost:"RM8.50",qty:3},
+     {zone:"常温区",loc:"A03-02-4",barcode:"9556002235",img:"🍪",name:"Julie's 花生酱三明治饼干540g",spec:"540g/盒 | 0.6KG",sale:"RM15.90",cost:"RM11.00",qty:2}
+   ]},
+  {id:"0000000000016",orderNo:"SM2025002140190402",contact:"WongKM",
+   status:"pending",type:"logistics",distance:"—",
+   warehouse:"吉隆坡前置仓",reserveTime:"—",
+   skuKinds:1,totalQty:6,orderTime:"2025-02-09 20:45:00",payTime:"2025-02-09 20:46:00",
+   oos:"缺货时与我联系",remark:"包装加固",
+   receiver:{name:"Wong",phone:"+60 178899",postcode:"11900",
+     addrFull:"Bayan Lepas, 11900 Penang, Malaysia",addrPoint:"BAYAN LEPAS HUB",
+     door:"12-3A",wechat:"—",whatsapp:"60178899"},
+   batch:{no:1,total:1},
+   buyer:"wongkm | 20377215",payAmount:"354.00",costAmount:"270.00",
+   skus:[
+     {zone:"常温区",loc:"B01-05-3",barcode:"9556003348",img:"🍚",name:"Jasmine 香米10kg",spec:"10kg/袋 | 10KG",sale:"RM59.00",cost:"RM45.00",qty:6}
+   ]}
+];
+
+/* ===== 状态 ===== */
+let locale=new URLSearchParams(location.search).get("locale")||"zh";
+let curTab="pending",curFilter="all",sortDesc=true,keyword="",currentTaskId=null,pendingAcceptId=null;
+
+/* ===== locale ===== */
+function toggleLocale(){setLocale(locale==="zh"?"en":"zh")}
+function setLocale(l){
+  locale=l;
+  document.getElementById("langBtn").textContent=T[l].langBtn;
+  document.querySelectorAll(".lang-btn").forEach(b=>b.textContent=T[l].langBtn);
+  document.getElementById("navTitle").textContent=T[l].pageTitle;
+  document.getElementById("searchInput").placeholder=T[l].searchPlaceholder;
+  document.getElementById("searchBtn").textContent=T[l].searchBtn;
+  document.getElementById("tab-pending").textContent=T[l].tabPending;
+  document.getElementById("tab-mine").textContent=T[l].tabMine;
+  document.getElementById("sortLabel").textContent=T[l].sortTime;
+  document.getElementById("chip-all").textContent=T[l].filterAll;
+  document.getElementById("chip-instant").textContent=T[l].filterInstant;
+  document.getElementById("chip-logistics").textContent=T[l].filterLogistics;
+  renderList();
+  if(currentTaskId)refreshDetail();
+}
+
+/* ===== 屏幕 ===== */
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+  document.getElementById("detailBar").classList.toggle("show",name==="detail"&&getTask(currentTaskId)?.status==="pending");
+}
+function goWorkbench(){
+  if(window.parent!==window)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");
+  else if(document.referrer)history.back();
+  else window.location.href="workbench.html"+window.location.search;
+}
+
+/* ===== 列表 ===== */
+function getTask(id){return TASKS.find(t=>t.id===id)}
+function typeLabel(type){return T[locale]["type"+type.charAt(0).toUpperCase()+type.slice(1)]||type}
+function slaLabel(type){return T[locale]["sla"+type.charAt(0).toUpperCase()+type.slice(1)]||""}
+function renderList(){
+  const wrap=document.getElementById("taskList");
+  let list=TASKS.filter(t=>curTab==="pending"?t.status==="pending":t.status==="accepted");
+  if(curFilter!=="all")list=list.filter(t=>t.type===curFilter);
+  if(keyword)list=list.filter(t=>t.orderNo.includes(keyword)||t.contact.toLowerCase().includes(keyword.toLowerCase()));
+  list.sort((a,b)=>sortDesc?b.orderTime.localeCompare(a.orderTime):a.orderTime.localeCompare(b.orderTime));
+  const tx=T[locale];
+  if(!list.length){wrap.innerHTML=`<div class="empty-state"><div class="icon">📭</div>${keyword?tx.emptyNoResult:tx.emptyNoTask}</div>`;return}
+  wrap.innerHTML=list.map(t=>{
+    const pend=t.status==="pending";
+    const deliverText=`${typeLabel(t.type)} | ${slaLabel(t.type)} | ${t.distance}`;
+    return `<div class="card task-card">
+      <div class="task-head" onclick="openDetail('${t.id}')">
+        <span class="task-name">${t.contact}</span>
+        <span class="task-status ${pend?"pending":"accepted"}"><span class="dot"></span>${pend?tx.statusPending:tx.statusAccepted}</span>
+      </div>
+      <div onclick="openDetail('${t.id}')">
+        <div class="field-row"><span class="k">${tx.fieldTaskId}</span><span class="v">${t.id}</span></div>
+        <div class="field-row"><span class="k">${tx.fieldWarehouse}</span><span class="v">${t.warehouse}</span></div>
+        <div class="field-row"><span class="k">${tx.fieldDelivery}</span><span class="v">${deliverText}</span></div>
+        <div class="field-row"><span class="k">${tx.fieldReserveTime}</span><span class="v">${t.reserveTime}</span></div>
+        <div class="field-row"><span class="k">${tx.fieldQty}</span><span class="v">${tx.qtyFmt(t.skuKinds,t.totalQty)}</span></div>
+        <div class="field-row"><span class="k">${tx.fieldOrderTime}</span><span class="v">${t.orderTime}</span></div>
+      </div>
+      <div class="dashed-divider" style="margin:8px 0 0"></div>
+      <div class="task-actions">
+        <button class="btn-secondary" onclick="openDetail('${t.id}')">${tx.btnDetail}</button>
+        ${pend
+          ?`<button class="btn-primary" onclick="confirmAccept('${t.id}',false)">${tx.btnAccept}</button>`
+          :`<button class="btn-primary" onclick="goPickWork('${t.id}')">${tx.btnGoPick}</button>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+function switchTab(tab){
+  curTab=tab;
+  document.getElementById("tab-pending").classList.toggle("on",tab==="pending");
+  document.getElementById("tab-mine").classList.toggle("on",tab==="mine");
+  renderList();
+}
+function setFilter(f,el){
+  curFilter=f;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on");
+  renderList();
+}
+function toggleSort(){
+  sortDesc=!sortDesc;
+  document.getElementById("sortArrow").textContent=sortDesc?"▼":"▲";
+  renderList();
+}
+function doSearch(){keyword=document.getElementById("searchInput").value.trim();renderList()}
+
+/* ===== 详情 ===== */
+function openDetail(id){
+  const t=getTask(id);if(!t)return;
+  currentTaskId=id;
+  refreshDetail();
+  showScreen("detail");
+}
+function refreshDetail(){
+  const t=getTask(currentTaskId);if(!t)return;
+  const tx=T[locale];
+  const set=(eid,v)=>{const el=document.getElementById(eid);if(el)el.textContent=v};
+  set("dState",t.status==="pending"?tx.detailPending:tx.detailAccepted);
+  set("dOrderNoLabel",tx.labelOrderNo);set("dOrderNo",t.orderNo);
+  set("dTaskIdLabel",tx.labelTaskId);set("dTaskId",t.id);
+  set("dCopyOrder",tx.copy);set("dCopyTask",tx.copy);
+  set("dDelivery",`${typeLabel(t.type)} | ${slaLabel(t.type)} | ${t.distance}`);
+  set("dkWarehouse",tx.fieldWarehouseD);set("dWarehouse",t.warehouse);
+  set("dkReserve",tx.fieldReserve);set("dReserve",t.reserveTime);
+  set("dkOos",tx.fieldOos);set("dOos",t.oos);
+  set("dkRemark",tx.fieldRemark);set("dRemark",t.remark);
+  set("dContact",`${t.receiver.name} | ${t.receiver.phone}`);
+  set("dPostcodeLabel",tx.postcode);set("dPostcode",t.receiver.postcode);
+  document.getElementById("addrToggle").textContent=tx.addrShow;
+  document.getElementById("addrBlock").classList.remove("show");
+  set("dAddrFull",t.receiver.addrFull);
+  set("dAddrPointLabel",tx.addrPoint);set("dAddrPoint",t.receiver.addrPoint);
+  set("dAddrFloorLabel",tx.addrFloor);set("dDoor",t.receiver.door);
+  set("dWechat",t.receiver.wechat);set("dWhatsapp",t.receiver.whatsapp);
+  set("dGoodsLabel",tx.goodsTitle);
+  set("dSkuCount",tx.skuCountFmt(t.skuKinds,t.totalQty));
+  document.getElementById("dBatch").innerHTML=
+    `${tx.batchLabel}#${t.batch.no} | <span class="seq">${tx.batchNo}${t.batch.no}</span>/${t.batch.total}${tx.batchOf}`;
+  document.getElementById("dSkuList").innerHTML=t.skus.map(s=>`
+    <div class="sku-item">
+      <div class="sku-loc"><span>🚚 <span class="zone">${s.zone}</span> ${s.loc}</span><span>▮▮ ${s.barcode}</span></div>
+      <div class="sku-main">
+        <div class="sku-img">${s.img}</div>
+        <div class="sku-info">
+          <div class="sku-name">${s.name}</div>
+          <div class="sku-spec">${s.spec}</div>
+          <div class="sku-price">${tx.saleLabel} <span class="sale">${s.sale}</span><span class="cost">${tx.costLabel} ${s.cost}</span></div>
+        </div>
+        <div class="sku-qty">x${s.qty}</div>
+      </div>
+    </div>`).join("");
+  set("dPayAmount",t.payAmount);set("dCostAmount",t.costAmount);
+  set("dAmountPayLabel",tx.payAmount);set("dAmountCostLabel",tx.totalCost);
+  set("dLogTitle",tx.logOrder);
+  document.getElementById("dLogDetail").innerHTML=
+    `${tx.logBuyer}${t.buyer}<br>${tx.logOrderTime}${t.orderTime}<br>${tx.logPayTime}${t.payTime}`;
+  set("confirmAcceptBtn",tx.confirmBtn);
+  set("modalTitle",tx.modalTitle);set("modalCancel",tx.modalCancel);set("modalOk",tx.modalConfirm);
+  document.getElementById("detailBar").classList.toggle("show",t.status==="pending");
+}
+function toggleAddr(){
+  const tx=T[locale];
+  const b=document.getElementById("addrBlock");b.classList.toggle("show");
+  document.getElementById("addrToggle").textContent=b.classList.contains("show")?tx.addrHide:tx.addrShow;
+}
+
+/* ===== 接单 ===== */
+function confirmAccept(id,fromDetail){
+  pendingAcceptId=id;
+  const tx=T[locale];
+  document.getElementById("modalTitle").textContent=tx.modalTitle;
+  document.getElementById("modalDesc").textContent=`${id} — ${tx.modalDescTpl}`;
+  document.getElementById("modalCancel").textContent=tx.modalCancel;
+  document.getElementById("modalOk").textContent=tx.modalConfirm;
+  document.getElementById("modalMask").classList.add("show");
+  document.getElementById("modalOk").onclick=()=>doAccept(fromDetail);
+}
+function doAccept(fromDetail){
+  const t=getTask(pendingAcceptId);closeModal();
+  if(!t||t.status!=="pending"){toast(T[locale].alreadyAccepted);renderList();return}
+  t.status="accepted";toast(T[locale].acceptSuccess);
+  if(fromDetail){setTimeout(()=>{switchTab("mine");showScreen("list")},600)}
+  else renderList();
+}
+function closeModal(){document.getElementById("modalMask").classList.remove("show")}
+
+/* ===== 去揽货 ===== */
+function goPickWork(id){
+  const q=new URLSearchParams(window.location.search);
+  q.set("taskId",id);q.set("locale",locale);
+  window.location.href=`pickup-work.html?${q.toString()}`;
+}
+
+/* ===== 工具 ===== */
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),1600);
+}
+function copyText(eid){
+  const v=document.getElementById(eid).textContent;
+  if(navigator.clipboard)navigator.clipboard.writeText(v).catch(()=>{});
+  toast(T[locale].copied);
+}
+
+/* ===== 初始化 ===== */
+const initTab=new URLSearchParams(location.search).get("tab");
+setLocale(locale);
+if(initTab==="mine")switchTab("mine");
+</script>
+</body>
+</html>

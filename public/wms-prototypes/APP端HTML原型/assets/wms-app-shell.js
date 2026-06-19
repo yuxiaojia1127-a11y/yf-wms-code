@@ -91,6 +91,18 @@
       return `./pages/mine.html?${stateQuery()}`;
     }
     if (state.route === "feature") {
+      if (state.menuId === "outbound_order") {
+        return `./pages/pickup-accept.html?${stateQuery()}`;
+      }
+      if (state.menuId === "outbound_wait_pick") {
+        return `./pages/pickup-accept.html?${stateQuery()}&tab=mine`;
+      }
+      if (state.menuId === "create_inbound") {
+        return `./pages/inbound-create.html?${stateQuery()}`;
+      }
+      if (state.menuId === "inventory_in_record") {
+        return `./pages/inbound-list.html?${stateQuery()}`;
+      }
       return `./pages/feature.html?${stateQuery({ menu: state.menuId })}`;
     }
     return `./pages/workbench.html?${stateQuery()}`;
@@ -317,6 +329,9 @@
     document.getElementById("navMine").textContent = t.navMine;
     document.getElementById("navHomeItem").classList.toggle("active", state.route === "workbench" || state.route === "feature");
     document.getElementById("navMineItem").classList.toggle("active", state.route === "mine");
+    // feature路由时隐藏底部导航栏，子页面自带操作栏
+    const bottomNav = document.querySelector(".bottom-nav");
+    if (bottomNav) bottomNav.classList.toggle("is-hidden", state.route === "feature");
     document.getElementById("panelWarehouseCount").textContent = state.warehouses.length;
     document.getElementById("panelMenuCount").textContent = enabledMenus.length;
 

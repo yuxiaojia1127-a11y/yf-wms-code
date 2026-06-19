@@ -306,8 +306,17 @@
         { id: 'mine', module: 'base', label: '我的', code: 'APP-022', href: './pages/mine.html' }
       ];
       var virtualPages = [
-        { id: 'create_inbound', module: 'inbound', label: '新建入库单', code: 'IB-NEW', href: './pages/feature.html?menu=create_inbound' }
+        { id: 'inbound_order_list', module: 'inbound', label: '入库单', code: 'IB-LIST', href: './pages/inbound-list.html' },
+        { id: 'create_inbound', module: 'inbound', label: '新建入库单', code: 'IB-NEW', href: './pages/inbound-create.html' }
       ];
+
+      // 「入库记录(IV-04)」与入库模块的「入库单」为同一列表页，统一收敛到入库，目录其他模块不再重复展示
+      var excludeIds = { inventory_in_record: true };
+      // 已落地的入库原型页：直接指向独立页面（其余 IB-01~04 暂用 feature 占位）
+      var hrefOverrides = {
+        inbound_order_list: './pages/inbound-list.html',
+        create_inbound: './pages/inbound-create.html'
+      };
 
       function getLabel(item) {
         return (locale.metrics && locale.metrics[item.id]) ||
@@ -317,6 +326,7 @@
       }
 
       function getHref(item) {
+        if (hrefOverrides[item.id]) return hrefOverrides[item.id];
         if (item.href) return item.href;
         return './pages/feature.html?menu=' + encodeURIComponent(item.id);
       }
@@ -343,8 +353,11 @@
         ].join('');
       }
 
+      var allPages = basePages.concat(menuDefs, virtualPages).filter(function (item) {
+        return !excludeIds[item.id];
+      });
       var grouped = {};
-      basePages.concat(menuDefs, virtualPages).forEach(function (item) {
+      allPages.forEach(function (item) {
         var moduleId = item.module || 'base';
         if (!grouped[moduleId]) grouped[moduleId] = [];
         grouped[moduleId].push(item);
@@ -361,7 +374,7 @@
       document.getElementById('moduleCount').textContent = order.filter(function (moduleId) {
         return grouped[moduleId] && grouped[moduleId].length;
       }).length;
-      document.getElementById('pageCount').textContent = basePages.length + menuDefs.length + virtualPages.length;
+      document.getElementById('pageCount').textContent = allPages.length;
     })();
   </script>
 </body>

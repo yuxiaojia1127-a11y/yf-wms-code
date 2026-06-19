@@ -67,4 +67,7 @@ if errors:
 print("   内嵌副本检查通过")
 EOF
 
+echo "==> 校验需求文档副本与源文档一致（assets/requirements）"
+python3 "$REPO_ROOT/scripts/sync-requirements.py" --check
+
 echo "✅ 校验全部通过"

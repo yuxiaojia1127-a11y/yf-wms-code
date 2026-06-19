@@ -183,6 +183,22 @@
       return;
     }
     if (route === "feature") {
+      if (menuId === "outbound_order") {
+        window.location.href = `pickup-accept.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "outbound_wait_pick") {
+        window.location.href = `pickup-accept.html?${stateQuery()}&tab=mine`;
+        return;
+      }
+      if (menuId === "create_inbound") {
+        window.location.href = `inbound-create.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "inventory_in_record") {
+        window.location.href = `inbound-list.html?${stateQuery()}`;
+        return;
+      }
       window.location.href = `feature.html?${stateQuery({ menu: menuId })}`;
       return;
     }
@@ -303,6 +319,10 @@
             ${metricItem("inbound_return", t.metrics.inbound_return, getCount(counts, "inbound_return"))}
             ${metricItem("inbound_purchase", t.metrics.inbound_purchase, getCount(counts, "inbound_purchase"))}
           </div>
+          <div class="replica-shortcuts">
+            ${shortcutItem("inventory_in_record", "purple", "inboundRecord", t.shortcuts.inbound_order_list)}
+            ${shortcutItem("create_inbound", "green", "addInbound", t.shortcuts.create_inbound)}
+          </div>
         </section>
       `);
     }
@@ -315,10 +335,8 @@
         </div>
         <div class="replica-shortcuts">
           ${shortcutItem("shipping_tracking", "green", "tracking", t.shortcuts.shipping_tracking)}
-          ${shortcutItem("create_inbound", "purple", "addInbound", t.shortcuts.create_inbound)}
           ${shortcutItem("inventory_query", "blue", "stock", t.shortcuts.inventory_query)}
           ${shortcutItem("inventory_out_record", "green", "outboundRecord", t.shortcuts.inventory_out_record)}
-          ${shortcutItem("inventory_in_record", "purple", "inboundRecord", t.shortcuts.inventory_in_record)}
           ${shortcutItem("inventory_count", "orange", "count", t.shortcuts.inventory_count)}
         </div>
       </section>

@@ -4,6 +4,8 @@
   "description": "WMS HTML 原型维护与部署",
   "scripts": {
     "preview:wms-prototypes": "python3 public/wms-prototypes/WEB端HTML原型/prototype_live_server.py --port 8091",
+    "sync:requirements": "python3 scripts/sync-requirements.py",
+    "watch:requirements": "python3 scripts/sync-requirements.py --watch",
     "check:wms-prototypes": "bash scripts/check-wms-prototypes.sh",
     "deploy:wms-prototypes": "bash scripts/deploy-wms-prototypes.sh"
   }

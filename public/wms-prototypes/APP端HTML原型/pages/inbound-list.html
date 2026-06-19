@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入库单 · Inbound Orders</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:10px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12)}
+.screen{display:none;min-height:812px;flex-direction:column}
+.screen.active{display:flex}
+.app-nav{height:46px;display:flex;align-items:center;padding:0 10px;gap:8px;background:#fff;border-bottom:1px solid var(--app-border)}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:22px;color:var(--app-text);flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.nav-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
+.lang-btn:active{background:var(--app-primary);color:#fff}
+.new-btn{border:none;background:var(--app-primary);color:#fff;font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;font-weight:600}
+.new-btn:active{background:var(--app-primary-strong)}
+.search-row{display:flex;gap:8px;padding:10px 12px 6px}
+.search-box{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:0 12px;height:36px}
+.search-box input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.search-box input::placeholder{color:var(--app-text-muted)}
+.search-btn{border:none;background:var(--app-primary);color:#fff;font-size:13px;border-radius:18px;padding:0 16px;height:36px;cursor:pointer}
+.filter-btn{border:none;background:#fff;border-radius:18px;width:40px;height:36px;cursor:pointer;font-size:16px;position:relative}
+.filter-btn.on{color:var(--app-primary)}
+.filter-dot{position:absolute;top:6px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--app-danger)}
+.tabs-row{display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+.tabs{display:flex;gap:18px;padding:4px 0 0}
+.ib-tab{font-size:14px;color:var(--app-text-secondary);padding:8px 0 10px;cursor:pointer;position:relative}
+.ib-tab.on{color:var(--app-text);font-weight:600;font-size:15px}
+.ib-tab.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:4px;width:22px;height:3px;border-radius:2px;background:var(--app-primary)}
+.stat-bar{padding:2px 14px 6px;font-size:12px;color:var(--app-text-secondary)}
+.stat-bar b{color:var(--app-text);font-weight:600}
+.list-body{flex:1;overflow-y:auto;padding:8px 12px 20px}
+.ib-order-card{background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:12px;margin-bottom:10px;cursor:pointer}
+.ib-order-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ib-order-no{font-size:14px;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace}
+.ib-badge{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600}
+.ib-badge.draft{background:rgba(217,154,25,.12);color:var(--app-warning)}
+.ib-badge.done{background:rgba(104,185,46,.12);color:var(--app-success)}
+.ib-badge.void{background:rgba(156,163,175,.16);color:var(--app-text-muted)}
+.ib-order-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.ib-order-row .k{color:var(--app-text-secondary)}
+.ib-order-row .v{color:var(--app-text);text-align:right;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ib-order-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--app-border);font-size:12px;color:var(--app-text-secondary)}
+.ib-order-amount{font-size:15px;font-weight:700;color:var(--app-danger)}
+.ib-order-amount.zero{color:var(--app-text-muted);font-weight:600}
+.ib-list-empty{text-align:center;color:var(--app-text-muted);font-size:13px;padding:70px 0}
+.ib-list-empty div{margin-top:8px}
+.list-more{text-align:center;color:var(--app-text-muted);font-size:12px;padding:10px 0 4px}
+.detail-body{flex:1;overflow-y:auto;padding:12px 12px 24px}
+.detail-banner{background:linear-gradient(120deg,var(--app-primary),var(--app-primary-strong));color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.detail-banner .no{font-size:17px;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace;display:flex;align-items:center;gap:8px}
+.copy-tag{font-size:11px;background:rgba(255,255,255,.22);border-radius:6px;padding:2px 7px;cursor:pointer}
+.detail-banner .ib-badge{background:rgba(255,255,255,.9)!important}
+.ib-card{background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:12px;margin-bottom:10px}
+.ib-card-title{font-size:14px;font-weight:600;margin-bottom:10px}
+.ib-info-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--app-border)}
+.ib-info-row:last-child{border-bottom:none}
+.ib-info-row .k{color:var(--app-text-secondary);flex-shrink:0}
+.ib-info-row .v{text-align:right;color:var(--app-text);margin-left:12px}
+.ib-ditem{background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:8px}
+.ib-ditem:last-child{margin-bottom:0}
+.ib-ditem-top{display:flex;justify-content:space-between;gap:8px}
+.ib-ditem-name{font-size:13px;font-weight:600;line-height:1.4}
+.ib-ditem-amt{font-size:13px;font-weight:700;color:var(--app-danger);flex-shrink:0}
+.ib-ditem-sub{font-size:11px;color:var(--app-text-muted);margin:4px 0}
+.ib-ditem-tag{display:inline-block;font-size:10px;color:var(--app-primary-strong);background:var(--app-primary-soft);border-radius:6px;padding:1px 7px;margin:2px 0 4px}
+.ib-ditem-qty{font-size:12px;color:var(--app-text-secondary)}
+.ib-ditem-qty b{color:var(--app-text);font-size:14px}
+.amount-card{display:flex;background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:14px 0;margin-bottom:10px;text-align:center}
+.amount-card>div{flex:1;border-right:1px solid var(--app-border)}
+.amount-card>div:last-child{border-right:none}
+.amount-num{font-size:18px;font-weight:700}
+.amount-num.money{color:var(--app-danger)}
+.amount-label{font-size:11px;color:var(--app-text-secondary);margin-top:4px}
+.ib-log-node{display:flex;gap:10px}
+.ib-log-rail{display:flex;flex-direction:column;align-items:center}
+.ib-log-dot{width:22px;height:22px;border-radius:50%;background:var(--app-primary);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib-log-line{flex:1;border-left:2px dashed var(--app-border);margin:2px 0}
+.ib-log-body{padding-bottom:14px}
+.ib-log-title{font-size:13px;font-weight:600;color:var(--app-text)}
+.ib-log-meta{font-size:11px;color:var(--app-text-muted);margin-top:3px}
+.detail-foot{display:flex;gap:10px;padding:8px 12px 16px;background:#fff;border-top:1px solid var(--app-border)}
+.detail-foot.hidden{display:none}
+.detail-foot button{height:42px;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;flex:1}
+.btn-ghost{border:1px solid var(--app-primary);background:#fff;color:var(--app-primary)}
+.btn-danger-o{border:1px solid var(--app-danger);background:#fff;color:var(--app-danger)}
+.btn-primary{border:none;background:var(--app-primary);color:#fff}
+.btn-primary:active{background:var(--app-primary-strong)}
+.mask{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}
+.mask.show{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:80%;background:#fff;border-radius:16px 16px 0 0;z-index:55;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s}
+.mask.show .sheet{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+.sheet-head h3{font-size:15px}
+.sheet-close{border:none;background:none;font-size:18px;color:var(--app-text-muted);cursor:pointer}
+.filter-body{padding:4px 16px 8px;overflow-y:auto}
+.filter-group{margin-bottom:14px}
+.filter-label{font-size:13px;color:var(--app-text-secondary);margin-bottom:8px}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary);font-size:12px;padding:6px 13px;border-radius:16px;cursor:pointer}
+.fchip.on{background:var(--app-primary);border-color:var(--app-primary);color:#fff;font-weight:600}
+.filter-dates{display:flex;align-items:center;gap:8px}
+.filter-dates input{flex:1;border:1px solid var(--app-border);border-radius:8px;height:36px;padding:0 10px;outline:none;font-size:13px;color:var(--app-text)}
+.filter-foot{display:flex;gap:10px;padding:10px 16px 18px;border-top:1px solid var(--app-border)}
+.filter-foot button{flex:1;height:42px;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-reset{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary)}
+.btn-apply{border:none;background:var(--app-primary);color:#fff}
+#confirmMask{align-items:center;justify-content:center}
+#confirmMask.show{display:flex}
+.modal{width:286px;background:#fff;border-radius:14px;padding:18px;text-align:center}
+.modal h3{font-size:15px;margin-bottom:6px}
+.modal p{font-size:12.5px;color:var(--app-text-secondary);margin-bottom:16px;line-height:1.6}
+.modal-acts{display:flex;gap:10px}
+.modal-acts button{flex:1;height:40px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer}
+.modal-acts .ok-danger{border:none;background:var(--app-danger);color:#fff}
+.modal-acts .ok-primary{border:none;background:var(--app-primary);color:#fff}
+.toast{position:absolute;left:50%;top:46%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="../assets/wms-app.css">
+</head>
+<body class="content-page" data-page="inbound-list" data-locale="zh">
+<div class="phone">
+  <!-- 列表 -->
+  <section class="screen active" id="screen-list">
+    <header class="app-nav">
+      <button class="nav-back" id="navBack">‹</button>
+      <div class="nav-title" id="navTitle">入库单</div>
+      <div class="nav-right">
+        <button class="lang-btn">EN</button>
+        <button class="new-btn" id="newBtn">＋ 新建</button>
+      </div>
+    </header>
+    <div class="search-row">
+      <div class="search-box"><span style="color:var(--app-text-muted)">🔍</span><input id="searchInput" placeholder="搜索入库单号"></div>
+      <button class="filter-btn" id="filterBtn">⛃<span class="filter-dot" id="filterDot" style="display:none"></span></button>
+      <button class="search-btn" id="searchBtn">搜索</button>
+    </div>
+    <div class="tabs-row"><div class="tabs" id="tabs"></div></div>
+    <div class="stat-bar" id="statBar"></div>
+    <div class="list-body" id="orderList"></div>
+
+    <div class="mask" id="filterSheet">
+      <div class="sheet" onclick="event.stopPropagation()">
+        <div class="sheet-head"><h3 id="filterTitle">筛选</h3><button class="sheet-close" id="filterClose">✕</button></div>
+        <div class="filter-body">
+          <div class="filter-group"><div class="filter-label" id="flbType">入库类型</div><div class="filter-chips" id="flType"></div></div>
+          <div class="filter-group"><div class="filter-label" id="flbWh">库房</div><div class="filter-chips" id="flWh"></div></div>
+          <div class="filter-group"><div class="filter-label" id="flbDate">入库时间</div><div class="filter-dates"><input type="date" id="flStart"><span style="color:var(--app-text-muted)">—</span><input type="date" id="flEnd"></div></div>
+        </div>
+        <div class="filter-foot"><button class="btn-reset" id="filterReset">重置</button><button class="btn-apply" id="filterApply">确定</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 详情 -->
+  <section class="screen" id="screen-detail">
+    <header class="app-nav">
+      <button class="nav-back" id="dNavBack">‹</button>
+      <div class="nav-title" id="dNavTitle">入库单详情</div>
+      <span style="width:32px"></span>
+    </header>
+    <div class="detail-body">
+      <div class="detail-banner">
+        <span class="no"><span id="dOrderNo">RK—</span><span class="copy-tag" id="dCopyNo">复制</span></span>
+        <span class="ib-badge done" id="dStatusBadge">已入库</span>
+      </div>
+      <div class="ib-card"><div class="ib-card-title" id="dBaseTitle">基本信息</div><div id="dBaseInfo"></div></div>
+      <div class="ib-card"><div class="ib-card-title" id="dItemsTitle">入库明细</div><div id="dItems"></div></div>
+      <div class="amount-card">
+        <div><div class="amount-num" id="dSumKinds">0</div><div class="amount-label" id="dLblKinds">种</div></div>
+        <div><div class="amount-num" id="dSumQty">0</div><div class="amount-label" id="dLblQty">件</div></div>
+        <div><div class="amount-num money" id="dSumAmount">RM 0</div><div class="amount-label" id="dLblAmount">合计金额</div></div>
+      </div>
+      <div class="ib-card"><div class="ib-card-title" id="dLogTitle">入库流水</div><div id="dLog"></div></div>
+    </div>
+    <footer class="detail-foot hidden" id="detailFoot"></footer>
+  </section>
+
+  <div class="mask" id="confirmMask">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3 id="cfTitle"></h3><p id="cfDesc"></p>
+      <div class="modal-acts"><button class="btn-ghost" id="cfCancel">取消</button><button id="cfOk">确定</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+ * WMS APP 入库单（查看列表 + 详情）· 单文件自包含
+ * 数据口径：MySQL 库 wms（w_wms_inbound_orders / _items / warehouses / item_skus+items）
+ * 状态：1=草稿 2=已入库 3=已作废；货币 RM；已去掉来源单号
+ * 与 inbound-create.html 共用同一份数据块（保持两页一致）
+ * ============================================================ */
+const inboundTypes=[{id:"purchase",zh:"采购入库",en:"Purchase"},{id:"return",zh:"退货入库",en:"Return"},{id:"transfer",zh:"调拨入库",en:"Transfer"},{id:"other",zh:"其他入库",en:"Other"}];
+const warehouses=[{id:15,name:"piao自营",code:"WH-15"},{id:7,name:"KL自营仓库",code:"WH-07"},{id:8,name:"静库1",code:"WH-08"},{id:10,name:"嘿咻库房",code:"WH-10"},{id:13,name:"静库2",code:"WH-13"},{id:6,name:"KL超市默认库房",code:"WH-06"}];
+const statusMap={1:{zh:"草稿",en:"Draft",className:"draft"},2:{zh:"已入库",en:"Inbound",className:"done"},3:{zh:"已作废",en:"Voided",className:"void"}};
+const skuCatalog=[
+ {skuId:77,name:"乐事鲜浓蕃茄味薯片 90g",brand:"乐事",category:"膨化零食",spec:"90g*1桶",unit:"桶",barcode:"6924743915855",price:8.90},
+ {skuId:78,name:"百草味津酥大麻花 120g",brand:"百草味",category:"糕点点心",spec:"120g*1袋",unit:"袋",barcode:"6920887361234",price:6.50},
+ {skuId:65,name:"黄飞红麻辣花生 210g",brand:"黄飞红",category:"坚果炒货",spec:"210g*1袋",unit:"袋",barcode:"12345678",price:10.00},
+ {skuId:68,name:"旺旺雪饼 84g",brand:"旺旺",category:"饼干蛋糕",spec:"84g*1袋",unit:"袋",barcode:"9501101530",price:3.50},
+ {skuId:67,name:"甘源缤纷每日豆果 208g",brand:"甘源",category:"",spec:"208g*1包",unit:"包",barcode:"1000001",price:1.20},
+ {skuId:174,name:"MAMEE金厨隆冬风味 97g*4/袋",brand:"",category:"方便速食",spec:"2包",unit:"袋",barcode:"333333",price:2.00},
+ {skuId:99,name:"Omega3鸡蛋 600g（10枚）",brand:"",category:"",spec:"10枚/盒",unit:"盒",barcode:"5000001",price:1.10},
+ {skuId:83,name:"商品分发",brand:"",category:"",spec:"",unit:"袋",barcode:"",price:1.30},
+ {skuId:200,name:"老干妈干煸肉丝油辣椒 260g",brand:"",category:"罐头酱菜",spec:"",unit:"",barcode:"",price:0.00}
+];
+const orders=[
+ {id:101,no:"RK202606180012",type:"purchase",warehouseId:15,warehouseName:"piao自营",date:"2026-06-18",time:"16:17",ts:1781770640,status:2,remark:"供应商批量到货，已核对效期",creator:"杨文强",items:[
+   {lineNo:1,skuId:77,name:"乐事鲜浓蕃茄味薯片 90g",brand:"乐事",category:"膨化零食",spec:"90g*1桶",unit:"桶",barcode:"6924743915855",qty:12,price:8.90,amount:106.80,expiry:"2026-12-01"},
+   {lineNo:2,skuId:78,name:"百草味津酥大麻花 120g",brand:"百草味",category:"糕点点心",spec:"120g*1袋",unit:"袋",barcode:"6920887361234",qty:8,price:6.50,amount:52.00,expiry:"2026-10-15"}]},
+ {id:102,no:"RK202606180011",type:"other",warehouseId:13,warehouseName:"静库2",date:"2026-06-18",time:"16:16",ts:1781770600,status:2,remark:"",creator:"piaole",items:[
+   {lineNo:1,skuId:200,name:"老干妈干煸肉丝油辣椒 260g",qty:10,price:0.00,amount:0.00}]},
+ {id:103,no:"RK202606180009",type:"return",warehouseId:7,warehouseName:"KL自营仓库",date:"2026-06-18",time:"15:38",ts:1781768280,status:2,remark:"",creator:"piaole",items:[
+   {lineNo:1,skuId:67,name:"甘源缤纷每日豆果 208g",brand:"甘源",category:"",spec:"208g*1包",unit:"包",barcode:"1000001",qty:3,price:1.20,amount:3.60,expiry:"2026-09-30"},
+   {lineNo:2,skuId:174,name:"MAMEE金厨隆冬风味 97g*4/袋",brand:"",category:"方便速食",spec:"2包",unit:"袋",barcode:"333333",qty:6,price:2.00,amount:12.00}]},
+ {id:104,no:"RK202606190003",type:"purchase",warehouseId:15,warehouseName:"piao自营",date:"2026-06-19",time:"09:28",ts:1781854080,status:1,remark:"今日到货，待复核数量后提交",creator:"piaole",items:[
+   {lineNo:1,skuId:99,name:"Omega3鸡蛋 600g（10枚）",spec:"10枚/盒",unit:"盒",barcode:"5000001",qty:12,price:1.10,amount:13.20,expiry:"2026-07-20"},
+   {lineNo:2,skuId:68,name:"旺旺雪饼 84g",brand:"旺旺",category:"饼干蛋糕",spec:"84g*1袋",unit:"袋",barcode:"9501101530",qty:6,price:3.50,amount:21.00}]},
+ {id:105,no:"RK202606180007",type:"purchase",warehouseId:15,warehouseName:"piao自营",date:"2026-06-18",time:"13:46",ts:1781761560,status:2,remark:"常规补货",creator:"杨文强",items:[
+   {lineNo:1,skuId:65,name:"黄飞红麻辣花生 210g",brand:"黄飞红",category:"坚果炒货",spec:"210g*1袋",unit:"袋",barcode:"12345678",qty:12,price:10.00,amount:120.00}]},
+ {id:106,no:"RK202606180004",type:"transfer",warehouseId:13,warehouseName:"静库2",date:"2026-06-18",time:"11:09",ts:1781751540,status:3,remark:"调拨单撤销，入库单作废",creator:"supadmin",items:[
+   {lineNo:1,skuId:83,name:"商品分发",unit:"袋",qty:10,price:1.30,amount:13.00}]}
+];
+const listStats={todayDone:4,draft:1};
+
+(()=>{
+ const PAGE_SIZE=4;
+ const params=new URLSearchParams(location.search);
+ const isEmbedded=window.parent&&window.parent!==window;
+ let locale=params.get("locale")||"zh";
+ const $=(id)=>document.getElementById(id);
+ const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const money=(n)=>`RM ${Number(n||0).toFixed(2)}`;
+ const typeMeta=(id)=>inboundTypes.find(t=>t.id===id)||inboundTypes[0];
+ const T=()=>locale==="zh";
+
+ /* —— 导航契约（与现有原型一致） —— */
+ function carryQuery(extra){const q=new URLSearchParams(location.search);q.set("locale",locale);if(extra)Object.entries(extra).forEach(([k,v])=>q.set(k,v));return q.toString();}
+ function goWorkbench(){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else location.href="workbench.html?"+carryQuery();}
+ function goFeature(menuId,page,extra){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"feature",menuId},"*");else location.href=page+"?"+carryQuery(extra);}
+ function goEdit(id){try{localStorage.setItem("wms_inbound_edit",String(id));}catch(e){}goFeature("create_inbound","inbound-create.html",{edit:id});}
+
+ const state={tab:"all",kw:"",page:1,filter:{type:"",whId:"",start:"",end:""}};
+ let curId=null,pendingCb=null;
+
+ function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1500);}
+ function statusZh(s){const m=statusMap[s];return T()?m.zh:m.en;}
+ function orderTotals(o){return{kinds:o.items.length,qty:o.items.reduce((s,l)=>s+l.qty,0),amount:o.items.reduce((s,l)=>s+l.amount,0)};}
+
+ function renderStatic(){
+   $("navTitle").textContent=T()?"入库单":"Inbound";
+   $("searchInput").placeholder=T()?"搜索入库单号":"Search order no.";
+   $("newBtn").textContent="＋ "+(T()?"新建":"New");
+   $("filterTitle").textContent=T()?"筛选":"Filter";
+   $("flbType").textContent=T()?"入库类型":"Type";$("flbWh").textContent=T()?"库房":"Warehouse";$("flbDate").textContent=T()?"入库时间":"Inbound Time";
+   $("filterReset").textContent=T()?"重置":"Reset";$("filterApply").textContent=T()?"确定":"Apply";
+   const tabs=[["all",T()?"全部":"All"],["draft",T()?"草稿":"Draft"],["done",T()?"已入库":"Inbound"],["void",T()?"已作废":"Voided"]];
+   $("tabs").innerHTML=tabs.map(([k,l])=>`<div class="ib-tab ${k===state.tab?"on":""}" data-tab="${k}">${l}</div>`).join("");
+   document.querySelectorAll(".lang-btn").forEach(b=>b.textContent=T()?"EN":"中文");
+   document.body.dataset.locale=locale;
+ }
+ function renderStat(){$("statBar").innerHTML=T()?`今日入库 <b>${listStats.todayDone}</b> 单 · 草稿 <b>${listStats.draft}</b>`:`Today <b>${listStats.todayDone}</b> done · Draft <b>${listStats.draft}</b>`;}
+
+ function filtered(){
+   const map={draft:1,done:2,void:3};const kw=state.kw.trim().toLowerCase();const f=state.filter;
+   return orders.filter(o=>{
+     if(state.tab!=="all"&&o.status!==map[state.tab])return false;
+     if(kw&&!o.no.toLowerCase().includes(kw))return false;
+     if(f.type&&o.type!==f.type)return false;
+     if(f.whId&&o.warehouseId!==Number(f.whId))return false;
+     if(f.start&&o.date<f.start)return false;
+     if(f.end&&o.date>f.end)return false;
+     return true;
+   });
+ }
+ function cardHtml(o){
+   const st=statusMap[o.status],tt=orderTotals(o);
+   const remarkRow=o.remark?`<div class="ib-order-row"><span class="k">${T()?"备注":"Remark"}</span><span class="v">${esc(o.remark)}</span></div>`:"";
+   return `<div class="ib-order-card" data-id="${o.id}">
+     <div class="ib-order-head"><span class="ib-order-no">${o.no}</span><span class="ib-badge ${st.className}">${statusZh(o.status)}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"入库类型":"Type"}</span><span class="v">${T()?typeMeta(o.type).zh:typeMeta(o.type).en}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"库房":"Warehouse"}</span><span class="v">${esc(o.warehouseName)}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"入库时间":"Time"}</span><span class="v">${o.date} ${o.time}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"商品数量":"Items"}</span><span class="v">${T()?`${tt.kinds}（共 ${tt.qty} 件）`:`${tt.kinds} kinds (${tt.qty} pcs)`}</span></div>
+     ${remarkRow}
+     <div class="ib-order-foot"><span></span><span class="ib-order-amount ${tt.amount>0?"":"zero"}">${money(tt.amount)}</span></div>
+   </div>`;
+ }
+ function renderList(reset){
+   if(reset)state.page=1;
+   const rows=filtered();
+   if(!rows.length){$("orderList").innerHTML=`<div class="ib-list-empty">📦<div>${T()?"没有符合条件的入库单":"No matching orders"}</div></div>`;return;}
+   const shown=rows.slice(0,state.page*PAGE_SIZE);
+   let html=shown.map(cardHtml).join("");
+   if(shown.length<rows.length)html+=`<div class="list-more">${T()?"上拉加载更多":"Pull to load more"}</div>`;
+   else if(rows.length>PAGE_SIZE)html+=`<div class="list-more">${T()?"没有更多了":"No more"}</div>`;
+   $("orderList").innerHTML=html;
+ }
+
+ function subInfo(l){const parts=[l.brand,l.category,l.spec,l.unit].filter(Boolean);if(l.barcode)parts.push((T()?"条码":"Barcode")+" "+l.barcode);return parts.join(" · ");}
+ function openDetail(id){
+   const o=orders.find(x=>x.id===id);if(!o)return;
+   const st=statusMap[o.status],tt=orderTotals(o);
+   $("dNavTitle").textContent=T()?"入库单详情":"Inbound Detail";
+   $("dOrderNo").textContent=o.no;$("dCopyNo").textContent=T()?"复制":"Copy";
+   $("dStatusBadge").className=`ib-badge ${st.className}`;$("dStatusBadge").textContent=statusZh(o.status);
+   $("dBaseTitle").textContent=T()?"基本信息":"Basic Info";
+   $("dItemsTitle").textContent=`${T()?"入库明细":"Items"}（${tt.kinds}）`;
+   $("dLogTitle").textContent=T()?"入库流水":"Timeline";
+   $("dLblKinds").textContent=T()?"种":"kinds";$("dLblQty").textContent=T()?"件":"pcs";$("dLblAmount").textContent=T()?"合计金额":"Total";
+   const rows=[[T()?"入库类型":"Type",T()?typeMeta(o.type).zh:typeMeta(o.type).en],[T()?"库房":"Warehouse",esc(o.warehouseName)],[T()?"入库时间":"Time",`${o.date} ${o.time}`]];
+   if(o.remark)rows.push([T()?"备注":"Remark",esc(o.remark)]);
+   $("dBaseInfo").innerHTML=rows.map(([k,v])=>`<div class="ib-info-row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+   $("dItems").innerHTML=o.items.map(l=>{
+     const sub=subInfo(l);
+     const expiry=l.expiry?`<div class="ib-ditem-tag">${T()?"有效期":"Expiry"} ${l.expiry}</div>`:"";
+     const qtyLine=l.price>0?`${T()?"数量":"Qty"}：<b>${l.qty}</b> × ${money(l.price)}`:`${T()?"数量":"Qty"}：<b>${l.qty}</b>`;
+     const amt=l.amount>0?`<div class="ib-ditem-amt">${money(l.amount)}</div>`:"";
+     return `<div class="ib-ditem"><div class="ib-ditem-top"><div class="ib-ditem-name">${esc(l.name)}</div>${amt}</div>${sub?`<div class="ib-ditem-sub">${esc(sub)}</div>`:""}${expiry}<div class="ib-ditem-qty">${qtyLine}</div></div>`;
+   }).join("");
+   $("dSumKinds").textContent=tt.kinds;$("dSumQty").textContent=tt.qty;$("dSumAmount").textContent=money(tt.amount);
+   const logs=[{icon:"＋",title:T()?"创建入库单":"Created",time:`${o.date} ${o.time}`,who:o.creator}];
+   if(o.status===2)logs.push({icon:"✓",title:T()?"提交入库 · 库存入账":"Submitted · stocked",time:`${o.date} ${o.time}`,who:o.creator});
+   if(o.status===3)logs.push({icon:"✕",title:T()?"作废入库单":"Voided",time:`${o.date} ${o.time}`,who:o.creator});
+   $("dLog").innerHTML=logs.map((g,i)=>`<div class="ib-log-node"><div class="ib-log-rail"><div class="ib-log-dot">${g.icon}</div>${i<logs.length-1?'<div class="ib-log-line"></div>':""}</div><div class="ib-log-body"><div class="ib-log-title">${g.title}</div><div class="ib-log-meta">${g.time} · ${esc(g.who)}</div></div></div>`).join("");
+   curId=o.id;renderDetailFoot(o);
+   $("screen-list").classList.remove("active");$("screen-detail").classList.add("active");
+ }
+ function closeDetail(){$("screen-detail").classList.remove("active");$("screen-list").classList.add("active");}
+
+ function renderDetailFoot(o){
+   const foot=$("detailFoot");
+   if(o.status===1){foot.className="detail-foot";foot.innerHTML=`<button class="btn-danger-o" data-act="del">${T()?"删除":"Delete"}</button><button class="btn-ghost" data-act="edit">${T()?"编辑":"Edit"}</button><button class="btn-primary" data-act="submit">${T()?"提交入库":"Submit"}</button>`;}
+   else if(o.status===2){foot.className="detail-foot";foot.innerHTML=`<button class="btn-danger-o" data-act="void">${T()?"作废":"Void"}</button>`;}
+   else{foot.className="detail-foot hidden";foot.innerHTML="";}
+ }
+ function askConfirm(title,desc,okText,danger,cb){$("cfTitle").textContent=title;$("cfDesc").textContent=desc;$("cfCancel").textContent=T()?"取消":"Cancel";const ok=$("cfOk");ok.textContent=okText;ok.className=danger?"ok-danger":"ok-primary";pendingCb=cb;$("confirmMask").classList.add("show");}
+ function closeConfirm(){$("confirmMask").classList.remove("show");pendingCb=null;}
+
+ function openFilter(){
+   $("flType").innerHTML=[["",T()?"全部":"All"],...inboundTypes.map(t=>[t.id,T()?t.zh:t.en])].map(([v,l])=>`<button class="fchip ${state.filter.type===v?"on":""}" data-ftype="${v}">${l}</button>`).join("");
+   $("flWh").innerHTML=[["",T()?"全部":"All"],...warehouses.map(w=>[String(w.id),w.name])].map(([v,l])=>`<button class="fchip ${String(state.filter.whId)===v?"on":""}" data-fwh="${v}">${l}</button>`).join("");
+   $("flStart").value=state.filter.start;$("flEnd").value=state.filter.end;$("filterSheet").classList.add("show");
+ }
+ function closeFilter(){$("filterSheet").classList.remove("show");}
+ function filterActive(){const f=state.filter;return f.type||f.whId||f.start||f.end;}
+ function syncFilterDot(){$("filterDot").style.display=filterActive()?"block":"none";$("filterBtn").classList.toggle("on",!!filterActive());}
+
+ document.addEventListener("click",(e)=>{
+   if(e.target.closest(".lang-btn")){locale=locale==="zh"?"en":"zh";renderStatic();renderStat();renderList(true);return;}
+   if(e.target.closest("#navBack")){goWorkbench();return;}
+   if(e.target.closest("#newBtn")){goFeature("create_inbound","inbound-create.html");return;}
+   const tab=e.target.closest(".ib-tab");if(tab){state.tab=tab.dataset.tab;renderStatic();renderList(true);return;}
+   if(e.target.closest("#searchBtn")){state.kw=$("searchInput").value;renderList(true);return;}
+   if(e.target.closest("#filterBtn")){openFilter();return;}
+   if(e.target.closest("#filterClose")||e.target.id==="filterSheet"){closeFilter();return;}
+   const ft=e.target.closest("[data-ftype]");if(ft){state.filter.type=ft.dataset.ftype;document.querySelectorAll("[data-ftype]").forEach(x=>x.classList.toggle("on",x===ft));return;}
+   const fw=e.target.closest("[data-fwh]");if(fw){state.filter.whId=fw.dataset.fwh;document.querySelectorAll("[data-fwh]").forEach(x=>x.classList.toggle("on",x===fw));return;}
+   if(e.target.closest("#filterReset")){state.filter={type:"",whId:"",start:"",end:""};openFilter();return;}
+   if(e.target.closest("#filterApply")){state.filter.start=$("flStart").value;state.filter.end=$("flEnd").value;syncFilterDot();closeFilter();renderList(true);return;}
+   const card=e.target.closest(".ib-order-card");if(card){openDetail(Number(card.dataset.id));return;}
+   if(e.target.closest("#dNavBack")){closeDetail();return;}
+   if(e.target.closest("#dCopyNo")){toast(T()?"已复制":"Copied");return;}
+   const act=e.target.closest("[data-act]");
+   if(act){
+     const o=orders.find(x=>x.id===curId);if(!o)return;const a=act.dataset.act;
+     if(a==="edit"){goEdit(o.id);return;}
+     if(a==="submit"){askConfirm(T()?"提交入库":"Submit",T()?"提交后库存入账，不可撤销。确认提交？":"Stock will be updated. Confirm?",T()?"提交":"Submit",false,()=>{o.status=2;listStats.draft=Math.max(0,listStats.draft-1);listStats.todayDone++;openDetail(o.id);renderStat();renderList(true);toast(T()?"已提交入库":"Submitted");});return;}
+     if(a==="void"){askConfirm(T()?"作废入库单":"Void",T()?"作废后该单只读，不可恢复。确认作废？":"Order becomes read-only. Confirm?",T()?"作废":"Void",true,()=>{o.status=3;openDetail(o.id);renderList(true);toast(T()?"已作废":"Voided");});return;}
+     if(a==="del"){askConfirm(T()?"删除草稿":"Delete Draft",T()?"删除后不可恢复。确认删除？":"Cannot be undone. Confirm?",T()?"删除":"Delete",true,()=>{const i=orders.findIndex(x=>x.id===o.id);if(i>-1)orders.splice(i,1);listStats.draft=Math.max(0,listStats.draft-1);closeConfirm();closeDetail();renderStat();renderList(true);toast(T()?"已删除":"Deleted");});return;}
+     return;
+   }
+   if(e.target.closest("#cfCancel")||e.target.id==="confirmMask"){closeConfirm();return;}
+   if(e.target.closest("#cfOk")){const cb=pendingCb;closeConfirm();if(cb)cb();return;}
+ });
+ document.addEventListener("input",(e)=>{if(e.target.id==="searchInput"){state.kw=e.target.value;renderList(true);}});
+ document.addEventListener("keydown",(e)=>{if(e.target.id==="searchInput"&&e.key==="Enter"){state.kw=e.target.value;renderList(true);}});
+ $("orderList").addEventListener("scroll",function(){if(this.scrollTop+this.clientHeight>=this.scrollHeight-24){const rows=filtered();if(state.page*PAGE_SIZE<rows.length){state.page++;renderList(false);}}});
+
+ renderStatic();renderStat();renderList(true);
+})();
+</script>
+</body>
+</html>
