@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发货详情 · Delivery Detail（草稿 P6）</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.app-nav{height:44px;display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--app-text);text-align:left}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
+.body{flex:1;overflow-y:auto;padding:0 12px;padding-bottom:90px}
+.card{background:var(--app-card);border-radius:8px;box-shadow:var(--app-shadow-card);margin-bottom:10px;padding:14px 12px}
+.head{display:flex;align-items:center;gap:8px;padding:6px 2px 12px}
+.head .st{font-size:20px;font-weight:600;display:flex;align-items:center;gap:6px}
+.head .st .dot{width:10px;height:10px;border-radius:50%;background:var(--app-success)}
+.head .time{margin-left:auto;font-size:12px;color:var(--app-text-secondary)}
+/* 状态时间轴 */
+.steps{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 2px 2px}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step .node{width:14px;height:14px;border-radius:50%;border:2px solid #CBD2D9;background:#fff;z-index:2}
+.step.done .node{border-color:var(--app-primary);background:var(--app-primary)}
+.step.cur .node{border-color:var(--app-primary);background:var(--app-primary);box-shadow:0 0 0 4px rgba(67,184,168,.18)}
+.step .lab{font-size:11px;color:var(--app-text-muted);margin-top:6px;text-align:center}
+.step.done .lab,.step.cur .lab{color:var(--app-text)}
+.step::before{content:"";position:absolute;top:7px;left:-50%;width:100%;height:2px;background:#CBD2D9;z-index:1}
+.step:first-child::before{display:none}
+.step.done::before,.step.cur::before{background:var(--app-primary)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:10px}
+/* 小费 */
+.tip-row{display:flex;flex-wrap:wrap;gap:10px}
+.tip-chip{border:1px solid var(--app-border);background:var(--app-bg-soft);border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer}
+.tip-chip.on{border-color:var(--app-primary);color:var(--app-primary-strong);background:var(--app-primary-soft);font-weight:600}
+.tip-custom{display:flex;align-items:center;gap:6px;border:1px solid var(--app-border);border-radius:8px;padding:0 12px;height:38px;margin-top:10px}
+.tip-custom .cur{color:var(--app-text-secondary);font-size:13px}
+.tip-custom input{border:none;outline:none;flex:1;font-size:13px}
+/* 车型行 */
+.row{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.row .v{font-weight:600}
+/* 路线 */
+.pickup{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:6px}
+.pickup .pt{width:10px;height:10px;border-radius:50%;background:var(--app-primary)}
+.rail{border-left:1px dashed var(--app-border);margin-left:4px;padding-left:16px}
+.stop{background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:10px}
+.stop.c0{background:#EAF7F1}.stop.c1{background:#FAF6EE}.stop.c2{background:#EEF2FA}
+.stop-top{display:flex;align-items:center;gap:8px}
+.stop-seq{width:20px;height:20px;border-radius:50%;background:#9CA3AF;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stop-name{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy-tag{font-size:11px;color:var(--app-info);background:rgba(47,128,237,.1);border-radius:4px;padding:1px 7px;cursor:pointer;flex-shrink:0}
+.addr-lab{font-size:10px;color:var(--app-text-muted);margin-top:8px}.addr-lab.act{color:var(--app-warning)}
+.addr-ori{font-size:12px;color:var(--app-text-secondary);line-height:1.5;margin-top:2px}
+.addr-act{font-size:12px;color:var(--app-text);line-height:1.5;font-weight:500;margin-top:2px}
+.addr-sep{border-top:1px dashed var(--app-border);margin:8px 0}
+.remark{font-size:12px;color:var(--app-text-secondary);margin-top:8px}.remark .k{color:var(--app-text-muted)}
+/* footer */
+.foot{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:10px 12px calc(10px + 12px)}
+.fee{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.fee .k{font-size:14px;color:var(--app-text)}
+.fee .amt{font-size:20px;font-weight:700;color:var(--app-text)}
+.fee .wallet{font-size:12px;color:var(--app-warning);width:100%;text-align:right;margin-top:2px}
+.foot-btns{display:flex;gap:10px}
+.foot-btns button{flex:1;height:44px;border-radius:22px;font-size:15px;cursor:pointer;font-weight:500}
+.btn-cancel{background:#fff;border:1px solid var(--app-border);color:var(--app-text-secondary)}
+.btn-modify{background:var(--app-primary);border:none;color:#fff}
+.btn-modify:active{background:var(--app-primary-strong)}
+.toast{position:absolute;left:50%;top:42%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;max-width:80%;text-align:center}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="app-nav">
+    <button class="nav-back" onclick="goBack()">‹</button>
+    <div class="nav-title" id="title">发货详情</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLocale()">EN</button>
+  </header>
+  <div class="body">
+    <div class="head">
+      <span class="st"><span class="dot"></span><span id="curStatus">待接单</span></span>
+      <span class="time" id="dispatchTime">派单时间: 12-24 12:00:00</span>
+    </div>
+    <div class="card">
+      <div class="steps" id="steps"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="t_tip">添加骑手配送小费，调配更多骑手</div>
+      <div class="tip-row" id="tipRow"></div>
+      <div class="tip-custom"><span class="cur">RM</span><input id="tipCustom" placeholder="请输入自定义金额" oninput="clearTipChips()"></div>
+    </div>
+    <div class="card">
+      <div class="row"><span id="t_veh">车型选择</span><span class="v">Motorcycle</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="t_route">配送路线</div>
+      <div class="pickup"><span class="pt"></span><span id="t_pickupPoint">Kuchai Supermarket（取货点）</span></div>
+      <div class="rail" id="stopList"></div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="fee"><span class="k" id="t_fee">预估运费</span><span class="amt">RM 20.00</span><span class="wallet" id="t_wallet">（钱包余额：RM 200.00）</span></div>
+    <div class="foot-btns">
+      <button class="btn-cancel" id="t_cancel" onclick="toast(T[locale].canceled)">配送取消</button>
+      <button class="btn-modify" id="t_modify" onclick="toast(T[locale].modified)">确认修改</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const T={
+  zh:{langBtn:"EN",title:"发货详情",tip:"添加骑手配送小费，调配更多骑手",veh:"车型选择",route:"配送路线",
+      fee:"预估运费",wallet:"（钱包余额：RM 200.00）",cancel:"配送取消",modify:"确认修改",remark:"备注",
+      cmpOri:"订单原地址",cmpAct:"实际发货地址",copy:"复制",copied:"已复制",
+      steps:["待接单","已接单","已取货","配送中","已送达"],dispatch:"派单时间: 12-24 12:00:00",
+      canceled:"已发起配送取消（演示）",modified:"已提交修改并重新报价（演示）"},
+  en:{langBtn:"中文",title:"Delivery Detail",tip:"Add rider tip to dispatch more riders",veh:"Vehicle Type",route:"Delivery Route",
+      fee:"Est. Fee",wallet:"(Wallet: RM 200.00)",cancel:"Cancel Delivery",modify:"Confirm Changes",remark:"Note",
+      cmpOri:"Original Order Address",cmpAct:"Actual Shipping Address",copy:"Copy",copied:"Copied",
+      steps:["To Accept","Accepted","Picked Up","In Transit","Delivered"],dispatch:"Dispatched: 12-24 12:00:00",
+      canceled:"Delivery cancellation requested (demo)",modified:"Changes submitted & re-quoted (demo)"}
+};
+/* 当前状态：0待接单 1已接单 2已取货 3配送中 4已送达（映射 delivery_status + tracks） */
+const CUR_STEP=0;
+const TIPS=["+RM1.00","+RM1.50","+RM2.00"];
+let selTip="+RM2.00";
+const STOPS=[
+  {id:"o1",name:"Liuzhaobin | 5392000",origin:"room15, crush cosss, malaysia street, crush cosss, malaysia street",
+   actual:"LiveIn @ The Hamilton Wangsa Maju, Jalan Wangsa Delima, Wangsa Maju, Kuala Lumpur",remark:"放门口，电话联系"},
+  {id:"o2",name:"Liuzhaobin | 5392000",origin:"room15, crush cosss, malaysia street, crush cosss, malaysia street",actual:null,remark:"-"},
+  {id:"o3",name:"Liuzhaobin | 5392000",origin:"room15, crush cosss, malaysia street, crush cosss, malaysia street",actual:null,remark:"易碎，轻放"},
+];
+let locale=new URLSearchParams(location.search).get("locale")||"zh";
+function toggleLocale(){setLocale(locale==="zh"?"en":"zh")}
+function setLocale(l){locale=l;const tx=T[l];
+  document.getElementById("langBtn").textContent=tx.langBtn;
+  document.getElementById("title").textContent=tx.title;
+  document.getElementById("t_tip").textContent=tx.tip;
+  document.getElementById("t_veh").textContent=tx.veh;
+  document.getElementById("t_route").textContent=tx.route;
+  document.getElementById("t_fee").textContent=tx.fee;
+  document.getElementById("t_wallet").textContent=tx.wallet;
+  document.getElementById("t_cancel").textContent=tx.cancel;
+  document.getElementById("t_modify").textContent=tx.modify;
+  document.getElementById("dispatchTime").textContent=tx.dispatch;
+  document.getElementById("curStatus").textContent=tx.steps[CUR_STEP];
+  renderSteps();renderTips();renderStops();
+}
+function renderSteps(){const tx=T[locale];
+  document.getElementById("steps").innerHTML=tx.steps.map((s,i)=>{
+    const cls=i<CUR_STEP?"done":i===CUR_STEP?"cur":"";
+    return `<div class="step ${cls}"><span class="node"></span><span class="lab">${s}</span></div>`;
+  }).join("");
+}
+function renderTips(){
+  document.getElementById("tipRow").innerHTML=TIPS.map(t=>`<span class="tip-chip ${t===selTip?"on":""}" onclick="selTipFn('${t}')">${t}</span>`).join("");
+}
+function selTipFn(t){selTip=t;document.getElementById("tipCustom").value="";renderTips()}
+function clearTipChips(){selTip=null;renderTips()}
+function renderStops(){const tx=T[locale];
+  document.getElementById("stopList").innerHTML=STOPS.map((s,i)=>{
+    const addr=s.actual
+      ? `<div class="addr-lab">${tx.cmpOri}</div><div class="addr-ori">${s.origin}</div><div class="addr-sep"></div><div class="addr-lab act">${tx.cmpAct}</div><div class="addr-act">${s.actual}</div>`
+      : `<div class="addr-ori" style="margin-top:8px">${s.origin}</div>`;
+    return `<div class="stop c${i%3}">
+      <div class="stop-top"><span class="stop-seq">${i+1}</span><span class="stop-name">${s.name}</span><span class="copy-tag" onclick="toast(T[locale].copied)">${tx.copy}</span></div>
+      ${addr}
+      <div class="remark"><span class="k">${tx.remark}：</span>${s.remark}</div>
+    </div>`;
+  }).join("");
+}
+function goBack(){if(window.parent!==window)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else if(history.length>1)history.back()}
+let tt=null;function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),1600)}
+setLocale(locale);
+</script>
+</body>
+</html>

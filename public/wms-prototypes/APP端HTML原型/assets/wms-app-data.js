@@ -14,7 +14,6 @@
           "outbound_order",
           "outbound_wait_pick",
           "outbound_merge",
-          "transfer_out",
           "shipping_pending",
           "shipping_wait_order",
           "shipping_redispatch",
@@ -23,12 +22,6 @@
           "shipping_delivering",
           "shipping_delivered_today",
           "shipping_tracking",
-          "inbound_purchase",
-          "inbound_return",
-          "inbound_transfer",
-          "inbound_putaway",
-          "inventory_query",
-          "inventory_out_record",
           "inventory_in_record"
         ]
       },
@@ -40,7 +33,6 @@
           "outbound_order",
           "outbound_wait_pick",
           "outbound_merge",
-          "transfer_out",
           "shipping_pending",
           "shipping_wait_order",
           "shipping_redispatch",
@@ -49,13 +41,7 @@
           "shipping_delivering",
           "shipping_delivered_today",
           "shipping_tracking",
-          "inbound_purchase",
-          "inbound_return",
-          "inbound_transfer",
-          "inbound_putaway",
-          "inventory_query",
           "inventory_count",
-          "inventory_out_record",
           "inventory_in_record"
         ]
       }
@@ -77,11 +63,6 @@
           "shipping_delivering",
           "shipping_delivered_today",
           "shipping_tracking",
-          "inbound_purchase",
-          "inbound_transfer",
-          "inbound_putaway",
-          "inventory_query",
-          "inventory_out_record",
           "inventory_in_record"
         ]
       },
@@ -92,7 +73,6 @@
           "outbound_order",
           "outbound_wait_pick",
           "outbound_merge",
-          "transfer_out",
           "shipping_pending",
           "shipping_wait_order",
           "shipping_redispatch",
@@ -100,20 +80,13 @@
           "shipping_accepted",
           "shipping_delivering",
           "shipping_delivered_today",
-          "shipping_tracking",
-          "inventory_query",
-          "inventory_out_record"
+          "shipping_tracking"
         ]
       },
       inbound: {
         label: "入库优先",
         desc: "突出采购收货、退货收货、调拨收货与上架。",
         menus: [
-          "inbound_purchase",
-          "inbound_return",
-          "inbound_transfer",
-          "inbound_putaway",
-          "inventory_query",
           "inventory_count",
           "inventory_in_record"
         ]
@@ -125,7 +98,6 @@
           "outbound_order",
           "outbound_wait_pick",
           "outbound_merge",
-          "transfer_out",
           "shipping_pending",
           "shipping_wait_order",
           "shipping_redispatch",
@@ -134,31 +106,24 @@
           "shipping_delivering",
           "shipping_delivered_today",
           "shipping_tracking",
-          "inbound_purchase",
-          "inbound_return",
-          "inbound_transfer",
-          "inbound_putaway",
-          "inventory_query",
           "inventory_count",
-          "inventory_out_record",
           "inventory_in_record"
         ]
       }
     };
 
     const moduleMeta = {
-      outbound: { label: "出库", desc: "接单、揽货、合单、调拨出库", className: "outbound" },
+      outbound: { label: "出库", desc: "接单、揽货与合单", className: "outbound" },
       shipping: { label: "发货", desc: "待发货、已发货、履约跟踪", className: "shipping" },
       packingReview: { label: "打包复核", desc: "打包后复核并确认待发货任务", className: "outbound" },
-      inbound: { label: "入库", desc: "采购、退货、调拨收货与上架", className: "inbound" },
-      inventory: { label: "其他", desc: "库存查询、盘点和出入库记录", className: "inventory" }
+      inbound: { label: "入库", desc: "入库单创建与查看", className: "inbound" },
+      inventory: { label: "其他", desc: "盘点和出入库记录", className: "inventory" }
     };
 
     const menuDefs = [
       { id: "outbound_order", module: "outbound", label: "揽货接单", code: "OB-01", desc: "按仓库接单并锁定处理人" },
       { id: "outbound_wait_pick", module: "outbound", label: "待揽货", code: "OB-02", desc: "查看待执行揽货任务" },
       { id: "outbound_merge", module: "packingReview", label: "打包复核", code: "OB-03", desc: "完成打包后的复核确认" },
-      { id: "transfer_out", module: "outbound", label: "调拨出库", code: "OB-04", desc: "处理仓间调拨调出" },
       { id: "shipping_pending", module: "shipping", label: "待发货", code: "SH-01", desc: "复核后待交接待发货" },
       { id: "shipping_wait_order", module: "shipping", label: "待接单", code: "SH-02", desc: "等待骑手或承运方接单" },
       { id: "shipping_redispatch", module: "shipping", label: "重新派单", code: "SH-03", desc: "处理需重新派单的发货任务" },
@@ -167,13 +132,7 @@
       { id: "shipping_delivering", module: "shipping", label: "配送中", code: "SH-06", desc: "配送途中，等待送达签收" },
       { id: "shipping_delivered_today", module: "shipping", label: "当日已送达", code: "SH-07", desc: "当日内已完成送达签收" },
       { id: "shipping_tracking", module: "shipping", label: "发货履约跟踪", code: "SH-08", desc: "跟踪履约状态与异常" },
-      { id: "inbound_purchase", module: "inbound", label: "采购收货", code: "IB-01", desc: "采购单到仓验收处理" },
-      { id: "inbound_return", module: "inbound", label: "退货收货", code: "IB-02", desc: "售后退货入仓登记" },
-      { id: "inbound_transfer", module: "inbound", label: "调拨收货", code: "IB-03", desc: "处理调拨调入收货" },
-      { id: "inbound_putaway", module: "inbound", label: "货物上架", code: "IB-04", desc: "确认货位与上架结果" },
-      { id: "inventory_query", module: "inventory", label: "库存查询", code: "IV-01", desc: "按仓库与货位查看库存" },
       { id: "inventory_count", module: "inventory", label: "盘点", code: "IV-02", desc: "发起盘点与差异复核" },
-      { id: "inventory_out_record", module: "inventory", label: "出库记录", code: "IV-03", desc: "按出库任务回看结果" },
       { id: "inventory_in_record", module: "inventory", label: "入库记录", code: "IV-04", desc: "按入库任务回看结果" }
     ];
 
@@ -556,15 +515,12 @@
           shipping_delivering: "配送中",
           shipping_delivered_today: "当日已送达",
           shipping_tracking: "发货履约跟踪",
-          inbound_return: "待退货入库",
-          inbound_purchase: "待采购入库",
           create_inbound: "新建入库单"
         },
         shortcuts: {
-          inventory_query: "库存查询",
-          inventory_out_record: "出库记录",
           inventory_in_record: "入库记录",
           inventory_count: "库存盘点",
+          order_tracking: "销售订单跟踪",
           shipping_tracking: "物流跟踪",
           create_inbound: "新建入库单",
           inbound_order_list: "入库单"
@@ -626,15 +582,12 @@
           shipping_delivering: "In Transit",
           shipping_delivered_today: "Delivered Today",
           shipping_tracking: "Shipment Tracking",
-          inbound_return: "Pending Returns Inbound",
-          inbound_purchase: "Pending Purchase Inbound",
           create_inbound: "Create Inbound Order"
         },
         shortcuts: {
-          inventory_query: "Inventory Search",
-          inventory_out_record: "Outbound Records",
           inventory_in_record: "Inbound Records",
           inventory_count: "Inventory Counting",
+          order_tracking: "Order Tracking",
           shipping_tracking: "Logistics Tracking",
           create_inbound: "Create Inbound Order",
           inbound_order_list: "Inbound Orders"

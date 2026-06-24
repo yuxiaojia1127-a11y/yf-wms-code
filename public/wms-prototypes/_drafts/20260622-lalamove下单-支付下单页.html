@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>支付下单 · Place Order（草稿 P5）</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:8px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.app-nav{height:44px;display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--app-text);text-align:left}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
+.body{flex:1;overflow-y:auto;padding:0 12px;padding-bottom:84px}
+.card{background:var(--app-card);border-radius:8px;box-shadow:var(--app-shadow-card);margin-bottom:10px;padding:14px 12px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px}
+.info-block{background:var(--app-bg-soft);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.info-block:last-child{margin-bottom:0}
+.info-block .main{font-size:14px;color:var(--app-text)}
+.info-block .sub{font-size:12px;color:var(--app-text-muted);margin-top:3px}
+/* 路线 */
+.pickup{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:6px}
+.pickup .pt{width:10px;height:10px;border-radius:50%;background:var(--app-primary)}
+.rail{border-left:1px dashed var(--app-border);margin-left:4px;padding-left:16px}
+.stop{background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:10px;position:relative}
+.stop.c0{background:#EAF7F1}.stop.c1{background:#FAF6EE}.stop.c2{background:#EEF2FA}
+.stop-top{display:flex;align-items:center;gap:8px}
+.stop-seq{width:20px;height:20px;border-radius:50%;background:#9CA3AF;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stop-name{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy-tag{font-size:11px;color:var(--app-info);background:rgba(47,128,237,.1);border-radius:4px;padding:1px 7px;cursor:pointer;flex-shrink:0}
+.addr-lab{font-size:10px;color:var(--app-text-muted);margin-top:8px}
+.addr-lab.act{color:var(--app-warning)}
+.addr-ori{font-size:12px;color:var(--app-text-secondary);line-height:1.5;margin-top:2px}
+.addr-act{font-size:12px;color:var(--app-text);line-height:1.5;font-weight:500;margin-top:2px}
+.addr-sep{border-top:1px dashed var(--app-border);margin:8px 0}
+.remark{font-size:12px;color:var(--app-text-secondary);margin-top:8px}
+.remark .k{color:var(--app-text-muted)}
+/* 列表行 */
+.row{display:flex;align-items:center;justify-content:space-between;font-size:14px;padding:11px 0;border-top:1px solid var(--app-border)}
+.row:first-child{border-top:none}
+.row .k{color:var(--app-text-secondary)}
+.row .v{color:var(--app-text);font-weight:500;display:flex;align-items:center;gap:8px}
+.row .v .price{color:var(--app-primary);font-weight:600}
+.row .arrow{color:var(--app-text-muted)}
+/* footer */
+.foot{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:10px 12px calc(10px + 12px)}
+.confirm-btn{width:100%;height:46px;border:none;border-radius:23px;background:var(--app-primary);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+.confirm-btn:active{background:var(--app-primary-strong)}
+.toast{position:absolute;left:50%;top:42%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;max-width:80%;text-align:center}
+.toast.show{opacity:1}
+.draft-tip{font-size:11px;color:var(--app-text-muted);text-align:center;padding:4px 12px 0}
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="app-nav">
+    <button class="nav-back" onclick="goBack()">‹</button>
+    <div class="nav-title" id="title">支付下单</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLocale()">EN</button>
+  </header>
+  <div class="body">
+    <div class="card">
+      <div class="card-title" id="t_other">其它信息</div>
+      <div class="info-block"><div class="main">+60 177638162</div><div class="sub" id="t_phone">订单联系号码</div></div>
+      <div class="info-block"><div class="main">RM 607.70</div><div class="sub" id="t_wallet">wallet余额</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="t_order">订单信息</div>
+      <div class="pickup"><span class="pt"></span><span id="t_pickupPoint">Kuchai Supermarket（取货点）</span></div>
+      <div class="rail" id="stopList"></div>
+    </div>
+    <div class="card" style="padding:2px 12px">
+      <div class="row"><span class="k" id="t_pickupTime">取货时间</span><span class="v">Now <span class="arrow">›</span></span></div>
+      <div class="row"><span class="k" id="t_veh">车型选择</span><span class="v">Motorcycle</span></div>
+      <div class="row"><span class="k" id="t_pay">支付方式</span><span class="v">Wallet <span class="price">RM 20.00</span></span></div>
+    </div>
+    <div class="draft-tip" id="tip">草稿 P5 · 确认订单将调用 Lalamove 下单（演示）</div>
+  </div>
+  <div class="foot"><button class="confirm-btn" id="confirm" onclick="placeOrder()">确认订单</button></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const T={
+  zh:{langBtn:"EN",title:"支付下单",other:"其它信息",phone:"订单联系号码",wallet:"wallet余额",order:"订单信息",
+      pickupTime:"取货时间",veh:"车型选择",pay:"支付方式",confirm:"确认订单",remark:"备注",
+      cmpOri:"订单原地址",cmpAct:"实际发货地址",copy:"复制",copied:"已复制",
+      tip:"草稿 P5 · 确认订单将调用 Lalamove 下单（演示）",ordered:"下单成功（演示）：Lalamove 报价已提交"},
+  en:{langBtn:"中文",title:"Place Order",other:"Other Info",phone:"Order Contact No.",wallet:"Wallet Balance",order:"Order Info",
+      pickupTime:"Pickup Time",veh:"Vehicle Type",pay:"Payment",confirm:"Confirm Order",remark:"Note",
+      cmpOri:"Original Order Address",cmpAct:"Actual Shipping Address",copy:"Copy",copied:"Copied",
+      tip:"Draft P5 · Confirm to place Lalamove order (demo)",ordered:"Order placed (demo): Lalamove quotation submitted"}
+};
+/* stop 数据与下单页一致（含实际发货地址、备注） */
+const STOPS=[
+  {id:"o1",name:"Liuzhaobin | 5392000",origin:"room15, crush cosss, malaysia street, crush cosss, malaysia street",
+   actual:"LiveIn @ The Hamilton Wangsa Maju, Jalan Wangsa Delima, Wangsa Maju, Kuala Lumpur",remark:"放门口，电话联系"},
+  {id:"o2",name:"Test-ios-piao | 123456789",origin:"Falalaa Desserts · Kuchai Lama, Jalan Kuchai Maju 8, Kuala Lumpur",actual:null,remark:"-"},
+  {id:"o3",name:"test 5kmStore | 11111111",origin:"Jalan Tuanku 4, Taman Salak Selatan, 57100 Petaling, WP Kuala Lumpur, Malaysia",actual:null,remark:"易碎，轻放"},
+];
+let locale=new URLSearchParams(location.search).get("locale")||"zh";
+function toggleLocale(){setLocale(locale==="zh"?"en":"zh")}
+function setLocale(l){locale=l;const tx=T[l];
+  document.getElementById("langBtn").textContent=tx.langBtn;
+  ["title","other","phone","wallet","order","pickupTime","veh","pay","confirm","tip"].forEach(k=>{const e=document.getElementById(({title:"title",other:"t_other",phone:"t_phone",wallet:"t_wallet",order:"t_order",pickupTime:"t_pickupTime",veh:"t_veh",pay:"t_pay",confirm:"confirm",tip:"tip"})[k]);if(e)e.textContent=tx[k]});
+  renderStops();
+}
+function renderStops(){const tx=T[locale];
+  document.getElementById("stopList").innerHTML=STOPS.map((s,i)=>{
+    const addr=s.actual
+      ? `<div class="addr-lab">${tx.cmpOri}</div><div class="addr-ori">${s.origin}</div><div class="addr-sep"></div><div class="addr-lab act">${tx.cmpAct}</div><div class="addr-act">${s.actual}</div>`
+      : `<div class="addr-ori" style="margin-top:8px">${s.origin}</div>`;
+    return `<div class="stop c${i%3}">
+      <div class="stop-top"><span class="stop-seq">${i+1}</span><span class="stop-name">${s.name}</span><span class="copy-tag" onclick="toast(T[locale].copied)">${tx.copy}</span></div>
+      ${addr}
+      <div class="remark"><span class="k">${tx.remark}：</span>${s.remark}</div>
+    </div>`;
+  }).join("");
+}
+function placeOrder(){toast(T[locale].ordered)}
+function goBack(){if(window.parent!==window)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else if(history.length>1)history.back()}
+let tt=null;function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("show"),1600)}
+setLocale(locale);
+</script>
+</body>
+</html>

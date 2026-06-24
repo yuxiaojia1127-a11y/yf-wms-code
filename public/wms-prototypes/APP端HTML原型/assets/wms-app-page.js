@@ -25,7 +25,7 @@
     locale: params.get("locale") || "zh",
     unreadMessages: Number(params.get("unreadMessages") || 99),
     warehouseDropdownOpen: false,
-    menuId: params.get("menu") || "inventory_query"
+    menuId: params.get("menu") || "inventory_count"
   };
 
   const virtualMenus = {
@@ -191,12 +191,32 @@
         window.location.href = `pickup-accept.html?${stateQuery()}&tab=mine`;
         return;
       }
+      if (menuId === "shipping_pending") {
+        window.location.href = `shipping-list.html?${stateQuery()}`;
+        return;
+      }
       if (menuId === "create_inbound") {
         window.location.href = `inbound-create.html?${stateQuery()}`;
         return;
       }
       if (menuId === "inventory_in_record") {
         window.location.href = `inbound-list.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "stocktake_task" || menuId === "inventory_count") {
+        window.location.href = `stocktake-list.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "create_stocktake") {
+        window.location.href = `stocktake-create.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "stocktake_count") {
+        window.location.href = `stocktake-count.html?${stateQuery()}`;
+        return;
+      }
+      if (menuId === "order_tracking") {
+        window.location.href = `order-tracking.html?${stateQuery()}`;
         return;
       }
       window.location.href = `feature.html?${stateQuery({ menu: menuId })}`;
@@ -308,16 +328,12 @@
       `);
     }
 
-    if (enabled.has("inbound_return") || enabled.has("inbound_purchase") || enabled.has("inbound_transfer")) {
+    if (enabled.has("inventory_in_record")) {
       cards.push(`
         <section class="replica-card">
           <div class="replica-card-head">
             <span class="replica-card-icon inbound">${iconSvg("inbound")}</span>
             <div class="replica-card-title">${t.modules.inbound}</div>
-          </div>
-          <div class="replica-metric-grid cols-4">
-            ${metricItem("inbound_return", t.metrics.inbound_return, getCount(counts, "inbound_return"))}
-            ${metricItem("inbound_purchase", t.metrics.inbound_purchase, getCount(counts, "inbound_purchase"))}
           </div>
           <div class="replica-shortcuts">
             ${shortcutItem("inventory_in_record", "purple", "inboundRecord", t.shortcuts.inbound_order_list)}
@@ -334,9 +350,8 @@
           <div class="replica-card-title">${t.modules.other}</div>
         </div>
         <div class="replica-shortcuts">
+          ${shortcutItem("order_tracking", "blue", "tracking", t.shortcuts.order_tracking)}
           ${shortcutItem("shipping_tracking", "green", "tracking", t.shortcuts.shipping_tracking)}
-          ${shortcutItem("inventory_query", "blue", "stock", t.shortcuts.inventory_query)}
-          ${shortcutItem("inventory_out_record", "green", "outboundRecord", t.shortcuts.inventory_out_record)}
           ${shortcutItem("inventory_count", "orange", "count", t.shortcuts.inventory_count)}
         </div>
       </section>

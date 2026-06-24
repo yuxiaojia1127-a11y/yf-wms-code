@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发货管理 · Shipping</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-ship-action:#D99A19;--app-radius-card:8px;--app-space-page-x:12px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.app-nav{height:44px;display:flex;align-items:center;position:relative;padding:0 12px;gap:8px;flex-shrink:0}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--app-text);text-align:left;flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer;flex-shrink:0}
+.lang-btn:active{background:var(--app-primary);color:#fff}
+.card{background:var(--app-card);border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);margin-bottom:10px}
+.dashed-divider{border-top:1px dashed var(--app-border);margin:8px 0 0}
+.btn-primary{background:var(--app-primary);color:#fff;border:none;cursor:pointer;border-radius:8px;font-size:13px;padding:9px 18px}
+.btn-primary:active{background:var(--app-primary-strong)}
+.btn-secondary{background:var(--app-bg-soft);color:var(--app-text);border:none;cursor:pointer;border-radius:8px;font-size:13px;padding:9px 16px}
+.toast{position:absolute;left:50%;top:42%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;max-width:80%;text-align:center;line-height:1.5}
+.toast.show{opacity:1}
+/* 搜索/Tab/筛选（复用 pickup-accept） */
+.search-row{display:flex;gap:8px;padding:6px 12px 10px}
+.search-box{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:0 12px;height:34px}
+.search-box input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.search-box input::placeholder{color:var(--app-text-muted)}
+.search-btn{border:none;background:var(--app-primary);color:#fff;font-size:13px;border-radius:17px;padding:0 18px;height:34px;cursor:pointer}
+.tab-row{display:flex;align-items:center;padding:0 12px;gap:18px}
+.tab{font-size:15px;color:var(--app-text-secondary);padding:8px 0 10px;cursor:pointer;position:relative}
+.tab.on{color:var(--app-text);font-weight:600;font-size:16px}
+.tab.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:4px;width:24px;height:3px;border-radius:2px;background:var(--app-primary)}
+.tab .badge{color:var(--app-danger);font-size:12px;margin-left:2px}
+.sort-toggle{margin-left:auto;font-size:12px;color:var(--app-text-secondary);cursor:pointer;display:flex;align-items:center;gap:2px}
+.sort-toggle .arrow{color:var(--app-primary);font-size:11px}
+.filter-row{display:flex;gap:8px;padding:8px 12px 10px}
+.chip{border:none;cursor:pointer;font-size:12px;padding:7px 16px;border-radius:16px;background:#fff;color:var(--app-text)}
+.chip.on{background:#2B2F36;color:#fff}
+.page-body{flex:1;overflow-y:auto;padding:0 var(--app-space-page-x) 16px}
+.page-body.has-bar{padding-bottom:72px}
+/* 发货订单卡片 */
+.ship-card{padding:12px}
+.ship-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
+.cbox{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--app-text-muted);flex-shrink:0;cursor:pointer;position:relative;background:#fff;margin-top:1px}
+.cbox.on{background:var(--app-primary);border-color:var(--app-primary)}
+.cbox.on::after{content:"✓";color:#fff;font-size:12px;position:absolute;left:50%;top:50%;transform:translate(-50%,-52%)}
+.ship-name{font-size:14px;font-weight:600;color:#1D3A5F;flex:1;min-width:0}
+.ship-status{font-size:12px;display:flex;align-items:center;gap:4px;flex-shrink:0;padding-top:1px}
+.ship-status .dot{width:6px;height:6px;border-radius:50%}
+.ship-status.pending{color:var(--app-info)}.ship-status.pending .dot{background:var(--app-info)}
+.ship-status.shipped{color:var(--app-success)}.ship-status.shipped .dot{background:var(--app-success)}
+.ship-status.completed{color:#2AA7C9}.ship-status.completed .dot{background:#2AA7C9}
+.field-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;gap:10px}
+.field-row .k{color:var(--app-text-secondary);flex-shrink:0}.field-row .v{color:var(--app-text);text-align:right;word-break:break-all}
+.field-row .v.ds-to_accept{color:var(--app-success)}
+.field-row .v.ds-accepted{color:var(--app-info)}
+.field-row .v.ds-delivering{color:var(--app-warning)}
+.field-row .v.ds-delivered{color:#2AA7C9}
+.ship-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:10px}
+.empty-state{text-align:center;color:var(--app-text-muted);font-size:13px;padding:60px 0 40px}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
+/* 底部统一发货栏 */
+.ship-bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:8px 16px calc(8px + 12px);display:none;align-items:center;gap:10px;z-index:60}
+.ship-bar.show{display:flex}
+.ship-bar .selall{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--app-text);cursor:pointer}
+.ship-bar .ship-btn{margin-left:auto;border:none;border-radius:20px;cursor:pointer;background:var(--app-ship-action);color:#fff;font-size:14px;font-weight:500;height:38px;padding:0 22px}
+.ship-bar .ship-btn:disabled{background:#D9DCE0;cursor:not-allowed}
+/* 确认发货底部抽屉 P2 */
+.sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:100;display:none}
+.sheet-mask.show{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + 12px);z-index:101;transform:translateY(100%);transition:transform .28s;max-height:84%;overflow-y:auto}
+.sheet.show{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sheet-title{font-size:16px;font-weight:600}
+.sheet-close{border:none;background:none;font-size:18px;color:var(--app-text-muted);cursor:pointer}
+.sheet-label{font-size:13px;margin-bottom:10px}
+.sheet-label .req{color:var(--app-danger);margin-right:2px}
+.carrier-list{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.carrier{border:1px solid var(--app-border);background:#fff;color:var(--app-text);font-size:13px;border-radius:8px;padding:7px 16px;cursor:pointer}
+.carrier.on{background:var(--app-primary-soft);border-color:var(--app-primary);color:var(--app-primary-strong);font-weight:600}
+.mode-note{display:none;background:rgba(47,128,237,.08);color:var(--app-info);font-size:12px;line-height:1.6;border-radius:8px;padding:10px 12px;margin-top:12px}
+.mode-note.show{display:block}
+.mode-form{display:none;margin-top:6px}
+.mode-form.show{display:block}
+.sheet-sep{border-top:1px solid var(--app-border);margin:14px 0}
+.form-line{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0}
+.form-line input{border:none;outline:none;text-align:right;font-size:13px;flex:1;background:transparent}
+.form-line input::placeholder{color:var(--app-text-muted)}
+.upload-box{width:88px;height:88px;border:1px dashed var(--app-border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--app-text-muted);font-size:12px;cursor:pointer;margin-top:8px}
+.upload-box .plus{font-size:24px;line-height:1}
+.upload-thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.upload-thumbs .thumb{width:88px;height:88px;border-radius:8px;background:var(--app-bg-soft);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative}
+.upload-thumbs .thumb .del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sheet-confirm{width:100%;height:44px;border:none;border-radius:22px;background:var(--app-primary);color:#fff;font-size:15px;font-weight:500;cursor:pointer;margin-top:18px}
+.sheet-confirm:active{background:var(--app-primary-strong)}
+.draft-tip{font-size:11px;color:var(--app-text-muted);text-align:center;padding:2px 12px 8px}
+</style>
+</head>
+<body>
+<div class="phone" id="phone" style="background:linear-gradient(180deg,var(--app-primary-soft),var(--app-bg) 16%)">
+  <header class="app-nav">
+    <button class="nav-back" onclick="goBack()">‹</button>
+    <div class="nav-title" id="navTitle">发货管理</div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLocale()">EN</button>
+  </header>
+  <div class="search-row">
+    <div class="search-box">
+      <span style="color:var(--app-text-muted)">🔍</span>
+      <input id="searchInput" placeholder="请输入订单号/联系人/邮编" onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <button class="search-btn" id="searchBtn" onclick="doSearch()">搜索</button>
+  </div>
+  <div class="tab-row">
+    <div class="tab on" id="tab-pending" onclick="switchTab('pending')"></div>
+    <div class="tab" id="tab-shipped" onclick="switchTab('shipped')"></div>
+    <div class="tab" id="tab-completed" onclick="switchTab('completed')"></div>
+    <div class="sort-toggle" onclick="toggleSort()"><span id="sortLabel">时间</span> <span class="arrow" id="sortArrow">▲</span></div>
+  </div>
+  <div class="filter-row">
+    <button class="chip on" data-f="all" id="chip-all" onclick="setFilter('all',this)">全部</button>
+    <button class="chip" data-f="instant" id="chip-instant" onclick="setFilter('instant',this)">即时配送</button>
+    <button class="chip" data-f="logistics" id="chip-logistics" onclick="setFilter('logistics',this)">物流发货</button>
+  </div>
+  <div class="page-body" id="shipList"></div>
+  <div class="draft-tip" id="draftTip">原型演示 · 选 Lalamove 进入报价下单页（车型选择）</div>
+
+  <!-- 底部统一发货栏 -->
+  <footer class="ship-bar" id="shipBar">
+    <span class="selall" onclick="toggleAll()"><span class="cbox" id="cbAll"></span><span id="selCount">已选0个</span></span>
+    <button class="ship-btn" id="shipBtn" onclick="openConfirmMulti()" disabled>统一发货</button>
+  </footer>
+
+  <!-- 确认发货底部抽屉 P2 -->
+  <div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-head">
+      <span class="sheet-title" id="sheetTitle">确认发货</span>
+      <button class="sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-label"><span class="req">*</span><span id="lblCarrier">物流公司</span></div>
+    <div class="carrier-list" id="carrierList"></div>
+    <div class="mode-note" id="modeNote"></div>
+    <div class="mode-form" id="modeForm">
+      <div class="sheet-sep"></div>
+      <div class="form-line">
+        <span id="lblTracking">物流单号</span>
+        <input id="trackingNo" placeholder="请输入物流订单号">
+      </div>
+      <div class="sheet-sep"></div>
+      <div class="sheet-label" id="lblProof">物流信息</div>
+      <div class="upload-thumbs" id="proofThumbs"></div>
+      <div class="upload-box" onclick="addProof()"><span class="plus">＋</span><span id="lblUpload">上传</span></div>
+    </div>
+    <button class="sheet-confirm" id="sheetConfirm" onclick="submitShip()">确定</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+/* ===== i18n ===== */
+const T={
+  zh:{
+    pageTitle:"发货管理",langBtn:"EN",
+    searchPlaceholder:"请输入订单号/联系人/邮编",searchBtn:"搜索",
+    tabPending:"待发货",tabShipped:"已发货",tabCompleted:"已完成",sortTime:"时间",
+    filterAll:"全部",filterInstant:"即时配送",filterLogistics:"物流发货",
+    stPending:"待发货",stShipped:"已发货",stCompleted:"已完成",
+    fOrderNo:"订单编号",fPostcode:"地址邮编",fDelivery:"配送方式",fReserve:"送达时间选择",fQty:"商品数量",fOrderTime:"下单时间",fDeliveryStatus:"配送状态",
+    btnDetail:"订单详情",btnConfirm:"确认发货",
+    selFmt:n=>`已选${n}个`,shipTogether:"统一发货",
+    emptyNo:"暂无数据",emptyNoResult:"未找到相关订单",
+    sheetTitle:"确认发货",lblCarrier:"物流公司",lblTracking:"物流单号",trackingPh:"请输入物流订单号",lblProof:"物流信息",lblUpload:"上传",confirm:"确定",
+    lalaNote:"Lalamove 不需要填写单号和上传物流图，确定后进入报价下单页。",
+    needCarrier:"请选择物流公司",needTracking:"请填写物流单号",
+    shipSuccess:"发货成功",gotoLalamove:"进入 Lalamove 报价下单页",
+    dsToAccept:"待接单",dsAccepted:"已接单",dsDelivering:"配送中",dsDelivered:"已送达",
+    typeInstant:"即时配送",typeLogistics:"物流发货",
+    qtyFmt:(k,t)=>t?`${k}（共${t}件）`:`${k}`,
+  },
+  en:{
+    pageTitle:"Shipping",langBtn:"中文",
+    searchPlaceholder:"Order No. / Contact Name / Postcode",searchBtn:"Search",
+    tabPending:"To Ship",tabShipped:"Shipped",tabCompleted:"Completed",sortTime:"Time",
+    filterAll:"All",filterInstant:"Instant Delivery",filterLogistics:"Carrier Shipping",
+    stPending:"To Ship",stShipped:"Shipped",stCompleted:"Completed",
+    fOrderNo:"Order No.",fPostcode:"Postcode",fDelivery:"Delivery Method",fReserve:"Scheduled Delivery Time",fQty:"Qty",fOrderTime:"Order Time",fDeliveryStatus:"Delivery Status",
+    btnDetail:"Details",btnConfirm:"Confirm Shipment",
+    selFmt:n=>`${n} Selected`,shipTogether:"Ship Together",
+    emptyNo:"No Data",emptyNoResult:"No orders found",
+    sheetTitle:"Confirm Shipment",lblCarrier:"Carrier",lblTracking:"Tracking No.",trackingPh:"Enter tracking number",lblProof:"Shipping Proof",lblUpload:"Upload",confirm:"Confirm",
+    lalaNote:"Lalamove does not require a tracking number or shipping proof. You will proceed to the quotation page.",
+    needCarrier:"Please select a carrier.",needTracking:"Please enter a tracking number.",
+    shipSuccess:"Shipped Successfully",gotoLalamove:"Proceed to Lalamove quotation page",
+    dsToAccept:"To Accept",dsAccepted:"Accepted",dsDelivering:"In Transit",dsDelivered:"Delivered",
+    typeInstant:"Instant Delivery",typeLogistics:"Carrier Shipping",
+    qtyFmt:(k,t)=>t?`${k} (${t} pcs)`:`${k}`,
+  }
+};
+
+/* ===== 配送商（数据驱动，来自 w_wms_delivery_providers）===== */
+/* isOffline: 2=在线API(Lalamove) 1=线下手动 */
+const PROVIDERS=[
+  {code:"Lalamove",name:"Lalamove",isOffline:2},
+  {code:"SELF",name:"自配送",isOffline:1},
+  {code:"Ninjavan",name:"Ninjavan",isOffline:1},
+  {code:"JT",name:"J&T express",isOffline:1},
+  {code:"Grab",name:"Grab",isOffline:1},
+  {code:"DHL",name:"DHL",isOffline:1},
+  {code:"Lalamove-test",name:"Lalamove-test",isOffline:2},
+];
+
+/* ===== 样例订单（来自 w_wms_picking_orders 口径）=====
+ status: pending(待发货 status=4) / shipped(已发货 5) / completed(已完成 6)
+ type: instant(1) / logistics(2)
+ deliveryStatus(已发货才有): to_accept/accepted/delivering/delivered */
+const ORDERS=[
+  {id:"p1",contact:"test 5kmStore",status:"pending",type:"instant",orderNo:"SM20260616170706000001",
+   postcode:"57100",delivery:"最快2小时送达",reserve:"尽快送达，预估 19:06",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-16 17:07:06"},
+  {id:"p2",contact:"Test-ios-piao",status:"pending",type:"instant",orderNo:"SM20260618181704000002",
+   postcode:"58200",delivery:"最快2小时送达",reserve:"尽快送达，预估 20:16",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-18 18:17:04"},
+  {id:"p3",contact:"Test-Piao",status:"pending",type:"instant",orderNo:"SM20260618000000000003",
+   postcode:"58200",delivery:"最快2小时送达",reserve:"尽快送达，预估 16:19",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-18 16:19:00"},
+  {id:"p4",contact:"LogiBuyer",status:"pending",type:"logistics",orderNo:"SM20260617000000000004",
+   postcode:"52100",delivery:"物流发货 · 最快半日达",reserve:"-",qtyKinds:2,qtyTotal:5,orderTime:"2026-06-17 09:30:00"},
+  {id:"s1",contact:"Jade",status:"shipped",type:"instant",orderNo:"SM20260619144538287452557",
+   postcode:"50450",delivery:"最快2小时送达",reserve:"尽快送达，预估 16:45",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-19 14:45:49",deliveryStatus:"to_accept"},
+  {id:"s2",contact:"Deng Fufang",status:"shipped",type:"instant",orderNo:"SM20260619144312487244560",
+   postcode:"56000",delivery:"最快2小时送达",reserve:"尽快送达，预估 16:43",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-19 14:43:22",deliveryStatus:"delivering"},
+  {id:"s3",contact:"xiangyee",status:"shipped",type:"logistics",orderNo:"SM20260617125024172177665",
+   postcode:"52100",delivery:"最快半日达",reserve:"-",qtyKinds:1,qtyTotal:0,orderTime:"2026-06-17 12:50:24",deliveryStatus:"accepted"},
+  {id:"c1",contact:"Lim Wei",status:"completed",type:"instant",orderNo:"SM20260615101212000777",
+   postcode:"50000",delivery:"最快2小时送达",reserve:"尽快送达，预估 11:10",qtyKinds:2,qtyTotal:4,orderTime:"2026-06-15 10:12:12",deliveryStatus:"delivered"},
+];
+
+/* ===== 状态 ===== */
+const params=new URLSearchParams(location.search);
+let locale=params.get("locale")||"zh";
+let curTab=["pending","shipped","completed"].includes(params.get("tab"))?params.get("tab"):"pending",curFilter="all",sortDesc=false,keyword="";
+let selected=new Set();
+let selCarrier=null,confirmIds=[],proofs=[];
+
+/* ===== locale ===== */
+function toggleLocale(){setLocale(locale==="zh"?"en":"zh")}
+function setLocale(l){
+  locale=l;const tx=T[l];
+  document.getElementById("langBtn").textContent=tx.langBtn;
+  document.getElementById("navTitle").textContent=tx.pageTitle;
+  document.getElementById("searchInput").placeholder=tx.searchPlaceholder;
+  document.getElementById("searchBtn").textContent=tx.searchBtn;
+  document.getElementById("sortLabel").textContent=tx.sortTime;
+  document.getElementById("chip-all").textContent=tx.filterAll;
+  document.getElementById("chip-instant").textContent=tx.filterInstant;
+  document.getElementById("chip-logistics").textContent=tx.filterLogistics;
+  renderTabs();renderList();
+}
+function renderTabs(){
+  const tx=T[locale];
+  const pendCount=ORDERS.filter(o=>o.status==="pending").length;
+  document.getElementById("tab-pending").innerHTML=`${tx.tabPending}<span class="badge">(${pendCount})</span>`;
+  document.getElementById("tab-shipped").textContent=tx.tabShipped;
+  document.getElementById("tab-completed").textContent=tx.tabCompleted;
+  ["pending","shipped","completed"].forEach(t=>document.getElementById("tab-"+t).classList.toggle("on",t===curTab));
+}
+
+/* ===== 列表 ===== */
+function dsLabel(ds){return{to_accept:T[locale].dsToAccept,accepted:T[locale].dsAccepted,delivering:T[locale].dsDelivering,delivered:T[locale].dsDelivered}[ds]||"-"}
+function renderList(){
+  const tx=T[locale];const wrap=document.getElementById("shipList");
+  let list=ORDERS.filter(o=>o.status===curTab);
+  if(curFilter!=="all")list=list.filter(o=>o.type===curFilter);
+  if(keyword){const k=keyword.toLowerCase();list=list.filter(o=>o.orderNo.toLowerCase().includes(k)||o.contact.toLowerCase().includes(k)||o.postcode.includes(keyword))}
+  list.sort((a,b)=>sortDesc?b.orderTime.localeCompare(a.orderTime):a.orderTime.localeCompare(b.orderTime));
+  const isPending=curTab==="pending";
+  wrap.classList.toggle("has-bar",isPending);
+  document.getElementById("shipBar").classList.toggle("show",isPending);
+  document.getElementById("draftTip").style.display=isPending?"block":"none";
+  if(!list.length){wrap.innerHTML=`<div class="empty-state"><div class="icon">📭</div>${keyword?tx.emptyNoResult:tx.emptyNo}</div>`;syncBar();return}
+  wrap.innerHTML=list.map(o=>{
+    const stCls=o.status,stTxt=o.status==="pending"?tx.stPending:o.status==="shipped"?tx.stShipped:tx.stCompleted;
+    const checked=selected.has(o.id);
+    const orderNoRow=isPending?"":`<div class="field-row"><span class="k">${tx.fOrderNo}</span><span class="v">${o.orderNo}</span></div>`;
+    const dsRow=(o.status!=="pending"&&o.deliveryStatus)?`<div class="field-row"><span class="k">${tx.fDeliveryStatus}</span><span class="v ds-${o.deliveryStatus}">${dsLabel(o.deliveryStatus)}</span></div>`:"";
+    const head=`<div class="ship-head">
+        ${isPending?`<span class="cbox ${checked?"on":""}" onclick="toggleSel('${o.id}')"></span>`:""}
+        <span class="ship-name">${o.contact}</span>
+        <span class="ship-status ${stCls}"><span class="dot"></span>${stTxt}</span>
+      </div>`;
+    const detailAction=`<button class="btn-secondary" onclick="openDetail('${o.id}')">${tx.btnDetail}</button>`;
+    const actions=isPending
+      ? `<div class="ship-actions"><button class="btn-secondary" onclick="toast('订单详情（演示）')">${tx.btnDetail}</button><button class="btn-primary" onclick="openConfirmSingle('${o.id}')">${tx.btnConfirm}</button></div>`
+      : `<div class="ship-actions">${detailAction}</div>`;
+    return `<div class="card ship-card">
+      ${head}
+      ${orderNoRow}
+      <div class="field-row"><span class="k">${tx.fPostcode}</span><span class="v">${o.postcode}</span></div>
+      <div class="field-row"><span class="k">${tx.fDelivery}</span><span class="v">${o.delivery}</span></div>
+      <div class="field-row"><span class="k">${tx.fReserve}</span><span class="v">${o.reserve}</span></div>
+      <div class="field-row"><span class="k">${tx.fQty}</span><span class="v">${tx.qtyFmt(o.qtyKinds,o.qtyTotal)}</span></div>
+      <div class="field-row"><span class="k">${tx.fOrderTime}</span><span class="v">${o.orderTime}</span></div>
+      ${dsRow}
+      <div class="dashed-divider"></div>
+      ${actions}
+    </div>`;
+  }).join("");
+  syncBar();
+}
+function switchTab(tab){
+  curTab=tab;selected.clear();
+  ["pending","shipped","completed"].forEach(t=>document.getElementById("tab-"+t).classList.toggle("on",t===tab));
+  renderList();
+}
+function setFilter(f,el){curFilter=f;document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));el.classList.add("on");renderList()}
+function toggleSort(){sortDesc=!sortDesc;document.getElementById("sortArrow").textContent=sortDesc?"▼":"▲";renderList()}
+function doSearch(){keyword=document.getElementById("searchInput").value.trim();renderList()}
+function stateQuery(extra={}){
+  const query=new URLSearchParams(location.search);
+  query.set("locale",locale);
+  Object.entries(extra).forEach(([key,value])=>{if(value!==undefined&&value!==null)query.set(key,value)});
+  return query.toString();
+}
+function pageUrl(page,extra={}){return `${page}?${stateQuery(extra)}`}
+function openDetail(id){window.location.href=pageUrl("shipping-delivery-detail.html",{order:id,tab:"shipped"})}
+
+/* ===== 选择 ===== */
+function pendingVisible(){
+  let list=ORDERS.filter(o=>o.status==="pending");
+  if(curFilter!=="all")list=list.filter(o=>o.type===curFilter);
+  if(keyword){const k=keyword.toLowerCase();list=list.filter(o=>o.orderNo.toLowerCase().includes(k)||o.contact.toLowerCase().includes(k)||o.postcode.includes(keyword))}
+  return list;
+}
+function toggleSel(id){selected.has(id)?selected.delete(id):selected.add(id);renderList()}
+function toggleAll(){
+  if(curTab!=="pending")return;
+  const vis=pendingVisible();const allOn=vis.length&&vis.every(o=>selected.has(o.id));
+  if(allOn)vis.forEach(o=>selected.delete(o.id));else vis.forEach(o=>selected.add(o.id));
+  renderList();
+}
+function syncBar(){
+  const tx=T[locale];const n=selected.size;
+  document.getElementById("selCount").textContent=tx.selFmt(n);
+  const vis=pendingVisible();const allOn=vis.length&&vis.every(o=>selected.has(o.id));
+  document.getElementById("cbAll").classList.toggle("on",!!allOn);
+  document.getElementById("shipBtn").disabled=n===0;
+}
+
+/* ===== 确认发货 P2 ===== */
+function openConfirmSingle(id){confirmIds=[id];openSheet()}
+function openConfirmMulti(){if(!selected.size){toast(T[locale].needCarrier);return}confirmIds=[...selected];openSheet()}
+function openSheet(){
+  selCarrier=null;proofs=[];
+  const tx=T[locale];
+  document.getElementById("sheetTitle").textContent=tx.sheetTitle;
+  document.getElementById("lblCarrier").textContent=tx.lblCarrier;
+  document.getElementById("lblTracking").textContent=tx.lblTracking;
+  document.getElementById("trackingNo").placeholder=tx.trackingPh;document.getElementById("trackingNo").value="";
+  document.getElementById("lblProof").textContent=tx.lblProof;
+  document.getElementById("lblUpload").textContent=tx.lblUpload;
+  document.getElementById("sheetConfirm").textContent=tx.confirm;
+  renderCarriers();applyMode();renderProofs();
+  document.getElementById("sheetMask").classList.add("show");
+  document.getElementById("sheet").classList.add("show");
+}
+function closeSheet(){document.getElementById("sheetMask").classList.remove("show");document.getElementById("sheet").classList.remove("show")}
+function renderCarriers(){
+  document.getElementById("carrierList").innerHTML=PROVIDERS.map(p=>
+    `<button class="carrier ${p.code===selCarrier?"on":""}" onclick="selectCarrier('${p.code}')">${p.name}</button>`).join("");
+}
+function selectCarrier(code){selCarrier=code;renderCarriers();applyMode()}
+function applyMode(){
+  const tx=T[locale];
+  const p=PROVIDERS.find(x=>x.code===selCarrier);
+  const note=document.getElementById("modeNote"),form=document.getElementById("modeForm");
+  if(!p){note.classList.remove("show");form.classList.remove("show");return}
+  if(p.isOffline===2){note.textContent=tx.lalaNote;note.classList.add("show");form.classList.remove("show")}
+  else{note.classList.remove("show");form.classList.add("show")}
+}
+function addProof(){proofs.push("🖼");renderProofs()}
+function delProof(i){proofs.splice(i,1);renderProofs()}
+function renderProofs(){
+  document.getElementById("proofThumbs").innerHTML=proofs.map((p,i)=>
+    `<div class="thumb">${p}<span class="del" onclick="delProof(${i})">✕</span></div>`).join("");
+}
+function submitShip(){
+  const tx=T[locale];
+  if(!selCarrier){toast(tx.needCarrier);return}
+  const p=PROVIDERS.find(x=>x.code===selCarrier);
+  if(p.isOffline===2){closeSheet();window.location.href=pageUrl("shipping-lalamove.html",{orders:confirmIds.join(","),provider:p.code});return}
+  if(!document.getElementById("trackingNo").value.trim()){toast(tx.needTracking);return}
+  // 线下物流：标记发货成功，订单进入已发货
+  confirmIds.forEach(id=>{const o=ORDERS.find(x=>x.id===id);if(o){o.status="shipped";o.deliveryStatus="to_accept"}});
+  selected.clear();closeSheet();toast(tx.shipSuccess);renderTabs();renderList();
+}
+
+/* ===== 工具 ===== */
+function goBack(){if(window.parent!==window)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else history.length>1?history.back():null}
+let toastTimer=null;
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),1700)}
+
+/* ===== init ===== */
+setLocale(locale);
+</script>
+</body>
+</html>

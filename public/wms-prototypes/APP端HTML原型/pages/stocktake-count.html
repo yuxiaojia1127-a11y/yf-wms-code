@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>盘点作业 · Stocktake Count</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2AA7C9;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:10px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.app-nav{min-height:46px;display:flex;align-items:center;padding:env(safe-area-inset-top,0) 10px 0;gap:8px;background:#fff;border-bottom:1px solid var(--app-border);flex-shrink:0}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:22px;color:var(--app-text);flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.nav-right{display:flex;gap:6px;align-items:center;flex-shrink:0;min-width:32px;justify-content:flex-end}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
+.prog-head{background:#fff;padding:10px 14px;border-bottom:1px solid var(--app-border);flex-shrink:0}
+.prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prog-no{font-size:13px;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace;display:flex;align-items:center;gap:8px}
+.prog-wh{font-size:12px;color:var(--app-text-secondary)}
+.copy-tag{font-size:10px;background:var(--app-bg-soft);border-radius:5px;padding:2px 6px;cursor:pointer;color:var(--app-text-secondary)}
+.prog-bar-row{display:flex;align-items:center;gap:10px}
+.prog-bar{flex:1;height:8px;border-radius:4px;background:var(--app-border);overflow:hidden}
+.prog-fill{height:100%;background:var(--app-primary);border-radius:4px;transition:width .25s}
+.prog-txt{font-size:13px;color:var(--app-text-secondary);flex-shrink:0}
+.prog-txt b{color:var(--app-text);font-size:15px;font-weight:700}
+.tool-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--app-bg);flex-shrink:0}
+.tool-search{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:16px;padding:0 12px;height:34px}
+.tool-search input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.tool-search input::placeholder{color:var(--app-text-muted)}
+.scan-mini{border:none;background:var(--app-primary);color:#fff;border-radius:16px;height:34px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.fil-row{display:flex;gap:8px;padding:0 12px 8px;background:var(--app-bg);flex-shrink:0}
+.fil-chip{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary);font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer}
+.fil-chip.on{background:var(--app-primary-soft);border-color:var(--app-primary);color:var(--app-primary-strong);font-weight:600}
+.fil-chip b{font-weight:700}
+.list-body{flex:1;overflow-y:auto;padding:8px 12px 12px}
+.sku-item{background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:12px;margin-bottom:10px;transition:box-shadow .2s}
+.sku-item.focus{box-shadow:0 0 0 2px var(--app-primary)}
+.sku-item.counted{background:#fff}
+.sku-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:4px}
+.sku-name{font-size:13px;font-weight:600;line-height:1.4}
+.sku-flag{font-size:11px;font-weight:600;flex-shrink:0}
+.sku-flag.counted{color:var(--app-success)}
+.sku-flag.wait{color:var(--app-text-muted)}
+.sku-spec{font-size:11px;color:var(--app-text-muted);margin-bottom:10px}
+.count-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.count-lbl{font-size:12px;color:var(--app-text-secondary)}
+.count-lbl .book-val{color:var(--app-text);font-weight:700;font-size:14px}
+.diff-mini{margin-left:10px;font-size:12px;font-weight:700}
+.diff-mini.gain{color:var(--app-success)}
+.diff-mini.loss{color:var(--app-danger)}
+.diff-mini.ok{color:var(--app-text-muted);font-weight:500}
+.sku-item.row-ok{background:#EEF6E6;box-shadow:var(--app-shadow-card),inset 3px 0 0 var(--app-success)}
+.sku-item.row-gain{background:#EEF6E6;box-shadow:var(--app-shadow-card),inset 3px 0 0 var(--app-success)}
+.sku-item.row-loss{background:#FCECEA;box-shadow:var(--app-shadow-card),inset 3px 0 0 var(--app-danger)}
+.stepper-wrap{display:flex;align-items:center;gap:0}
+.step-btn{width:32px;height:32px;border:1px solid var(--app-border);background:#fff;color:var(--app-text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.step-btn:first-child{border-radius:8px 0 0 8px}
+.step-btn:last-child{border-radius:0 8px 8px 0}
+.step-btn:active{background:var(--app-bg-soft)}
+.step-val{width:48px;height:32px;text-align:center;font-size:15px;font-weight:700;color:var(--app-text);border:1px solid var(--app-border);border-left:none;border-right:none;outline:none}
+.step-val.empty{color:var(--app-text-muted);font-weight:400}
+.list-empty{text-align:center;color:var(--app-text-muted);font-size:13px;padding:60px 0}
+.task-foot{display:flex;align-items:center;gap:10px;padding:8px 12px calc(12px + env(safe-area-inset-bottom,0));background:#fff;border-top:1px solid var(--app-border);flex-shrink:0}
+.bar-assign{font-size:12px;color:var(--app-text-secondary);line-height:1.4}
+.bar-assign b{color:var(--app-text);font-size:15px}
+.bar-save{border:1px solid var(--app-primary);background:#fff;color:var(--app-primary);height:42px;border-radius:21px;font-size:13px;font-weight:600;cursor:pointer;padding:0 14px}
+.bar-scan{width:46px;height:46px;border-radius:50%;background:var(--app-primary);color:#fff;border:none;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(67,184,168,.4)}
+.bar-finish{flex:1;height:46px;border-radius:23px;background:var(--app-primary);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer}
+.bar-finish:active{background:var(--app-primary-strong)}
+.mask{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}
+.mask.show{display:flex}
+#scanModal,#confirmMask{align-items:center;justify-content:center}
+.modal{width:290px;background:#fff;border-radius:14px;padding:18px;text-align:center}
+.modal h3{font-size:15px;margin-bottom:6px}
+.modal p{font-size:12.5px;color:var(--app-text-secondary);margin-bottom:14px;line-height:1.6}
+.scan-frame{height:108px;border:2px dashed var(--app-primary);border-radius:10px;margin:6px 0 12px;position:relative;background:var(--app-bg-soft)}
+.scan-frame::after{content:"";position:absolute;left:10%;right:10%;top:50%;height:2px;background:var(--app-primary)}
+.scan-input-row{display:flex;gap:8px}
+.scan-input-row input{flex:1;border:1px solid var(--app-border);border-radius:8px;height:38px;padding:0 10px;font-size:13px;outline:none}
+.scan-input-row button{border:none;background:var(--app-primary);color:#fff;border-radius:8px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}
+.scan-close{margin-top:12px;border:1px solid var(--app-text-muted);background:none;color:var(--app-text-muted);border-radius:10px;padding:5px 14px;font-size:12px;cursor:pointer}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:84%;background:#fff;border-radius:16px 16px 0 0;z-index:55;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s;width:375px;margin:auto}
+.mask.show .sheet{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.sheet-head h3{font-size:15px}
+.sheet-sub{font-size:12px;color:var(--app-text-secondary);padding:0 16px 8px}
+.sheet-close{border:none;background:none;font-size:18px;color:var(--app-text-muted);cursor:pointer}
+.diff-list{padding:4px 12px 8px;overflow-y:auto}
+.diff-card{background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:8px}
+.diff-card.gain{box-shadow:inset 2px 0 0 var(--app-success)}
+.diff-card.loss{box-shadow:inset 2px 0 0 var(--app-danger)}
+.diff-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.diff-nums{font-size:12px;color:var(--app-text-secondary);margin-bottom:8px}
+.diff-nums .tag{font-weight:700;margin-left:8px}
+.diff-nums .tag.gain{color:var(--app-success)}
+.diff-nums .tag.loss{color:var(--app-danger)}
+.reason-chips{display:flex;gap:6px;flex-wrap:wrap}
+.rchip{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary);font-size:12px;padding:5px 11px;border-radius:13px;cursor:pointer}
+.rchip.on{background:var(--app-primary);border-color:var(--app-primary);color:#fff;font-weight:600}
+.sheet-foot{display:flex;gap:10px;padding:10px 16px calc(16px + env(safe-area-inset-bottom,0));border-top:1px solid var(--app-border)}
+.sheet-foot button{flex:1;height:44px;border-radius:22px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-ghost{border:1px solid var(--app-primary);background:#fff;color:var(--app-primary)}
+.btn-primary{border:none;background:var(--app-primary);color:#fff}
+.modal-acts{display:flex;gap:10px}
+.modal-acts button{flex:1;height:40px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer}
+.ok-primary{border:none;background:var(--app-primary);color:#fff}
+.toast{position:absolute;left:50%;top:46%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;text-align:center;max-width:80%}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="../assets/wms-app.css">
+</head>
+<body class="content-page" data-page="stocktake-count" data-locale="zh">
+<div class="phone">
+  <header class="app-nav">
+    <button class="nav-back" id="navBack">‹</button>
+    <div class="nav-title" id="navTitle">盘点作业</div>
+    <div class="nav-right"><button class="lang-btn">EN</button></div>
+  </header>
+
+  <div class="prog-head">
+    <div class="prog-top">
+      <span class="prog-no"><span id="hNo">PD—</span><span class="copy-tag" id="copyNo">复制</span></span>
+      <span class="prog-wh" id="hWh">—</span>
+    </div>
+    <div class="prog-bar-row">
+      <span class="prog-bar"><span class="prog-fill" id="progFill" style="width:0%"></span></span>
+      <span class="prog-txt"><b id="progDone">0</b> / <span id="progTotal">0</span></span>
+    </div>
+  </div>
+
+  <div class="tool-row">
+    <div class="tool-search"><span style="color:var(--app-text-muted)">🔍</span><input id="searchInput" placeholder="搜索商品名称 / 条码"></div>
+    <button class="scan-mini" id="scanBtn">📷 <span id="scanBtnTxt">扫码定位</span></button>
+  </div>
+  <div class="fil-row" id="filRow"></div>
+
+  <div class="list-body" id="skuList"></div>
+
+  <footer class="task-foot">
+    <div class="bar-assign" id="barAssign">已盘 <b>0</b>/0</div>
+    <button class="bar-save" id="saveBtn">暂存</button>
+    <button class="bar-scan" id="scanBtn2">⊞</button>
+    <button class="bar-finish" id="submitBtn">提交盘点</button>
+  </footer>
+
+  <!-- 扫码定位弹层 -->
+  <div class="mask" id="scanModal">
+    <div class="modal">
+      <h3 id="scanTitle">扫码定位</h3>
+      <p id="scanHint">扫描或输入条码，自动定位明细行</p>
+      <div class="scan-frame"></div>
+      <div class="scan-input-row">
+        <input id="scanInput" placeholder="输入/扫描条码后回车">
+        <button id="scanConfirm">定位</button>
+      </div>
+      <button class="scan-close" id="scanClose">✕ 关闭</button>
+    </div>
+  </div>
+
+  <!-- 差异确认抽屉 -->
+  <div class="mask" id="diffSheet">
+    <div class="sheet">
+      <div class="sheet-head"><h3 id="diffTitle">差异确认</h3><button class="sheet-close" id="diffClose">✕</button></div>
+      <div class="sheet-sub" id="diffSub">以下商品存在盘盈/盘亏，请逐条选择差异原因</div>
+      <div class="diff-list" id="diffList"></div>
+      <div class="sheet-foot"><button class="btn-ghost" id="diffCancel">返回修改</button><button class="btn-primary" id="diffConfirm">确认提交</button></div>
+    </div>
+  </div>
+
+  <!-- 通用确认 -->
+  <div class="mask" id="confirmMask">
+    <div class="modal">
+      <h3 id="cfTitle"></h3><p id="cfDesc"></p>
+      <div class="modal-acts"><button class="btn-ghost" id="cfCancel">取消</button><button class="ok-primary" id="cfOk">确定</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+ * WMS APP 盘点作业页（明盘录实盘）· 单文件自包含
+ * 数据口径：MySQL 库 wms（账面来自 w_wms_warehouse_inventories 快照）
+ * 明盘：直接显示账面数，录实盘后实时显示盘盈/盘亏；全部盘完方可提交；有差异行提交前补填原因
+ * 提交：status 盘点中(2)→待复核(3)，不改库存（差异复核/调账在 WEB）
+ * 与 stocktake-list.html / stocktake-create.html 共用同一套数据约定
+ * ============================================================ */
+const order={id:201,no:"PD20260620001",warehouseName:"piao自营",counter:"李海",items:[
+  {lineNo:1,skuId:65,name:"黄飞红麻辣花生 210g（即时配送）",category:"花生瓜子",spec:"210g*1袋",barcode:"12345678",book:6,counted:6,reason:""},
+  {lineNo:2,skuId:66,name:"黄飞红麻辣花生 210g（即时配送）",category:"花生瓜子",spec:"400g*1袋",barcode:"123456789",book:3,counted:3,reason:""},
+  {lineNo:3,skuId:67,name:"甘源缤纷每日豆果 208g",category:"休闲豆类",spec:"208g*1包",barcode:"1000001",book:5,counted:4,reason:""},
+  {lineNo:4,skuId:69,name:"无穷盐焗鸡翅 60g",category:"卤制食品",spec:"15g*4包/袋",barcode:"3000001",book:5,counted:null,reason:""},
+  {lineNo:5,skuId:74,name:"赤豆精选（当日配送）",category:"休闲豆类",spec:"100g",barcode:"1000002",book:7,counted:null,reason:""},
+  {lineNo:6,skuId:83,name:"商品分发",category:"新鲜水果",spec:"210g*1袋",barcode:"2000001",book:16,counted:16,reason:""},
+  {lineNo:7,skuId:84,name:"商品分发",category:"新鲜水果",spec:"400g*1袋",barcode:"2000002",book:3,counted:null,reason:""},
+  {lineNo:8,skuId:99,name:"Omega3鸡蛋 600g（10枚）",category:"蔬菜/鸡蛋",spec:"10枚/盒",barcode:"5000001",book:15,counted:null,reason:""}]};
+const reasons=[{zh:"破损",en:"Damaged"},{zh:"过期",en:"Expired"},{zh:"错记",en:"Miscount"},{zh:"被盗",en:"Theft"},{zh:"其它",en:"Other"}];
+
+(()=>{
+ const params=new URLSearchParams(location.search);
+ const isEmbedded=window.parent&&window.parent!==window;
+ let locale=params.get("locale")||"zh";
+ const $=(id)=>document.getElementById(id);
+ const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const T=()=>locale==="zh";
+ const state={filter:"all",kw:"",focusLine:null};
+ let pendingCb=null;
+
+ function carryQuery(extra){const q=new URLSearchParams(location.search);q.set("locale",locale);if(extra)Object.entries(extra).forEach(([k,v])=>q.set(k,v));return q.toString();}
+ function goWorkbench(){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else location.href="workbench.html?"+carryQuery();}
+ function goList(extra){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"feature",menuId:"stocktake_task"},"*");else location.href="stocktake-list.html?"+carryQuery(extra);}
+
+ function toast(msg){const el=$("toast");el.innerHTML=msg;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1700);}
+ function progress(){const total=order.items.length;const done=order.items.filter(i=>i.counted!=null).length;return{total,done,pct:total?Math.round(done/total*100):0};}
+ function diffRows(){return order.items.filter(i=>i.counted!=null&&i.counted!==i.book);}
+
+ function renderHead(){
+   $("navTitle").textContent=T()?"盘点作业":"Counting";
+   $("hNo").textContent=order.no;$("copyNo").textContent=T()?"复制":"Copy";
+   $("hWh").textContent=order.warehouseName;
+   $("searchInput").placeholder=T()?"搜索商品名称 / 条码":"Search name / barcode";
+   $("scanBtnTxt").textContent=T()?"扫码定位":"Scan";
+   $("saveBtn").textContent=T()?"暂存":"Save";
+   $("submitBtn").textContent=T()?"提交盘点":"Submit";
+   $("scanTitle").textContent=T()?"扫码定位":"Scan to locate";
+   $("scanHint").textContent=T()?"扫描或输入条码，自动定位明细行":"Scan/type barcode to locate";
+   $("diffTitle").textContent=T()?"差异确认":"Confirm diff";
+   $("diffSub").textContent=T()?"以下商品存在盘盈/盘亏，请逐条选择差异原因":"Pick a reason for each diff item";
+   $("diffCancel").textContent=T()?"返回修改":"Back";$("diffConfirm").textContent=T()?"确认提交":"Confirm";
+   document.querySelectorAll(".lang-btn").forEach(b=>b.textContent=T()?"EN":"中文");
+   document.body.dataset.locale=locale;
+ }
+ function renderFilters(){
+   const pg=progress();const dn=diffRows().length;
+   const wait=order.items.filter(i=>i.counted==null).length;
+   const f=[["all",T()?"全部":"All",pg.total],["wait",T()?"待盘":"Uncounted",wait],["counted",T()?"已盘":"Counted",pg.done],["diff",T()?"有差异":"Diff",dn]];
+   $("filRow").innerHTML=f.map(([k,l,n])=>`<button class="fil-chip ${state.filter===k?"on":""}" data-fil="${k}">${l} <b>${n}</b></button>`).join("");
+ }
+ function visibleItems(){
+   const kw=state.kw.trim().toLowerCase();
+   return order.items.filter(i=>{
+     if(state.filter==="wait"&&i.counted!=null)return false;
+     if(state.filter==="counted"&&i.counted==null)return false;
+     if(state.filter==="diff"&&!(i.counted!=null&&i.counted!==i.book))return false;
+     if(kw&&!(i.name.toLowerCase().includes(kw)||(i.barcode||"").includes(kw)))return false;
+     return true;
+   });
+ }
+ function rowHtml(l){
+   const counted=l.counted!=null;
+   const flag=counted?`<span class="sku-flag counted">✓ ${T()?"已盘":"Counted"}</span>`:`<span class="sku-flag wait">${T()?"待盘":"Uncounted"}</span>`;
+   const sub=[l.category,l.spec].filter(Boolean).join(" · ")+(l.barcode?` · ${T()?"条码":"Barcode"} ${l.barcode}`:"");
+   const val=counted?l.counted:"";
+   const focusCls=state.focusLine===l.lineNo?" focus":"";
+   const d=counted?l.counted-l.book:null;
+   const diffMini=(d!==null&&d!==0)?`<span class="diff-mini ${d>0?"gain":"loss"}">${d>0?(T()?"盘盈 +":"Overage +")+d:(T()?"盘亏 ":"Shortage ")+d}</span>`:(counted?`<span class="diff-mini ok">${T()?"一致":"Match"}</span>`:"");
+   const rowCls=counted?(d>0?" row-gain":(d<0?" row-loss":" row-ok")):"";
+   return `<div class="sku-item${counted?" counted":""}${rowCls}${focusCls}" data-line="${l.lineNo}" id="row-${l.lineNo}">
+     <div class="sku-top"><div class="sku-name">${esc(l.name)}</div>${flag}</div>
+     <div class="sku-spec">${esc(sub)}</div>
+     <div class="count-row">
+       <span class="count-lbl">${T()?"账面":"Book"} <b class="book-val">${l.book}</b>${diffMini}</span>
+       <span class="stepper-wrap">
+         <button class="step-btn" data-step="-1" data-line="${l.lineNo}">−</button>
+         <input class="step-val ${counted?"":"empty"}" data-val="${l.lineNo}" inputmode="numeric" value="${val}" placeholder="实盘">
+         <button class="step-btn" data-step="1" data-line="${l.lineNo}">＋</button>
+       </span>
+     </div>
+   </div>`;
+ }
+ function renderList(){
+   const rows=visibleItems();
+   $("skuList").innerHTML=rows.length?rows.map(rowHtml).join(""):`<div class="list-empty">${T()?"无符合条件的商品":"No items"}</div>`;
+   const pg=progress();
+   $("progDone").textContent=pg.done;$("progTotal").textContent=pg.total;$("progFill").style.width=pg.pct+"%";
+   $("barAssign").innerHTML=`${T()?"已盘":"Counted"} <b>${pg.done}</b>/${pg.total}`;
+   renderFilters();
+ }
+ function setCounted(line,val){
+   const l=order.items.find(x=>x.lineNo===line);if(!l)return;
+   if(val===""||val==null){l.counted=null;}
+   else{let n=parseInt(val,10);if(isNaN(n)||n<0)n=0;l.counted=n;}
+   renderList();
+ }
+ function step(line,delta){
+   const l=order.items.find(x=>x.lineNo===line);if(!l)return;
+   let n=l.counted==null?0:l.counted;n+=delta;if(n<0)n=0;l.counted=n;
+   state.focusLine=line;renderList();
+ }
+ function locate(code){
+   const l=order.items.find(x=>(x.barcode||"")===code.trim());
+   if(!l){toast(T()?"条码未匹配到本单商品":"Barcode not in this order");return false;}
+   state.focusLine=l.lineNo;state.filter="all";$("searchInput").value="";state.kw="";renderList();
+   const row=$("row-"+l.lineNo);if(row){if(row.scrollIntoView)row.scrollIntoView({behavior:"smooth",block:"center"});const inp=document.querySelector(`[data-val="${l.lineNo}"]`);if(inp)setTimeout(()=>inp.focus(),300);}
+   toast(T()?`已定位：${l.name}`:`Located: ${l.name}`);return true;
+ }
+
+ function askConfirm(title,desc,okText,cb){$("cfTitle").textContent=title;$("cfDesc").textContent=desc;$("cfCancel").textContent=T()?"取消":"Cancel";$("cfOk").textContent=okText;pendingCb=cb;$("confirmMask").classList.add("show");}
+ function closeConfirm(){$("confirmMask").classList.remove("show");pendingCb=null;}
+
+ function trySubmit(){
+   const pg=progress();
+   if(pg.done<pg.total){
+     const first=order.items.find(i=>i.counted==null);
+     state.filter="wait";renderList();
+     if(first){const row=$("row-"+first.lineNo);if(row&&row.scrollIntoView)row.scrollIntoView({behavior:"smooth",block:"center"});}
+     toast(T()?`还有 ${pg.total-pg.done} 个商品未盘点`:`${pg.total-pg.done} items not counted`);
+     return;
+   }
+   const diffs=diffRows();
+   if(diffs.length){openDiff(diffs);return;}
+   askConfirm(T()?"提交盘点":"Submit",T()?"全部一致，无差异。提交后转待复核。":"All match. Submit for review?",T()?"提交":"Submit",doSubmit);
+ }
+ function openDiff(diffs){
+   $("diffList").innerHTML=diffs.map(l=>{
+     const d=l.counted-l.book;
+     const tag=d>0?`<span class="tag gain">${T()?"盘盈 +":"Overage +"}${d}</span>`:`<span class="tag loss">${T()?"盘亏 ":"Shortage "}${d}</span>`;
+     return `<div class="diff-card ${d>0?"gain":"loss"}" data-dline="${l.lineNo}">
+       <div class="diff-name">${esc(l.name)}</div>
+       <div class="diff-nums">${T()?"实盘":"Counted"} ${l.counted} · ${T()?"账面":"Book"} ${l.book} ${tag}</div>
+       <div class="reason-chips">${reasons.map(r=>`<button class="rchip ${l.reason===r.zh?"on":""}" data-rline="${l.lineNo}" data-reason="${r.zh}">${T()?r.zh:r.en}</button>`).join("")}</div>
+     </div>`;
+   }).join("");
+   $("diffSheet").classList.add("show");
+ }
+ function closeDiff(){$("diffSheet").classList.remove("show");}
+ function doSubmit(){
+   closeConfirm();closeDiff();
+   toast(T()?"已提交，等待复核":"Submitted for review");
+   setTimeout(()=>goList({detail:order.id}),900);
+ }
+
+ document.addEventListener("click",(e)=>{
+   if(e.target.closest(".lang-btn")){locale=locale==="zh"?"en":"zh";renderHead();renderList();return;}
+   if(e.target.closest("#navBack")){askConfirm(T()?"退出盘点":"Exit",T()?"已录入的实盘数会暂存。确认退出？":"Counts will be saved. Exit?",T()?"退出":"Exit",()=>{closeConfirm();goList();});return;}
+   if(e.target.closest("#copyNo")){toast(T()?"已复制":"Copied");return;}
+   const fil=e.target.closest("[data-fil]");if(fil){state.filter=fil.dataset.fil;renderList();return;}
+   const sb=e.target.closest("[data-step]");if(sb){step(Number(sb.dataset.line),Number(sb.dataset.step));return;}
+   if(e.target.closest("#scanBtn")||e.target.closest("#scanBtn2")){$("scanInput").value="";$("scanModal").classList.add("show");setTimeout(()=>$("scanInput").focus(),100);return;}
+   if(e.target.closest("#scanClose")||e.target.id==="scanModal"){$("scanModal").classList.remove("show");return;}
+   if(e.target.closest("#scanConfirm")){if(locate($("scanInput").value))$("scanModal").classList.remove("show");return;}
+   if(e.target.closest("#saveBtn")){toast(T()?"已暂存":"Saved");return;}
+   if(e.target.closest("#submitBtn")){trySubmit();return;}
+   const rc=e.target.closest("[data-reason]");if(rc){const l=order.items.find(x=>x.lineNo===Number(rc.dataset.rline));if(l)l.reason=rc.dataset.reason;document.querySelectorAll(`[data-rline="${rc.dataset.rline}"]`).forEach(x=>x.classList.toggle("on",x===rc));return;}
+   if(e.target.closest("#diffClose")||e.target.closest("#diffCancel")||e.target.id==="diffSheet"){closeDiff();return;}
+   if(e.target.closest("#diffConfirm")){const diffs=diffRows();const miss=diffs.find(l=>!l.reason);if(miss){toast(T()?"请为每个差异项选择原因":"Pick a reason for each");return;}doSubmit();return;}
+   if(e.target.closest("#cfCancel")||e.target.id==="confirmMask"){closeConfirm();return;}
+   if(e.target.closest("#cfOk")){const cb=pendingCb;closeConfirm();if(cb)cb();return;}
+ });
+ document.addEventListener("input",(e)=>{
+   if(e.target.id==="searchInput"){state.kw=e.target.value;renderList();}
+   const v=e.target.closest("[data-val]");if(v){const line=Number(v.dataset.val);const l=order.items.find(x=>x.lineNo===line);if(l){const raw=v.value.replace(/[^0-9]/g,"");if(raw==="")l.counted=null;else l.counted=parseInt(raw,10);}}
+ });
+ document.addEventListener("focusin",(e)=>{const v=e.target.closest("[data-val]");if(v)state.focusLine=Number(v.dataset.val);});
+ document.addEventListener("focusout",(e)=>{const v=e.target.closest("[data-val]");if(v){renderList();}});
+ document.addEventListener("keydown",(e)=>{if(e.target.id==="scanInput"&&e.key==="Enter"){if(locate(e.target.value))$("scanModal").classList.remove("show");}});
+
+ renderHead();renderList();
+})();
+</script>
+</body>
+</html>

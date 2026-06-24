@@ -295,27 +295,33 @@
       };
       var moduleDesc = {
         base: '工作台、我的等 APP 主页面',
-        outbound: '接单、待揽货与出库相关入口',
+        outbound: '接单、待揽货与合单相关入口',
         packingReview: '打包后的复核确认入口',
         shipping: '待发货、配送状态与履约跟踪入口',
-        inbound: '采购、退货、调拨收货与上架入口',
-        inventory: '库存查询、盘点和出入库记录入口'
+        inbound: '入库单创建与查看入口',
+        inventory: '盘点和出入库记录入口'
       };
       var basePages = [
         { id: 'workbench', module: 'base', label: '工作台', code: 'APP-003', href: './pages/workbench.html' },
         { id: 'mine', module: 'base', label: '我的', code: 'APP-022', href: './pages/mine.html' }
       ];
       var virtualPages = [
+        { id: 'shipping_manage', module: 'shipping', label: '发货管理', code: 'SH-LIST', href: './pages/shipping-list.html' },
         { id: 'inbound_order_list', module: 'inbound', label: '入库单', code: 'IB-LIST', href: './pages/inbound-list.html' },
-        { id: 'create_inbound', module: 'inbound', label: '新建入库单', code: 'IB-NEW', href: './pages/inbound-create.html' }
+        { id: 'create_inbound', module: 'inbound', label: '新建入库单', code: 'IB-NEW', href: './pages/inbound-create.html' },
+        { id: 'create_stocktake', module: 'inventory', label: '新建盘点单', code: 'PD-NEW', href: './pages/stocktake-create.html' },
+        { id: 'stocktake_count', module: 'inventory', label: '盘点作业', code: 'PD-COUNT', href: './pages/stocktake-count.html' },
+        { id: 'order_tracking', module: 'inventory', label: '销售订单跟踪', code: 'OT-LIST', href: './pages/order-tracking.html' }
       ];
 
       // 「入库记录(IV-04)」与入库模块的「入库单」为同一列表页，统一收敛到入库，目录其他模块不再重复展示
       var excludeIds = { inventory_in_record: true };
-      // 已落地的入库原型页：直接指向独立页面（其余 IB-01~04 暂用 feature 占位）
+      // 已落地的原型页：直接指向独立页面（盘点 inventory_count→盘点任务列表 PD01）
       var hrefOverrides = {
+        shipping_pending: './pages/shipping-list.html',
         inbound_order_list: './pages/inbound-list.html',
-        create_inbound: './pages/inbound-create.html'
+        create_inbound: './pages/inbound-create.html',
+        inventory_count: './pages/stocktake-list.html'
       };
 
       function getLabel(item) {

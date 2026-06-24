@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>盘点任务 · Stocktake Tasks</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2AA7C9;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:10px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12)}
+.screen{display:none;min-height:812px;flex-direction:column}
+.screen.active{display:flex}
+.app-nav{min-height:46px;display:flex;align-items:center;padding:env(safe-area-inset-top,0) 10px 0;gap:8px;background:#fff;border-bottom:1px solid var(--app-border)}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:22px;color:var(--app-text);flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.nav-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
+.lang-btn:active{background:var(--app-primary);color:#fff}
+.new-btn{border:none;background:var(--app-primary);color:#fff;font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;font-weight:600}
+.new-btn:active{background:var(--app-primary-strong)}
+.search-row{display:flex;gap:8px;padding:10px 12px 6px}
+.search-box{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:0 12px;height:36px}
+.search-box input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.search-box input::placeholder{color:var(--app-text-muted)}
+.search-btn{border:none;background:var(--app-primary);color:#fff;font-size:13px;border-radius:18px;padding:0 16px;height:36px;cursor:pointer}
+.filter-btn{border:none;background:#fff;border-radius:18px;width:40px;height:36px;cursor:pointer;font-size:16px;position:relative}
+.filter-btn.on{color:var(--app-primary)}
+.filter-dot{position:absolute;top:6px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--app-danger)}
+.tabs-row{display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+.tabs{display:flex;gap:16px;padding:4px 0 0;overflow-x:auto}
+.ib-tab{font-size:14px;color:var(--app-text-secondary);padding:8px 0 10px;cursor:pointer;position:relative;white-space:nowrap}
+.ib-tab.on{color:var(--app-text);font-weight:600;font-size:15px}
+.ib-tab.on::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:4px;width:22px;height:3px;border-radius:2px;background:var(--app-primary)}
+.stat-bar{padding:2px 14px 6px;font-size:12px;color:var(--app-text-secondary)}
+.stat-bar b{color:var(--app-text);font-weight:600}
+.list-body{flex:1;overflow-y:auto;padding:8px 12px calc(20px + env(safe-area-inset-bottom,0))}
+.ib-order-card{background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:12px;margin-bottom:10px;cursor:pointer}
+.ib-order-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ib-order-no{font-size:14px;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace}
+.ib-badge{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.ib-badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.ib-badge.draft{background:rgba(156,163,175,.16);color:var(--app-text-muted)}
+.ib-badge.counting{background:rgba(217,154,25,.12);color:var(--app-warning)}
+.ib-badge.review{background:rgba(42,167,201,.14);color:var(--app-info)}
+.ib-badge.done{background:rgba(104,185,46,.12);color:var(--app-success)}
+.ib-badge.void{background:rgba(156,163,175,.16);color:var(--app-text-muted)}
+.ib-order-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.ib-order-row .k{color:var(--app-text-secondary)}
+.ib-order-row .v{color:var(--app-text);text-align:right;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prog-row{display:flex;align-items:center;gap:8px;padding:5px 0 2px}
+.prog-row .k{color:var(--app-text-secondary);font-size:12px;flex-shrink:0}
+.prog-bar{flex:1;height:6px;border-radius:3px;background:var(--app-border);overflow:hidden}
+.prog-fill{height:100%;background:var(--app-primary);border-radius:3px}
+.prog-txt{font-size:12px;color:var(--app-text-secondary);flex-shrink:0}
+.prog-txt b{color:var(--app-text);font-weight:600}
+.diff-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.diff-row .k{color:var(--app-text-secondary)}
+.diff-row .v{color:var(--app-danger);font-weight:600}
+.ib-list-empty{text-align:center;color:var(--app-text-muted);font-size:13px;padding:70px 0}
+.ib-list-empty div{margin-top:8px}
+.list-more{text-align:center;color:var(--app-text-muted);font-size:12px;padding:10px 0 4px}
+.detail-body{flex:1;overflow-y:auto;padding:12px 12px 24px}
+.detail-banner{background:linear-gradient(120deg,var(--app-primary),var(--app-primary-strong));color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.detail-banner .no{font-size:17px;font-weight:700;font-family:"SFMono-Regular",Consolas,monospace;display:flex;align-items:center;gap:8px}
+.copy-tag{font-size:11px;background:rgba(255,255,255,.22);border-radius:6px;padding:2px 7px;cursor:pointer}
+.detail-banner .ib-badge{background:rgba(255,255,255,.9)!important;color:var(--app-primary-strong)!important}
+.ib-card{background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:12px;margin-bottom:10px}
+.ib-card-title{font-size:14px;font-weight:600;margin-bottom:10px}
+.ib-info-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--app-border)}
+.ib-info-row:last-child{border-bottom:none}
+.ib-info-row .k{color:var(--app-text-secondary);flex-shrink:0}
+.ib-info-row .v{text-align:right;color:var(--app-text);margin-left:12px}
+.ib-ditem{background:var(--app-bg-soft);border-radius:8px;padding:10px;margin-bottom:8px}
+.ib-ditem:last-child{margin-bottom:0}
+.ib-ditem.diff-ok{background:#EEF6E6;box-shadow:inset 2px 0 0 var(--app-success)}
+.ib-ditem.diff-gain{background:#EEF6E6;box-shadow:inset 2px 0 0 var(--app-success)}
+.ib-ditem.diff-loss{background:#FCECEA;box-shadow:inset 2px 0 0 var(--app-danger)}
+.ib-ditem-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.ib-ditem-name{font-size:13px;font-weight:600;line-height:1.4}
+.ib-ditem-flag{font-size:11px;font-weight:600;flex-shrink:0}
+.ib-ditem-flag.counted{color:var(--app-success)}
+.ib-ditem-flag.wait{color:var(--app-text-muted)}
+.ib-ditem-sub{font-size:11px;color:var(--app-text-muted);margin:4px 0}
+.ib-nums{display:flex;gap:14px;align-items:center;margin-top:6px;font-size:12px;color:var(--app-text-secondary);flex-wrap:wrap}
+.ib-nums b{color:var(--app-text);font-size:14px;font-weight:700}
+.diff-tag{font-size:12px;font-weight:700;padding:1px 8px;border-radius:8px}
+.diff-tag.gain{color:var(--app-success);background:rgba(104,185,46,.12)}
+.diff-tag.loss{color:var(--app-danger);background:rgba(232,91,74,.12)}
+.diff-tag.ok{color:var(--app-text-muted);background:rgba(156,163,175,.14);font-weight:500}
+.reason-tag{display:inline-block;font-size:10px;color:var(--app-text-secondary);background:#fff;border:1px solid var(--app-border);border-radius:6px;padding:1px 7px;margin-top:6px}
+.amount-card{display:flex;background:#fff;border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);padding:14px 0;margin-bottom:10px;text-align:center}
+.amount-card>div{flex:1;border-right:1px solid var(--app-border)}
+.amount-card>div:last-child{border-right:none}
+.amount-num{font-size:18px;font-weight:700}
+.amount-num.gain{color:var(--app-success)}
+.amount-num.loss{color:var(--app-danger)}
+.amount-label{font-size:11px;color:var(--app-text-secondary);margin-top:4px}
+.ib-log-node{display:flex;gap:10px}
+.ib-log-rail{display:flex;flex-direction:column;align-items:center}
+.ib-log-dot{width:22px;height:22px;border-radius:50%;background:var(--app-primary);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib-log-dot.muted{background:var(--app-text-muted)}
+.ib-log-line{flex:1;border-left:2px dashed var(--app-border);margin:2px 0}
+.ib-log-body{padding-bottom:14px}
+.ib-log-title{font-size:13px;font-weight:600;color:var(--app-text)}
+.ib-log-meta{font-size:11px;color:var(--app-text-muted);margin-top:3px}
+.detail-foot{display:flex;gap:10px;padding:8px 12px calc(16px + env(safe-area-inset-bottom,0));background:#fff;border-top:1px solid var(--app-border)}
+.detail-foot.hidden{display:none}
+.detail-foot button{height:42px;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer;flex:1}
+.btn-ghost{border:1px solid var(--app-primary);background:#fff;color:var(--app-primary)}
+.btn-danger-o{border:1px solid var(--app-danger);background:#fff;color:var(--app-danger)}
+.btn-primary{border:none;background:var(--app-primary);color:#fff}
+.btn-primary:active{background:var(--app-primary-strong)}
+.mask{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}
+.mask.show{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:80%;background:#fff;border-radius:16px 16px 0 0;z-index:55;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s}
+.mask.show .sheet{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+.sheet-head h3{font-size:15px}
+.sheet-close{border:none;background:none;font-size:18px;color:var(--app-text-muted);cursor:pointer}
+.filter-body{padding:4px 16px 8px;overflow-y:auto}
+.filter-group{margin-bottom:14px}
+.filter-label{font-size:13px;color:var(--app-text-secondary);margin-bottom:8px}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary);font-size:12px;padding:6px 13px;border-radius:16px;cursor:pointer}
+.fchip.on{background:var(--app-primary);border-color:var(--app-primary);color:#fff;font-weight:600}
+.filter-dates{display:flex;align-items:center;gap:8px}
+.filter-dates input{flex:1;border:1px solid var(--app-border);border-radius:8px;height:36px;padding:0 10px;outline:none;font-size:13px;color:var(--app-text)}
+.filter-foot{display:flex;gap:10px;padding:10px 16px 18px;border-top:1px solid var(--app-border)}
+.filter-foot button{flex:1;height:42px;border-radius:21px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-reset{border:1px solid var(--app-border);background:#fff;color:var(--app-text-secondary)}
+.btn-apply{border:none;background:var(--app-primary);color:#fff}
+#confirmMask{align-items:center;justify-content:center}
+#confirmMask.show{display:flex}
+.modal{width:286px;background:#fff;border-radius:14px;padding:18px;text-align:center}
+.modal h3{font-size:15px;margin-bottom:6px}
+.modal p{font-size:12.5px;color:var(--app-text-secondary);margin-bottom:16px;line-height:1.6}
+.modal-acts{display:flex;gap:10px}
+.modal-acts button{flex:1;height:40px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer}
+.modal-acts .btn-ghost{border:1px solid var(--app-primary)}
+.modal-acts .ok-danger{border:none;background:var(--app-danger);color:#fff}
+.modal-acts .ok-primary{border:none;background:var(--app-primary);color:#fff}
+.toast{position:absolute;left:50%;top:46%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;white-space:nowrap;text-align:center}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="../assets/wms-app.css">
+</head>
+<body class="content-page" data-page="stocktake-list" data-locale="zh">
+<div class="phone">
+  <!-- 列表 -->
+  <section class="screen active" id="screen-list">
+    <header class="app-nav">
+      <button class="nav-back" id="navBack">‹</button>
+      <div class="nav-title" id="navTitle">盘点任务</div>
+      <div class="nav-right">
+        <button class="lang-btn">EN</button>
+        <button class="new-btn" id="newBtn">＋ 新建</button>
+      </div>
+    </header>
+    <div class="search-row">
+      <div class="search-box"><span style="color:var(--app-text-muted)">🔍</span><input id="searchInput" placeholder="搜索盘点单号"></div>
+      <button class="filter-btn" id="filterBtn">⛃<span class="filter-dot" id="filterDot" style="display:none"></span></button>
+      <button class="search-btn" id="searchBtn">搜索</button>
+    </div>
+    <div class="tabs-row"><div class="tabs" id="tabs"></div></div>
+    <div class="stat-bar" id="statBar"></div>
+    <div class="list-body" id="orderList"></div>
+
+    <div class="mask" id="filterSheet">
+      <div class="sheet">
+        <div class="sheet-head"><h3 id="filterTitle">筛选</h3><button class="sheet-close" id="filterClose">✕</button></div>
+        <div class="filter-body">
+          <div class="filter-group"><div class="filter-label" id="flbType">盘点类型</div><div class="filter-chips" id="flType"></div></div>
+          <div class="filter-group"><div class="filter-label" id="flbWh">库房</div><div class="filter-chips" id="flWh"></div></div>
+          <div class="filter-group"><div class="filter-label" id="flbDate">创建时间</div><div class="filter-dates"><input type="date" id="flStart"><span style="color:var(--app-text-muted)">—</span><input type="date" id="flEnd"></div></div>
+        </div>
+        <div class="filter-foot"><button class="btn-reset" id="filterReset">重置</button><button class="btn-apply" id="filterApply">确定</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 详情 -->
+  <section class="screen" id="screen-detail">
+    <header class="app-nav">
+      <button class="nav-back" id="dNavBack">‹</button>
+      <div class="nav-title" id="dNavTitle">盘点单详情</div>
+      <span style="width:32px"></span>
+    </header>
+    <div class="detail-body">
+      <div class="detail-banner">
+        <span class="no"><span id="dOrderNo">PD—</span><span class="copy-tag" id="dCopyNo">复制</span></span>
+        <span class="ib-badge done" id="dStatusBadge">已完成</span>
+      </div>
+      <div class="ib-card"><div class="ib-card-title" id="dBaseTitle">基本信息</div><div id="dBaseInfo"></div></div>
+      <div class="ib-card"><div class="ib-card-title" id="dItemsTitle">盘点明细</div><div id="dItems"></div></div>
+      <div class="amount-card">
+        <div><div class="amount-num" id="dSumKinds">0</div><div class="amount-label" id="dLblKinds">盘点SKU</div></div>
+        <div><div class="amount-num loss" id="dSumDiff">0</div><div class="amount-label" id="dLblDiff">有差异</div></div>
+        <div><div class="amount-num gain" id="dSumGain">+0</div><div class="amount-label" id="dLblGain">盘盈</div></div>
+        <div><div class="amount-num loss" id="dSumLoss">-0</div><div class="amount-label" id="dLblLoss">盘亏</div></div>
+      </div>
+      <div class="ib-card"><div class="ib-card-title" id="dLogTitle">盘点流水</div><div id="dLog"></div></div>
+    </div>
+    <footer class="detail-foot hidden" id="detailFoot"></footer>
+  </section>
+
+  <div class="mask" id="confirmMask">
+    <div class="modal">
+      <h3 id="cfTitle"></h3><p id="cfDesc"></p>
+      <div class="modal-acts"><button class="btn-ghost" id="cfCancel">取消</button><button id="cfOk">确定</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+ * WMS APP 盘点任务（列表 + 详情）· 单文件自包含
+ * 数据口径：MySQL 库 wms（w_wms_warehouse_inventories 账面；盘点单/明细为新增表 w_wms_stocktake_orders/_items）
+ * 状态：1=草稿 2=盘点中 3=待复核 4=已完成 5=已作废
+ * 盘点粒度：库房+SKU；账面为生成盘点单时快照；APP 只录实盘+提交待复核，差异复核/调账在 WEB
+ * 与 stocktake-create.html / stocktake-count.html 共用同一套数据约定
+ * ============================================================ */
+const stTypes=[{id:"full",zh:"全盘",en:"Full"},{id:"sample",zh:"抽盘",en:"Sample"}];
+const warehouses=[{id:15,name:"piao自营"},{id:7,name:"KL自营仓库"},{id:8,name:"静库1-自营"},{id:13,name:"静库2-合作"},{id:10,name:"嘿咻库房"},{id:6,name:"KL超市默认库房"}];
+const statusMap={1:{zh:"草稿",en:"Draft",cn:"draft"},2:{zh:"盘点中",en:"Counting",cn:"counting"},3:{zh:"待复核",en:"Review",cn:"review"},4:{zh:"已完成",en:"Done",cn:"done"},5:{zh:"已作废",en:"Voided",cn:"void"}};
+/* 明细：book=账面快照, counted=实盘(null=待盘), reason=差异原因 */
+const orders=[
+ {id:201,no:"PD20260620001",type:"full",scope:"",warehouseId:15,warehouseName:"piao自营",counter:"李海",date:"2026-06-20",time:"09:12",status:2,remark:"月中常规全盘",items:[
+   {lineNo:1,skuId:65,name:"黄飞红麻辣花生 210g（即时配送）",category:"花生瓜子",spec:"210g*1袋",barcode:"12345678",book:6,counted:6,reason:""},
+   {lineNo:2,skuId:66,name:"黄飞红麻辣花生 210g（即时配送）",category:"花生瓜子",spec:"400g*1袋",barcode:"123456789",book:3,counted:3,reason:""},
+   {lineNo:3,skuId:67,name:"甘源缤纷每日豆果 208g",category:"休闲豆类",spec:"208g*1包",barcode:"1000001",book:5,counted:4,reason:"破损"},
+   {lineNo:4,skuId:69,name:"无穷盐焗鸡翅 60g",category:"卤制食品",spec:"15g*4包/袋",barcode:"3000001",book:5,counted:null,reason:""},
+   {lineNo:5,skuId:74,name:"（当日配送）赤豆精选推荐存量有限，限时优惠",category:"休闲豆类",spec:"100g",barcode:"1000002",book:7,counted:null,reason:""},
+   {lineNo:6,skuId:83,name:"商品分发",category:"新鲜水果",spec:"210g*1袋",barcode:"2000001",book:16,counted:16,reason:""},
+   {lineNo:7,skuId:84,name:"商品分发",category:"新鲜水果",spec:"400g*1袋",barcode:"2000002",book:3,counted:null,reason:""},
+   {lineNo:8,skuId:99,name:"Omega3鸡蛋 600g（10枚）",category:"蔬菜/鸡蛋",spec:"10枚/盒",barcode:"5000001",book:15,counted:null,reason:""}]},
+ {id:202,no:"PD20260620002",type:"full",scope:"",warehouseId:8,warehouseName:"静库1-自营",counter:"李海",date:"2026-06-20",time:"08:40",status:3,remark:"",items:[
+   {lineNo:1,skuId:65,name:"黄飞红麻辣花生 210g（即时配送）",category:"花生瓜子",spec:"210g*1袋",barcode:"12345678",book:23,counted:23,reason:""},
+   {lineNo:2,skuId:104,name:"【扫货榜】银鹭牛奶花生 360g",spec:"360g*1罐",barcode:"2000000039695",book:2,counted:4,reason:"错记"},
+   {lineNo:3,skuId:126,name:"辣美仔小米辣 2kg",category:"12.12好货",spec:"2Kg",barcode:"6900000000004",book:3,counted:2,reason:"破损"},
+   {lineNo:4,skuId:129,name:"美汁源果粒橙 1.25L*12/箱",category:"12.12好货",spec:"1.25L*12/箱",barcode:"6900000000003",book:21,counted:21,reason:""},
+   {lineNo:5,skuId:172,name:"Super Ring 小飞侠芝士圈 60g",category:"膨化食品",spec:"60g",barcode:"6900000000008",book:9,counted:7,reason:"过期"},
+   {lineNo:6,skuId:174,name:"MAMEE金厨隆冬风味 97g*4/袋",category:"膨化食品",spec:"2包",barcode:"333333",book:1,counted:1,reason:""}]},
+ {id:203,no:"PD20260619003",type:"sample",scope:"膨化食品",warehouseId:7,warehouseName:"KL自营仓库",counter:"张敏",date:"2026-06-19",time:"15:20",status:4,remark:"专区抽盘，差异已复核调账",items:[
+   {lineNo:1,skuId:104,name:"【扫货榜】银鹭牛奶花生 360g",spec:"360g*1罐",barcode:"2000000039695",book:94,counted:95,reason:"错记"},
+   {lineNo:2,skuId:107,name:"海底捞番茄火锅底料 200g-促销商品（测试超长标题）",category:"12.12好货",spec:"200g",barcode:"003134555",book:95,counted:93,reason:"破损"}]},
+ {id:204,no:"PD20260620004",type:"full",scope:"",warehouseId:13,warehouseName:"静库2-合作",counter:"张敏",date:"2026-06-20",time:"10:05",status:1,remark:"刚生成账面快照，待开始",items:[
+   {lineNo:1,skuId:172,name:"Super Ring 小飞侠芝士圈 60g",category:"膨化食品",spec:"60g",barcode:"6900000000008",book:3,counted:null,reason:""},
+   {lineNo:2,skuId:174,name:"MAMEE金厨隆冬风味 97g*4/袋",category:"膨化食品",spec:"2包",barcode:"333333",book:14,counted:null,reason:""}]},
+ {id:205,no:"PD20260618005",type:"sample",scope:"新鲜水果",warehouseId:10,warehouseName:"嘿咻库房",counter:"李海",date:"2026-06-18",time:"14:30",status:5,remark:"重复创建，作废",items:[
+   {lineNo:1,skuId:83,name:"商品分发",category:"新鲜水果",spec:"210g*1袋",barcode:"2000001",book:500,counted:null,reason:""}]}
+];
+const reasonMap={"破损":"Damaged","过期":"Expired","错记":"Miscount","被盗":"Theft","其它":"Other"};
+
+(()=>{
+ const PAGE_SIZE=5;
+ const params=new URLSearchParams(location.search);
+ const isEmbedded=window.parent&&window.parent!==window;
+ let locale=params.get("locale")||"zh";
+ const $=(id)=>document.getElementById(id);
+ const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const T=()=>locale==="zh";
+ const typeMeta=(id)=>stTypes.find(t=>t.id===id)||stTypes[0];
+
+ function carryQuery(extra){const q=new URLSearchParams(location.search);q.set("locale",locale);if(extra)Object.entries(extra).forEach(([k,v])=>q.set(k,v));return q.toString();}
+ function goWorkbench(){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"workbench"},"*");else location.href="workbench.html?"+carryQuery();}
+ function goFeature(menuId,page,extra){if(isEmbedded)window.parent.postMessage({type:"wms-navigate",route:"feature",menuId},"*");else location.href=page+"?"+carryQuery(extra);}
+ function goCount(id){try{localStorage.setItem("wms_stocktake_count",String(id));}catch(e){}goFeature("stocktake_count","stocktake-count.html",{id});}
+
+ const state={tab:"all",kw:"",page:1,filter:{type:"",whId:"",start:"",end:""}};
+ let curId=null,pendingCb=null;
+
+ function toast(msg){const el=$("toast");el.innerHTML=msg;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1600);}
+ function statusZh(s){const m=statusMap[s];return T()?m.zh:m.en;}
+ function progress(o){const total=o.items.length;const done=o.items.filter(i=>i.counted!=null).length;return{total,done,pct:total?Math.round(done/total*100):0};}
+ function diffStats(o){let cnt=0,gain=0,loss=0;o.items.forEach(i=>{if(i.counted!=null){const d=i.counted-i.book;if(d!==0)cnt++;if(d>0)gain+=d;if(d<0)loss+=d;}});return{cnt,gain,loss};}
+
+ function renderStatic(){
+   $("navTitle").textContent=T()?"盘点任务":"Stocktake Tasks";
+   $("searchInput").placeholder=T()?"搜索盘点单号":"Search no.";
+   $("newBtn").textContent="＋ "+(T()?"新建":"New");
+   $("filterTitle").textContent=T()?"筛选":"Filter";
+   $("flbType").textContent=T()?"盘点类型":"Type";$("flbWh").textContent=T()?"库房":"Warehouse";$("flbDate").textContent=T()?"创建时间":"Created";
+   $("filterReset").textContent=T()?"重置":"Reset";$("filterApply").textContent=T()?"确定":"Apply";
+   const cTodo=orders.filter(o=>o.status===1||o.status===2).length;
+   const cReview=orders.filter(o=>o.status===3).length;
+   const withN=(l,n)=>T()?`${l}（${n}）`:`${l} (${n})`;
+   const tabs=[["all",T()?"全部":"All"],["todo",withN(T()?"待盘点":"To count",cTodo)],["review",withN(T()?"待复核":"Review",cReview)],["done",T()?"已完成":"Done"],["void",T()?"已作废":"Voided"]];
+   $("tabs").innerHTML=tabs.map(([k,l])=>`<div class="ib-tab ${k===state.tab?"on":""}" data-tab="${k}">${l}</div>`).join("");
+   document.querySelectorAll(".lang-btn").forEach(b=>b.textContent=T()?"EN":"中文");
+   document.body.dataset.locale=locale;
+ }
+ function renderStat(){
+   const todo=orders.filter(o=>o.status===1||o.status===2).length;
+   const diffOrders=orders.filter(o=>diffStats(o).cnt>0&&o.status!==5).length;
+   // 全部 tab 显示「待盘点 N 单 · 有差异 N 单」；其余 tab 只显示「有差异 N 单」
+   if(state.tab==="all"){
+     $("statBar").innerHTML=T()?`待盘点 <b>${todo}</b> 单 · 有差异 <b>${diffOrders}</b> 单`:`To count <b>${todo}</b> · With diff <b>${diffOrders}</b>`;
+   }else{
+     $("statBar").innerHTML=T()?`有差异 <b>${diffOrders}</b> 单`:`With diff <b>${diffOrders}</b>`;
+   }
+ }
+ function filtered(){
+   const map={review:3,done:4,void:5};const kw=state.kw.trim().toLowerCase();const f=state.filter;
+   return orders.filter(o=>{
+     if(state.tab==="todo"){if(o.status!==1&&o.status!==2)return false;}
+     else if(state.tab!=="all"&&o.status!==map[state.tab])return false;
+     if(kw&&!o.no.toLowerCase().includes(kw))return false;
+     if(f.type&&o.type!==f.type)return false;
+     if(f.whId&&o.warehouseId!==Number(f.whId))return false;
+     if(f.start&&o.date<f.start)return false;
+     if(f.end&&o.date>f.end)return false;
+     return true;
+   });
+ }
+ function cardHtml(o){
+   const st=statusMap[o.status],pg=progress(o),df=diffStats(o);
+   const scopeRow=o.type==="sample"&&o.scope?`<div class="ib-order-row"><span class="k">${T()?"盘点范围":"Scope"}</span><span class="v">${esc(o.scope)}</span></div>`:"";
+   const diffRow=df.cnt>0?`<div class="diff-row"><span class="k">${T()?"差异":"Diff"}</span><span class="v">${df.cnt} ${T()?"条":""}</span></div>`:"";
+   return `<div class="ib-order-card" data-id="${o.id}">
+     <div class="ib-order-head"><span class="ib-order-no">${o.no}</span><span class="ib-badge ${st.cn}"><span class="dot"></span>${statusZh(o.status)}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"盘点类型":"Type"}</span><span class="v">${T()?typeMeta(o.type).zh:typeMeta(o.type).en}</span></div>
+     <div class="ib-order-row"><span class="k">${T()?"库房":"Warehouse"}</span><span class="v">${esc(o.warehouseName)}</span></div>
+     ${scopeRow}
+     <div class="ib-order-row"><span class="k">${T()?"盘点人":"Counter"}</span><span class="v">${esc(o.counter)}</span></div>
+     <div class="prog-row"><span class="k">${T()?"进度":"Progress"}</span><span class="prog-bar"><span class="prog-fill" style="width:${pg.pct}%"></span></span><span class="prog-txt"><b>${pg.done}</b> / ${pg.total}</span></div>
+     ${diffRow}
+   </div>`;
+ }
+ function renderList(reset){
+   if(reset)state.page=1;
+   const rows=filtered();
+   if(!rows.length){$("orderList").innerHTML=`<div class="ib-list-empty">📋<div>${T()?"暂无盘点任务":"No tasks"}</div></div>`;return;}
+   const shown=rows.slice(0,state.page*PAGE_SIZE);
+   let html=shown.map(cardHtml).join("");
+   if(shown.length<rows.length)html+=`<div class="list-more">${T()?"上拉加载更多":"Pull to load more"}</div>`;
+   else if(rows.length>PAGE_SIZE)html+=`<div class="list-more">${T()?"没有更多了":"No more"}</div>`;
+   $("orderList").innerHTML=html;
+ }
+
+ function subInfo(l){const parts=[l.category,l.spec].filter(Boolean);if(l.barcode)parts.push((T()?"条码":"Barcode")+" "+l.barcode);return parts.join(" · ");}
+ function openDetail(id){
+   const o=orders.find(x=>x.id===id);if(!o)return;
+   const st=statusMap[o.status],pg=progress(o),df=diffStats(o);
+   const showDiff=true; /* 明盘：账面与差异始终展示（不盲盘） */
+   $("dNavTitle").textContent=T()?"盘点单详情":"Stocktake Detail";
+   $("dOrderNo").textContent=o.no;$("dCopyNo").textContent=T()?"复制":"Copy";
+   $("dStatusBadge").className=`ib-badge ${st.cn}`;$("dStatusBadge").textContent=statusZh(o.status);
+   $("dBaseTitle").textContent=T()?"基本信息":"Basic Info";
+   $("dItemsTitle").textContent=`${T()?"盘点明细":"Items"}（${pg.total}）`;
+   $("dLogTitle").textContent=T()?"盘点流水":"Timeline";
+   $("dLblKinds").textContent=T()?"盘点SKU":"SKUs";$("dLblDiff").textContent=T()?"有差异":"Diff";$("dLblGain").textContent=T()?"盘盈":"Overage";$("dLblLoss").textContent=T()?"盘亏":"Shortage";
+   const rows=[[T()?"盘点类型":"Type",T()?typeMeta(o.type).zh:typeMeta(o.type).en],[T()?"库房":"Warehouse",esc(o.warehouseName)],[T()?"盘点人":"Counter",esc(o.counter)],[T()?"创建时间":"Created",`${o.date} ${o.time}`]];
+   if(o.type==="sample"&&o.scope)rows.push([T()?"盘点范围":"Scope",esc(o.scope)]);
+   if(o.remark)rows.push([T()?"备注":"Remark",esc(o.remark)]);
+   $("dBaseInfo").innerHTML=rows.map(([k,v])=>`<div class="ib-info-row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+   $("dItems").innerHTML=o.items.map(l=>{
+     const sub=subInfo(l);
+     const counted=l.counted!=null;
+     const flag=counted?`<span class="ib-ditem-flag counted">✓ ${T()?"已盘":"Counted"}</span>`:`<span class="ib-ditem-flag wait">${T()?"待盘":"Uncounted"}</span>`;
+     let cls="ib-ditem",nums="",reason="";
+     if(counted&&showDiff){
+       const d=l.counted-l.book;
+       if(d>0)cls+=" diff-gain";else if(d<0)cls+=" diff-loss";else cls+=" diff-ok";
+       const diffTag=d===0?`<span class="diff-tag ok">${T()?"一致":"Match"}</span>`:`<span class="diff-tag ${d>0?"gain":"loss"}">${d>0?(T()?"盘盈 +":"Overage +")+d:(T()?"盘亏 ":"Shortage ")+d}</span>`;
+       nums=`<div class="ib-nums"><span>${T()?"实盘":"Counted"} <b>${l.counted}</b></span><span>${T()?"账面":"Book"} ${l.book}</span>${diffTag}</div>`;
+       if(d!==0&&l.reason)reason=`<div class="reason-tag">${T()?"原因":"Reason"}：${T()?l.reason:(reasonMap[l.reason]||l.reason)}</div>`;
+     }else if(counted){
+       nums=`<div class="ib-nums"><span>${T()?"实盘":"Counted"} <b>${l.counted}</b></span><span>${T()?"账面":"Book"} ${l.book}</span></div>`;
+     }else{
+       nums=`<div class="ib-nums"><span style="color:var(--app-text-muted)">${T()?"尚未盘点":"Not counted"}</span></div>`;
+     }
+     return `<div class="${cls}"><div class="ib-ditem-top"><div class="ib-ditem-name">${esc(l.name)}</div>${flag}</div>${sub?`<div class="ib-ditem-sub">${esc(sub)}</div>`:""}${nums}${reason}</div>`;
+   }).join("");
+   $("dSumKinds").textContent=pg.total;
+   $("dSumDiff").textContent=showDiff?df.cnt:"—";
+   $("dSumGain").textContent=showDiff?"+"+df.gain:"—";
+   $("dSumLoss").textContent=showDiff?(df.loss<0?df.loss:"-0"):"—";
+   buildLog(o);
+   curId=o.id;renderDetailFoot(o);
+   $("screen-list").classList.remove("active");$("screen-detail").classList.add("active");
+ }
+ function buildLog(o){
+   const logs=[{icon:"＋",title:T()?"创建 · 账面快照":"Created · snapshot",time:`${o.date} ${o.time}`,who:o.counter,m:false}];
+   if(o.status>=2&&o.status!==5)logs.push({icon:"▶",title:T()?"开始盘点":"Counting started",time:`${o.date} ${o.time}`,who:o.counter,m:false});
+   if(o.status>=3)logs.push({icon:"✓",title:T()?"提交 · 待复核":"Submitted · review",time:`${o.date} ${o.time}`,who:o.counter,m:false});
+   if(o.status===4)logs.push({icon:"✓",title:T()?"复核完成 · 已调账":"Reviewed · adjusted",time:`${o.date} ${o.time}`,who:"WEB 复核",m:false});
+   if(o.status===5)logs.push({icon:"✕",title:T()?"作废盘点单":"Voided",time:`${o.date} ${o.time}`,who:o.counter,m:true});
+   $("dLog").innerHTML=logs.map((g,i)=>`<div class="ib-log-node"><div class="ib-log-rail"><div class="ib-log-dot${g.m?" muted":""}">${g.icon}</div>${i<logs.length-1?'<div class="ib-log-line"></div>':""}</div><div class="ib-log-body"><div class="ib-log-title">${g.title}</div><div class="ib-log-meta">${g.time} · ${esc(g.who)}</div></div></div>`).join("");
+ }
+ function closeDetail(){$("screen-detail").classList.remove("active");$("screen-list").classList.add("active");}
+
+ function renderDetailFoot(o){
+   const foot=$("detailFoot");
+   if(o.status===1){foot.className="detail-foot";foot.innerHTML=`<button class="btn-danger-o" data-act="void">${T()?"作废":"Void"}</button><button class="btn-primary" data-act="count">${T()?"开始盘点":"Start"}</button>`;}
+   else if(o.status===2){foot.className="detail-foot";foot.innerHTML=`<button class="btn-danger-o" data-act="void">${T()?"作废":"Void"}</button><button class="btn-primary" data-act="count">${T()?"继续盘点":"Continue"}</button>`;}
+   else{foot.className="detail-foot hidden";foot.innerHTML="";}
+ }
+ function askConfirm(title,desc,okText,danger,cb){$("cfTitle").textContent=title;$("cfDesc").textContent=desc;$("cfCancel").textContent=T()?"取消":"Cancel";const ok=$("cfOk");ok.textContent=okText;ok.className=danger?"ok-danger":"ok-primary";pendingCb=cb;$("confirmMask").classList.add("show");}
+ function closeConfirm(){$("confirmMask").classList.remove("show");pendingCb=null;}
+
+ function openFilter(){
+   $("flType").innerHTML=[["",T()?"全部":"All"],...stTypes.map(t=>[t.id,T()?t.zh:t.en])].map(([v,l])=>`<button class="fchip ${state.filter.type===v?"on":""}" data-ftype="${v}">${l}</button>`).join("");
+   $("flWh").innerHTML=[["",T()?"全部":"All"],...warehouses.map(w=>[String(w.id),w.name])].map(([v,l])=>`<button class="fchip ${String(state.filter.whId)===v?"on":""}" data-fwh="${v}">${l}</button>`).join("");
+   $("flStart").value=state.filter.start;$("flEnd").value=state.filter.end;$("filterSheet").classList.add("show");
+ }
+ function closeFilter(){$("filterSheet").classList.remove("show");}
+ function filterActive(){const f=state.filter;return f.type||f.whId||f.start||f.end;}
+ function syncFilterDot(){$("filterDot").style.display=filterActive()?"block":"none";$("filterBtn").classList.toggle("on",!!filterActive());}
+
+ document.addEventListener("click",(e)=>{
+   if(e.target.closest(".lang-btn")){locale=locale==="zh"?"en":"zh";renderStatic();renderStat();renderList(true);if($("screen-detail").classList.contains("active")&&curId)openDetail(curId);return;}
+   if(e.target.closest("#navBack")){goWorkbench();return;}
+   if(e.target.closest("#newBtn")){goFeature("create_stocktake","stocktake-create.html");return;}
+   const tab=e.target.closest(".ib-tab");if(tab){state.tab=tab.dataset.tab;renderStatic();renderStat();renderList(true);return;}
+   if(e.target.closest("#searchBtn")){state.kw=$("searchInput").value;renderList(true);return;}
+   if(e.target.closest("#filterBtn")){openFilter();return;}
+   if(e.target.closest("#filterClose")||e.target.id==="filterSheet"){closeFilter();return;}
+   const ft=e.target.closest("[data-ftype]");if(ft){state.filter.type=ft.dataset.ftype;document.querySelectorAll("[data-ftype]").forEach(x=>x.classList.toggle("on",x===ft));return;}
+   const fw=e.target.closest("[data-fwh]");if(fw){state.filter.whId=fw.dataset.fwh;document.querySelectorAll("[data-fwh]").forEach(x=>x.classList.toggle("on",x===fw));return;}
+   if(e.target.closest("#filterReset")){state.filter={type:"",whId:"",start:"",end:""};openFilter();return;}
+   if(e.target.closest("#filterApply")){state.filter.start=$("flStart").value;state.filter.end=$("flEnd").value;syncFilterDot();closeFilter();renderList(true);return;}
+   const card=e.target.closest(".ib-order-card");if(card){openDetail(Number(card.dataset.id));return;}
+   if(e.target.closest("#dNavBack")){closeDetail();return;}
+   if(e.target.closest("#dCopyNo")){toast(T()?"已复制":"Copied");return;}
+   const act=e.target.closest("[data-act]");
+   if(act){
+     const o=orders.find(x=>x.id===curId);if(!o)return;const a=act.dataset.act;
+     if(a==="count"){goCount(o.id);return;}
+     if(a==="void"){askConfirm(T()?"作废盘点单":"Void",T()?"作废后该单只读，不可恢复。确认作废？":"Becomes read-only. Confirm?",T()?"作废":"Void",true,()=>{o.status=5;openDetail(o.id);renderStat();renderList(true);toast(T()?"已作废":"Voided");});return;}
+     return;
+   }
+   if(e.target.closest("#cfCancel")||e.target.id==="confirmMask"){closeConfirm();return;}
+   if(e.target.closest("#cfOk")){const cb=pendingCb;closeConfirm();if(cb)cb();return;}
+ });
+ document.addEventListener("input",(e)=>{if(e.target.id==="searchInput"){state.kw=e.target.value;renderList(true);}});
+ document.addEventListener("keydown",(e)=>{if(e.target.id==="searchInput"&&e.key==="Enter"){state.kw=e.target.value;renderList(true);}});
+ $("orderList").addEventListener("scroll",function(){if(this.scrollTop+this.clientHeight>=this.scrollHeight-24){const rows=filtered();if(state.page*PAGE_SIZE<rows.length){state.page++;renderList(false);}}});
+
+ /* 支持从作业页/新建页带 id 直接进详情 */
+ const wantId=params.get("detail");
+ renderStatic();renderStat();renderList(true);
+ if(wantId)openDetail(Number(wantId));
+})();
+</script>
+</body>
+</html>

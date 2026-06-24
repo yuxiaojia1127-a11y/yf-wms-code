@@ -24,7 +24,7 @@
     loginError: "",
     unreadMessages: Number(params.get("unreadMessages") || 99),
     route: params.get("page") || "workbench",
-    menuId: params.get("menu") || "inventory_query"
+    menuId: params.get("menu") || "inventory_count"
   };
 
   let activeFrameKey = "";
@@ -97,11 +97,26 @@
       if (state.menuId === "outbound_wait_pick") {
         return `./pages/pickup-accept.html?${stateQuery()}&tab=mine`;
       }
+      if (state.menuId === "shipping_pending") {
+        return `./pages/shipping-list.html?${stateQuery()}`;
+      }
       if (state.menuId === "create_inbound") {
         return `./pages/inbound-create.html?${stateQuery()}`;
       }
       if (state.menuId === "inventory_in_record") {
         return `./pages/inbound-list.html?${stateQuery()}`;
+      }
+      if (state.menuId === "stocktake_task" || state.menuId === "inventory_count") {
+        return `./pages/stocktake-list.html?${stateQuery()}`;
+      }
+      if (state.menuId === "create_stocktake") {
+        return `./pages/stocktake-create.html?${stateQuery()}`;
+      }
+      if (state.menuId === "stocktake_count") {
+        return `./pages/stocktake-count.html?${stateQuery()}`;
+      }
+      if (state.menuId === "order_tracking") {
+        return `./pages/order-tracking.html?${stateQuery()}`;
       }
       return `./pages/feature.html?${stateQuery({ menu: state.menuId })}`;
     }

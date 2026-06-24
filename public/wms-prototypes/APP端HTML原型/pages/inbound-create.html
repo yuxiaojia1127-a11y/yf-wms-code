@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>新建/编辑入库单 · Inbound</title>
 <style>
 :root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:10px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
@@ -11,7 +11,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12)}
 .screen{display:none;min-height:812px;flex-direction:column}
 .screen.active{display:flex}
-.app-nav{height:46px;display:flex;align-items:center;padding:0 10px;gap:8px;background:#fff;border-bottom:1px solid var(--app-border);position:sticky;top:0;z-index:5}
+.app-nav{min-height:46px;display:flex;align-items:center;padding:env(safe-area-inset-top,0) 10px 0;gap:8px;background:#fff;border-bottom:1px solid var(--app-border);position:sticky;top:0;z-index:5}
 .nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:22px;color:var(--app-text);flex-shrink:0}
 .nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
 .lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer}
@@ -54,7 +54,7 @@ textarea.ib-input{text-align:left;min-height:44px;resize:none;padding-top:8px}
 .ib-expiry-add{color:var(--app-primary);cursor:pointer}
 .ib-expiry-val{color:var(--app-text-secondary);cursor:pointer}
 .ib-expiry-val b{color:var(--app-text);font-weight:600}
-.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:8px 12px 16px;display:flex;align-items:center;gap:10px}
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:8px 12px calc(16px + env(safe-area-inset-bottom,0));display:flex;align-items:center;gap:10px}
 .bar-sum{flex:1;font-size:11px;color:var(--app-text-secondary);line-height:1.5}
 .bar-sum b{color:var(--app-danger);font-size:16px}
 .btn-ghost{border:1px solid var(--app-primary);background:#fff;color:var(--app-primary);border-radius:20px;height:40px;padding:0 16px;font-size:13px;cursor:pointer;font-weight:600}

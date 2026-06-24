@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lalamove下单 · 车型选择与地址搜索</title>
+<style>
+:root{--app-primary:#43B8A8;--app-primary-strong:#2FAE9D;--app-primary-soft:#DDF8F2;--app-bg:#F5F7F8;--app-bg-soft:#F7F8FA;--app-card:#FFFFFF;--app-text:#1F2329;--app-text-secondary:#6B7280;--app-text-muted:#9CA3AF;--app-border:#EEF0F2;--app-success:#68B92E;--app-info:#2F80ED;--app-warning:#D99A19;--app-danger:#E85B4A;--app-radius-card:8px;--app-space-page-x:12px;--app-shadow-card:0 4px 12px rgba(31,35,41,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8EAED;display:flex;justify-content:center;min-height:100vh;color:var(--app-text)}
+.phone{width:375px;min-height:812px;background:var(--app-bg);position:relative;overflow:hidden;box-shadow:0 0 24px rgba(0,0,0,.12)}
+.screen{display:none;min-height:812px;flex-direction:column}
+.screen.active{display:flex}
+.app-nav{height:44px;display:flex;align-items:center;position:relative;padding:0 12px;gap:8px;flex-shrink:0}
+.nav-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--app-text);text-align:left;flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+.lang-btn{border:1px solid var(--app-primary);background:transparent;color:var(--app-primary);font-size:11px;padding:3px 9px;border-radius:10px;cursor:pointer;flex-shrink:0}
+.lang-btn:active{background:var(--app-primary);color:#fff}
+.card{background:var(--app-card);border-radius:var(--app-radius-card);box-shadow:var(--app-shadow-card);margin-bottom:10px;padding:14px 12px}
+.toast{position:absolute;left:50%;top:42%;transform:translateX(-50%);background:rgba(31,35,41,.88);color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:120;max-width:80%;text-align:center;line-height:1.5}
+.toast.show{opacity:1}
+/* ===== P3 ===== */
+.p3-body{flex:1;overflow-y:auto;padding:0 var(--app-space-page-x);padding-bottom:150px}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.card-head .title{font-size:15px;font-weight:600}
+.card-head .title .opt{color:var(--app-warning);font-size:12px;font-weight:400;margin-left:4px}
+.card-head .hint{font-size:11px;color:var(--app-text-muted)}
+/* 路线 stop */
+.stop{border-radius:8px;padding:10px;margin-bottom:10px;background:var(--app-bg-soft)}
+.stop.c0{background:#EAF7F1}.stop.c1{background:#FAF6EE}.stop.c2{background:#EEF2FA}
+.stop-top{display:flex;align-items:center;gap:8px}
+.stop-seq{width:22px;height:22px;border-radius:50%;background:var(--app-primary);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stop-name{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 来源标签：放在底部「修改地址」前，不额外占行 */
+.src-tag{font-size:10px;padding:2px 8px;border-radius:8px;border:1px solid;flex-shrink:0}
+.src-tag.s1{color:#4E9A2E;border-color:#9BD27C;background:rgba(104,185,46,.12)}
+.src-tag.s2{color:#2F80ED;border-color:#9DC2F5;background:rgba(47,128,237,.12)}
+.src-tag.s3{color:var(--app-primary-strong);border-color:#9BD9CF;background:var(--app-primary-soft)}
+.stop-ico{border:none;background:none;cursor:pointer;color:var(--app-text-muted);font-size:14px;flex-shrink:0;padding:2px}
+.stop-addr{font-size:12px;color:var(--app-text-secondary);line-height:1.6;margin:8px 0 0}
+.addr-block{margin-top:8px}
+.addr-lab{font-size:10px;color:var(--app-text-muted);display:inline-flex;align-items:center;gap:4px}
+.addr-lab.act{color:var(--app-warning)}
+.addr-lab.act .badge{font-size:9px;border:1px solid #E6C786;background:rgba(217,154,25,.10);border-radius:6px;padding:1px 5px}
+.addr-ori{font-size:12px;color:var(--app-text-secondary);line-height:1.5;margin-top:2px}
+.addr-act{font-size:12px;color:var(--app-text);line-height:1.5;font-weight:500;margin-top:2px}
+.addr-sep{border-top:1px dashed var(--app-border);margin:8px 0}
+.photo-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.photo-lab{font-size:12px;color:var(--app-info);display:inline-flex;align-items:center;gap:4px}
+.photo-thumb{width:50px;height:50px;border-radius:6px;background:#fff;border:1px solid var(--app-border);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer}
+.stop-ops{display:flex;align-items:center;gap:16px;margin-top:10px;flex-wrap:wrap}
+.stop-op{font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.stop-op.edit{color:var(--app-primary)}
+.stop-door{margin-top:8px;background:#fff;border-radius:8px;border:1px solid var(--app-border);padding:8px 12px;font-size:12px;color:var(--app-text-muted)}
+.route-foot{display:flex;align-items:center;gap:12px;margin-top:4px}
+.switch{width:42px;height:24px;border-radius:12px;background:#D9DCE0;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.switch.on{background:var(--app-primary)}
+.switch .knob{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
+.switch.on .knob{left:20px}
+.switch-label{font-size:13px}
+.add-order{flex:1;border:1px dashed var(--app-border);border-radius:8px;background:#fff;color:var(--app-text-secondary);font-size:13px;padding:10px;cursor:pointer}
+.row-line{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.row-line .r{color:var(--app-text-muted);font-size:13px;cursor:pointer}
+/* 车型 */
+.veh-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.veh{flex:0 0 78%;border:1.5px solid var(--app-border);border-radius:10px;padding:12px;background:#fff;position:relative;cursor:pointer}
+.veh.on{border-color:var(--app-primary);background:var(--app-primary-soft)}
+.veh .check{position:absolute;top:0;right:0;width:26px;height:26px;background:var(--app-primary);color:#fff;border-radius:0 8px 0 10px;display:none;align-items:center;justify-content:center;font-size:14px}
+.veh.on .check{display:flex}
+.veh-top{display:flex;gap:10px}
+.veh-img{width:48px;height:48px;border-radius:8px;background:#fff;border:1px solid var(--app-border);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.veh-name{font-size:15px;font-weight:600}
+.veh-desc{font-size:11px;color:var(--app-text-secondary);line-height:1.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.veh-meta{display:flex;gap:6px;margin-top:8px}
+.veh-meta span{font-size:11px;color:var(--app-text-secondary);background:var(--app-bg-soft);border-radius:4px;padding:2px 6px}
+.veh-bag{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:13px}
+.veh-bag .fee{color:var(--app-warning)}
+/* P3 footer */
+.p3-foot{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--app-border);padding:10px 12px calc(10px + 12px);z-index:60}
+.svc-title{font-size:14px;margin-bottom:8px}
+.svc-title .wallet{color:var(--app-warning);font-size:12px}
+.svc{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--app-border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font-size:14px}
+.svc.on{border-color:var(--app-primary)}
+.svc .left{display:flex;align-items:center;gap:8px}
+.svc .tag{font-size:11px;color:var(--app-primary);border:1px solid var(--app-primary);border-radius:4px;padding:1px 6px}
+.svc .price{font-weight:600}
+.svc .tick{color:var(--app-primary);font-weight:700;margin-left:8px;visibility:hidden}
+.svc.on .tick{visibility:visible}
+.confirm-btn{width:100%;height:46px;border:none;border-radius:23px;background:var(--app-primary);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px}
+.confirm-btn:active{background:var(--app-primary-strong)}
+/* ===== P4 地址搜索 ===== */
+.search-row{display:flex;gap:8px;padding:6px 12px 10px}
+.search-box{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:0 12px;height:36px;border:1px solid var(--app-border)}
+.search-box input{border:none;outline:none;flex:1;font-size:13px;background:transparent}
+.search-box input::placeholder{color:var(--app-text-muted)}
+.search-btn{border:none;background:var(--app-primary);color:#fff;font-size:13px;border-radius:18px;padding:0 18px;height:36px;cursor:pointer}
+.map-box{height:230px;margin:0 12px;border-radius:10px;position:relative;overflow:hidden;background:linear-gradient(135deg,#E9EEF2,#DDE6EC);flex-shrink:0;border:1px solid var(--app-border)}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(120,140,160,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(120,140,160,.18) 1px,transparent 1px);background-size:34px 34px}
+.map-road{position:absolute;left:-10%;top:40%;width:130%;height:14px;background:#C7D2DA;transform:rotate(-18deg)}
+.map-pin{position:absolute;left:46%;top:44%;font-size:26px;transform:translate(-50%,-100%)}
+.map-here{position:absolute;left:44%;top:46%;width:14px;height:14px;border-radius:50%;background:var(--app-info);border:3px solid #fff;box-shadow:0 0 0 2px rgba(47,128,237,.3)}
+.map-logo{position:absolute;left:10px;bottom:8px;font-size:13px;font-weight:700;color:#5B6B79}
+.map-locate{position:absolute;right:10px;bottom:10px;width:38px;height:38px;border-radius:50%;background:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:18px;color:var(--app-primary);cursor:pointer}
+.cand-list{flex:1;overflow-y:auto;margin-top:8px}
+.cand{padding:12px;border-bottom:1px solid var(--app-border);cursor:pointer}
+.cand:active{background:var(--app-bg-soft)}
+.cand .name{font-size:14px;color:var(--app-text)}
+.cand .addr{font-size:12px;color:var(--app-text-muted);margin-top:3px;line-height:1.5}
+/* modal */
+.modal-mask{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-mask.show{display:flex}
+.photo-view{width:100%;max-width:300px;text-align:center}
+.photo-stage{background:#fff;border-radius:12px;height:240px;display:flex;align-items:center;justify-content:center;font-size:96px}
+.photo-bar{display:flex;align-items:center;justify-content:space-between;margin-top:12px;color:#fff;font-size:14px}
+.photo-bar button{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer}
+.photo-close{position:absolute;top:16px;right:18px;color:#fff;font-size:22px;border:none;background:none;cursor:pointer}
+.cmp{width:290px;background:#fff;border-radius:14px;padding:18px}
+.cmp h4{font-size:15px;margin-bottom:14px;text-align:center}
+.cmp .blk{margin-bottom:12px}
+.cmp .lab{font-size:11px;color:var(--app-text-muted);margin-bottom:4px}
+.cmp .ori{font-size:13px;color:var(--app-text-secondary);line-height:1.5}
+.cmp .act{font-size:13px;color:var(--app-text);line-height:1.5;font-weight:500}
+.cmp .act .badge{font-size:10px;color:var(--app-warning);border:1px solid #E6C786;background:rgba(217,154,25,.1);border-radius:6px;padding:1px 6px;margin-left:4px}
+.cmp .ok{width:100%;height:38px;border:none;border-radius:19px;background:var(--app-primary);color:#fff;font-size:14px;cursor:pointer;margin-top:6px}
+.draft-tip{font-size:11px;color:var(--app-text-muted);text-align:center;padding:6px 12px 0}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <!-- P3 车型选择/报价下单 -->
+  <section class="screen active" id="screen-quote" style="background:var(--app-bg)">
+    <header class="app-nav">
+      <button class="nav-back" onclick="goBack()">‹</button>
+      <div class="nav-title" id="q_title">车型选择</div>
+      <button class="lang-btn" id="langBtn" onclick="toggleLocale()">EN</button>
+    </header>
+    <div class="p3-body">
+      <div class="card">
+        <div class="card-head">
+          <span class="title" id="q_routeTitle">路线规划 <span class="opt" id="q_routeOpt">(当前为最优路线)</span></span>
+          <span class="hint" id="q_routeHint">长按拖动调整顺序</span>
+        </div>
+        <div id="stopList"></div>
+        <div class="route-foot">
+          <span class="switch on" id="recSwitch" onclick="toggleRec()"><span class="knob"></span></span>
+          <span class="switch-label" id="q_rec">推荐</span>
+          <button class="add-order" id="q_add" onclick="toast(T[locale].addDemo)">＋ 继续添加订单</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-line"><span id="q_pickup">取货时间</span><span class="r" onclick="toast(T[locale].pickupDemo)" id="q_pickupNow">立即取货 ›</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="title" id="q_vehTitle">车型选择</span></div>
+        <div class="veh-scroll" id="vehList"></div>
+      </div>
+    </div>
+
+    <div class="p3-foot">
+      <div class="svc-title"><span id="q_svcTitle">服务类型</span> <span class="wallet" id="q_wallet"></span></div>
+      <div id="svcList"></div>
+      <button class="confirm-btn" id="q_confirm" onclick="confirmOrder()">确认订单</button>
+    </div>
+  </section>
+
+  <!-- P4 地址搜索 -->
+  <section class="screen" id="screen-address" style="background:var(--app-bg)">
+    <header class="app-nav">
+      <button class="nav-back" onclick="showScreen('quote')">‹</button>
+      <div class="nav-title" id="a_title">地址搜索</div>
+      <button class="lang-btn" onclick="toggleLocale()">EN</button>
+    </header>
+    <div class="search-row">
+      <div class="search-box"><span style="color:var(--app-text-muted)">🔍</span><input id="a_input" placeholder="请输入小区/公寓/排屋/写字楼/酒店等"></div>
+      <button class="search-btn" id="a_searchBtn" onclick="toast(T[locale].searchDemo)">搜索</button>
+    </div>
+    <div class="map-box">
+      <div class="map-grid"></div><div class="map-road"></div>
+      <div class="map-here"></div><div class="map-pin">📍</div>
+      <div class="map-logo">Google</div>
+      <button class="map-locate" onclick="toast(T[locale].locateDemo)">◎</button>
+    </div>
+    <div class="cand-list" id="candList"></div>
+  </section>
+
+  <!-- 位置图预览 M1 -->
+  <div class="modal-mask" id="photoMask">
+    <button class="photo-close" onclick="closePhoto()">✕</button>
+    <div class="photo-view">
+      <div class="photo-stage" id="photoStage">🖼</div>
+      <div class="photo-bar">
+        <button onclick="photoStep(-1)">‹</button>
+        <span id="photoIdx">1/1</span>
+        <button onclick="photoStep(1)">›</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+/* ===== i18n ===== */
+const T={
+  zh:{
+    langBtn:"EN",qTitle:"车型选择",
+    routeTitle:"路线规划",routeOpt:"(当前为最优路线)",routeHint:"长按拖动调整顺序",
+    rec:"推荐",addOrder:"＋ 继续添加订单",
+    pickup:"取货时间",pickupNow:"立即取货 ›",
+    vehTitle:"车型选择",svcTitle:"服务类型",confirm:"确认订单",
+    walletFmt:b=>`（Wallet余额：MYR ${b.toFixed(2)}）`,
+    photo:"位置图",edit:"修改地址",edited:"实际发货地址",doorPh:"门牌号收货点",
+    src1:"微信小程序",src2:"H5",src3:"APP",
+    aTitle:"地址搜索",searchPh:"请输入小区/公寓/排屋/写字楼/酒店等",
+    cmpTitle:"地址对照",cmpOri:"订单原地址",cmpAct:"实际发货地址",cmpOk:"知道了",
+    addDemo:"继续添加订单（演示）",pickupDemo:"选择取货时间（演示）",
+    searchDemo:"调用谷歌地址检索（演示）",locateDemo:"回到当前定位（演示）",
+    requote:"实际发货地址已更新，重新报价…",ordered:"下单成功（演示）：Lalamove 报价已提交",
+    addrEdited:"已更新为实际发货地址",
+    regular:"常规配送",
+  },
+  en:{
+    langBtn:"中文",qTitle:"Vehicle Type",
+    routeTitle:"Route",routeOpt:"(Optimal Route)",routeHint:"Long press to reorder",
+    rec:"Recommend",addOrder:"＋ Add Order",
+    pickup:"Pickup Time",pickupNow:"Pickup Now ›",
+    vehTitle:"Vehicle Type",svcTitle:"Service Type",confirm:"Confirm Order",
+    walletFmt:b=>`(Wallet: MYR ${b.toFixed(2)})`,
+    photo:"Location Photo",edit:"Edit Address",edited:"Actual Shipping Address",doorPh:"Floor / Unit & Pickup Point",
+    src1:"WeChat Mini Program",src2:"H5",src3:"App",
+    aTitle:"Address Search",searchPh:"Search residence / condo / office / hotel…",
+    cmpTitle:"Address Comparison",cmpOri:"Original Order Address",cmpAct:"Actual Shipping Address",cmpOk:"Got it",
+    addDemo:"Add order (demo)",pickupDemo:"Select pickup time (demo)",
+    searchDemo:"Google address search (demo)",locateDemo:"Back to current location (demo)",
+    requote:"Actual shipping address updated, re-quoting…",ordered:"Order placed (demo): Lalamove quotation submitted",
+    addrEdited:"Updated to actual shipping address",
+    regular:"Regular",
+  }
+};
+
+/* ===== 数据（来自 w_wms_picking_orders + 实际发货地址记录）=====
+ source: 1微信小程序 2H5 3APP ; photos: 位置图(address_images) ; actual: 实际发货地址(可空) */
+const STOPS=[
+  {id:"o1",name:"Liuzhaobin | 5392000",source:1,
+   origin:"room15, crush cosss, malaysia street, crush cosss, malaysia street",
+   photos:["🏠","🚪"],actual:null},
+  {id:"o2",name:"Test-ios-piao | 123456789",source:2,
+   origin:"Falalaa Desserts · Kuchai Lama, Jalan Kuchai Maju 8, Kuala Lumpur",
+   photos:[],actual:null},
+  {id:"o3",name:"test 5kmStore | 11111111",source:3,
+   origin:"Jalan Tuanku 4, Taman Salak Selatan, 57100 Petaling, WP Kuala Lumpur, Malaysia",
+   photos:["🏬"],actual:null},
+];
+const VEHICLES=[
+  {id:"moto",name:"摩托车",nameEn:"Motorcycle",img:"🏍",base:6.9,perStop:1.0,
+   desc:"适合生鲜、食品、小件包裹（起步 2kg）",descEn:"Ideal for groceries, food, small parcels (from 2kg)",size:"0.3m*0.3m*0.3m",weight:"UP to 10 kg",bag:"Thermal Bag",bagFee:0},
+  {id:"car",name:"轿车",nameEn:"Car",img:"🚗",base:14.0,perStop:1.5,
+   desc:"适合中件包裹、多件订单",descEn:"For medium parcels and multi-item orders",size:"0.5m*0.5m*0.5m",weight:"UP to 30 kg",bag:"Thermal Bag",bagFee:0},
+  {id:"van",name:"面包车",nameEn:"Van",img:"🚐",base:22.0,perStop:1.0,
+   desc:"车型说明车型说明车型说明，适合大件批量配送",descEn:"For bulky / batch deliveries",size:"2.0m*2.0m*2.0m",weight:"UP to 40 KG",bag:"Thermal Bag",bagFee:0},
+];
+const WALLET=2000.00;
+
+/* ===== 状态 ===== */
+let locale=new URLSearchParams(location.search).get("locale")||"zh";
+let recommend=true,curVeh="moto",curSvc="regular",editingStopId=null;
+let photoSet=[],photoPos=0;
+
+/* ===== locale ===== */
+function toggleLocale(){setLocale(locale==="zh"?"en":"zh")}
+function setLocale(l){
+  locale=l;const tx=T[l];
+  document.querySelectorAll(".lang-btn").forEach(b=>b.textContent=tx.langBtn);
+  document.getElementById("q_title").textContent=tx.qTitle;
+  document.getElementById("q_routeTitle").firstChild.textContent="";
+  document.getElementById("q_routeTitle").childNodes[0].nodeValue=tx.routeTitle+" ";
+  document.getElementById("q_routeOpt").textContent=tx.routeOpt;
+  document.getElementById("q_routeHint").textContent=tx.routeHint;
+  document.getElementById("q_rec").textContent=tx.rec;
+  document.getElementById("q_add").textContent=tx.addOrder;
+  document.getElementById("q_pickup").textContent=tx.pickup;
+  document.getElementById("q_pickupNow").textContent=tx.pickupNow;
+  document.getElementById("q_vehTitle").textContent=tx.vehTitle;
+  document.getElementById("q_svcTitle").textContent=tx.svcTitle;
+  document.getElementById("q_confirm").textContent=tx.confirm;
+  document.getElementById("a_title").textContent=tx.aTitle;
+  document.getElementById("a_input").placeholder=tx.searchPh;
+  renderStops();renderVeh();renderSvc();renderWallet();renderCand();
+}
+
+/* ===== 屏幕 ===== */
+function showScreen(n){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("screen-"+n).classList.add("active")}
+function stateQuery(extra={}){
+  const query=new URLSearchParams(location.search);
+  query.set("locale",locale);
+  Object.entries(extra).forEach(([key,value])=>{if(value!==undefined&&value!==null)query.set(key,value)});
+  return query.toString();
+}
+function pageUrl(page,extra={}){return `${page}?${stateQuery(extra)}`}
+function goBack(){window.location.href=pageUrl("shipping-list.html",{tab:"pending"})}
+
+/* ===== 路线 stop ===== */
+function renderStops(){
+  const tx=T[locale];
+  document.getElementById("stopList").innerHTML=STOPS.map((s,i)=>{
+    const srcTxt=tx["src"+s.source];
+    // 地址区：未改址只显示地址；已改址直接显示「订单原地址 + 实际发货地址」做对比
+    let addrHtml;
+    if(s.actual){
+      addrHtml=`
+      <div class="addr-block"><span class="addr-lab">${tx.cmpOri}</span><div class="addr-ori">${s.origin}</div></div>
+      <div class="addr-sep"></div>
+      <div class="addr-block"><span class="addr-lab act">${tx.edited}</span><div class="addr-act">${s.actual.full}</div></div>`;
+    }else{
+      addrHtml=`<div class="stop-addr">${s.origin}</div>`;
+    }
+    // 位置图：直接显示缩略图预览（点击放大）
+    const photoHtml=s.photos.length?`<div class="photo-row">${s.photos.map((p,pi)=>`<div class="photo-thumb" onclick="openPhoto('${s.id}',${pi})">${p}</div>`).join("")}</div>`:"";
+    return `<div class="stop c${i%3}">
+      <div class="stop-top">
+        <span class="stop-seq">${i+1}</span>
+        <span class="stop-name">${s.name}</span>
+        <button class="stop-ico" onclick="toast('${tx.addDemo}')">✕</button>
+        <button class="stop-ico" title="drag">⠿</button>
+      </div>
+      ${addrHtml}
+      ${photoHtml}
+      <div class="stop-ops">
+        <span class="src-tag s${s.source}">${srcTxt}</span>
+        <span class="stop-op edit" onclick="editAddr('${s.id}')">✎ ${tx.edit}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+function toggleRec(){recommend=!recommend;document.getElementById("recSwitch").classList.toggle("on",recommend)}
+
+/* ===== 车型/服务/报价 ===== */
+function curStops(){return STOPS.length}
+function editedCount(){return STOPS.filter(s=>s.actual).length}
+function computeQuote(svc){
+  const v=VEHICLES.find(x=>x.id===curVeh);
+  let q=v.base+(curStops()-1)*v.perStop+v.bagFee;
+  q+=editedCount()*0.5; // 演示：实际发货地址距离调整
+  if(svc==="pooling")q=Math.max(q-0,q); // Pooling 同价（演示）
+  return q;
+}
+function renderVeh(){
+  const tx=T[locale];
+  document.getElementById("vehList").innerHTML=VEHICLES.map(v=>`
+    <div class="veh ${v.id===curVeh?"on":""}" onclick="selVeh('${v.id}')">
+      <div class="check">✓</div>
+      <div class="veh-top">
+        <div class="veh-img">${v.img}</div>
+        <div style="flex:1;min-width:0">
+          <div class="veh-name">${locale==="zh"?v.name:v.nameEn}</div>
+          <div class="veh-desc">${locale==="zh"?v.desc:v.descEn}</div>
+        </div>
+      </div>
+      <div class="veh-meta"><span>${v.size}</span><span>${v.weight}</span></div>
+      <div class="veh-bag"><span>${v.bag}</span><span class="fee">RM${v.bagFee.toFixed(2)}</span></div>
+    </div>`).join("");
+}
+function selVeh(id){curVeh=id;renderVeh();renderSvc()}
+function renderSvc(){
+  const tx=T[locale];const reg=computeQuote("regular"),pool=computeQuote("pooling");
+  document.getElementById("svcList").innerHTML=`
+    <div class="svc ${curSvc==="regular"?"on":""}" onclick="selSvc('regular')">
+      <span class="left">Regular <span class="tag">${tx.regular}</span></span>
+      <span><span class="price">MYR ${reg.toFixed(1)}</span><span class="tick">✓</span></span>
+    </div>
+    <div class="svc ${curSvc==="pooling"?"on":""}" onclick="selSvc('pooling')">
+      <span class="left">Pooling</span>
+      <span><span class="price">MYR ${pool.toFixed(1)}</span><span class="tick">✓</span></span>
+    </div>`;
+}
+function selSvc(s){curSvc=s;renderSvc()}
+function renderWallet(){document.getElementById("q_wallet").textContent=T[locale].walletFmt(WALLET)}
+
+/* ===== 位置图 M1 ===== */
+function openPhoto(id,start){const s=STOPS.find(x=>x.id===id);if(!s||!s.photos.length)return;photoSet=s.photos;photoPos=start||0;updPhoto();document.getElementById("photoMask").classList.add("show")}
+function updPhoto(){document.getElementById("photoStage").textContent=photoSet[photoPos];document.getElementById("photoIdx").textContent=`${photoPos+1}/${photoSet.length}`}
+function photoStep(d){photoPos=(photoPos+d+photoSet.length)%photoSet.length;updPhoto()}
+function closePhoto(){document.getElementById("photoMask").classList.remove("show")}
+
+/* ===== 修改地址 → 实际发货地址 ===== */
+function editAddr(id){editingStopId=id;renderCand();showScreen("address")}
+const CANDIDATES=[
+  {name:"Kuala Lumpur",addr:"Kuala Lumpur",lat:3.139,lng:101.687},
+  {name:"LiveIn @ The Hamilton Wangsa Maju",addr:"Jalan Wangsa Delima, Wangsa Maju, Kuala Lumpur",lat:3.205,lng:101.738},
+  {name:"Artsyy Atelier",addr:"Jalan Hamilton, Wangsa Maju, Kuala Lumpur",lat:3.206,lng:101.739},
+  {name:"The Hamilton",addr:"8, Jalan Wangsa Delima, Wangsa Maju, Kuala Lumpur",lat:3.205,lng:101.737},
+  {name:"GKafe",addr:"1, Jalan Wangsa Delima 7, Wangsa Maju, Kuala Lumpur",lat:3.204,lng:101.736},
+  {name:"Mamasab Wangsa Maju Kak Zali",addr:"Residensi Wangsamas, 1, Jalan Wangsa Delima 7, Wangsa Maju, Kuala Lumpur",lat:3.207,lng:101.740},
+  {name:"OJ x Beauty",addr:"RESIDENSI HAMILTON, 1, Jalan Wangsa Delima 7, Wangsa Maju, Kuala Lumpur",lat:3.206,lng:101.741},
+];
+function renderCand(){
+  document.getElementById("candList").innerHTML=CANDIDATES.map((c,i)=>
+    `<div class="cand" onclick="pickCand(${i})"><div class="name">${c.name}</div><div class="addr">${c.addr}</div></div>`).join("");
+}
+function pickCand(i){
+  const c=CANDIDATES[i];const s=STOPS.find(x=>x.id===editingStopId);if(!s)return;
+  s.actual={full:`${c.name}, ${c.addr}`,lat:c.lat,lng:c.lng};
+  showScreen("quote");renderStops();
+  toast(T[locale].requote);
+  setTimeout(()=>{renderSvc();},700); // 重新报价
+}
+/* ===== 确认订单 ===== */
+function confirmOrder(){window.location.href=pageUrl("shipping-pay.html",{vehicle:curVeh,service:curSvc})}
+
+/* ===== 工具 ===== */
+let toastTimer=null;
+function toast(m){const el=document.getElementById("toast");el.textContent=m;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),1700)}
+
+/* ===== init ===== */
+setLocale(locale);
+</script>
+</body>
+</html>
