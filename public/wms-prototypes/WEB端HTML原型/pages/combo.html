@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<!--
+  📦 电商系统页面 · 组合商品管理（创建/编辑/配方/分摊/定价/分发）。
+  组合管理属【电商系统】范畴，非 WMS；WMS 只接收电商拆解后的 SKU 行履约。
+  详见 docs/业务需求/组合商品需求-最终版（电商管理·WMS仅SKU履约）.md
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>组合商品管理（电商系统）</title>
+<style>
+:root{
+  --bg:#f5f5f7; --surface:#ffffff; --surface-2:#fafafc;
+  --line:rgba(29,29,31,0.08); --line-strong:rgba(29,29,31,0.14);
+  --text:#1d1d1f; --subtext:rgba(29,29,31,0.72); --muted:rgba(29,29,31,0.48);
+  --accent:#00ab95; --accent-soft:rgba(0,171,149,0.10);
+  --warn:#c77c11; --warn-soft:rgba(199,124,17,0.12);
+  --danger:#d92d20; --danger-soft:rgba(217,45,32,0.10);
+  --info:#2563eb; --info-soft:rgba(37,99,235,0.10);
+  --radius-lg:18px; --radius-md:12px; --radius-sm:10px; --radius-pill:999px;
+  --shadow-soft:0 8px 22px rgba(0,0,0,0.035);
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;font-family:var(--font);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+.wrap{padding:22px 24px 120px;display:flex;flex-direction:column;gap:16px;}
+.hidden{display:none!important;}
+.num{font-variant-numeric:tabular-nums;color:var(--text);}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--text);}
+.muted{color:var(--muted);}
+
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:var(--radius-pill);padding:9px 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{border-color:var(--line-strong);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:9px;}
+.btn.danger{color:var(--danger);border-color:var(--danger-soft);}
+.btn-link{border:0;background:transparent;color:var(--accent);padding:5px 6px;font-size:12.5px;cursor:pointer;}
+.btn-link.danger{color:var(--danger);} .btn-link.dist{color:var(--info);}
+.back{font-size:12.5px;color:var(--accent);cursor:pointer;}
+
+.page-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.page-title{font-size:24px;font-weight:700;line-height:1.2;}
+.page-sub{font-size:13px;color:var(--muted);margin-top:6px;max-width:680px;}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow-soft);}
+.metric-kicker{font-size:12px;color:var(--muted);}
+.metric-value{font-size:28px;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums;}
+.metric-note{font-size:12px;color:var(--subtext);margin-top:6px;} .metric-note.up{color:var(--accent);} .metric-note.warn{color:var(--warn);}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);}
+.panel-pad{padding:16px 18px;}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 14px;align-items:end;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;color:var(--muted);} .field label .req{color:var(--danger);}
+.field input,.field select{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-md);padding:9px 12px;font-size:13px;color:var(--text);outline:none;}
+.field input:focus,.field select:focus{border-color:var(--accent);background:#fff;}
+.filters-actions{display:flex;gap:8px;justify-content:flex-end;grid-column:1/-1;margin-top:2px;}
+.suffix{position:relative;} .suffix input{width:100%;padding-right:46px;} .suffix span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0;}
+.toolbar-right{font-size:13px;color:var(--subtext);} .toolbar-right b{color:var(--text);}
+.table-wrap{overflow:auto;padding:10px 10px 6px;}
+table.list{width:100%;border-collapse:collapse;font-size:13px;min-width:1100px;}
+table.list thead th{font-size:12px;font-weight:600;color:var(--subtext);text-align:left;background:var(--surface-2);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+table.list tbody td{padding:12px;border-bottom:1px solid var(--line);color:var(--subtext);vertical-align:middle;}
+table.list tbody tr:hover{background:var(--surface-2);}
+.cell-strong{color:var(--text);font-weight:600;}
+.thumb{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#e9f7f4,#d7efe9);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.row-actions{display:flex;gap:2px;flex-wrap:wrap;}
+.stock-cell{display:flex;flex-direction:column;gap:2px;} .stock-cell .sub{font-size:11px;color:var(--muted);} .stock-zero{color:var(--danger);font-weight:600;}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:var(--radius-pill);white-space:nowrap;}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.pill.on{background:var(--accent-soft);color:var(--accent);}
+.pill.partial{background:var(--warn-soft);color:var(--warn);}
+.pill.allout{background:var(--danger-soft);color:var(--danger);}
+.pill.off{background:rgba(29,29,31,.06);color:var(--subtext);}
+.switch{position:relative;display:inline-block;width:38px;height:22px;vertical-align:middle;}
+.switch input{display:none;}
+.slider{position:absolute;inset:0;background:#d7d7db;border-radius:999px;transition:.2s;cursor:pointer;}
+.slider::before{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.switch input:checked + .slider{background:var(--accent);}
+.switch input:checked + .slider::before{transform:translateX(16px);}
+.switch.disabled .slider{opacity:.4;cursor:not-allowed;}
+
+.hint{display:flex;gap:8px;align-items:flex-start;background:var(--accent-soft);border:1px solid var(--accent-soft);border-radius:var(--radius-md);padding:10px 14px;font-size:12.5px;color:#0a7d6e;}
+.pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:13px;color:var(--subtext);}
+.pager .pg{min-width:30px;height:30px;border:1px solid var(--line);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:var(--surface);}
+.pager .pg.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* 编辑页 */
+.edit-wrap{max-width:100%;width:100%;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:18px 20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card-title .idx{width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.card-sub{font-size:12px;color:var(--muted);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px;}
+.imgup{width:96px;height:96px;border:1px dashed var(--line-strong);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:12px;cursor:pointer;background:var(--surface-2);}
+.imgup:hover{border-color:var(--accent);color:var(--accent);}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-pill);padding:3px;gap:2px;}
+.seg button{border:0;background:transparent;padding:7px 16px;border-radius:var(--radius-pill);font-size:12.5px;color:var(--subtext);cursor:pointer;}
+.seg button.active{background:var(--accent);color:#fff;font-weight:600;}
+.seg button:disabled{opacity:.45;cursor:not-allowed;}
+.tagline{font-size:11.5px;color:var(--muted);margin-top:6px;}
+.items-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+.items-table th,.items-table td{overflow:hidden;text-overflow:ellipsis;}
+.items-table th{font-size:12px;color:var(--subtext);font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap;}
+.items-table td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.items-table input[type=number]{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 9px;font-size:13px;outline:none;font-variant-numeric:tabular-nums;}
+.items-table input[type=number]:focus{border-color:var(--accent);}
+.items-table select.atype{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;font-size:12.5px;outline:none;}
+.items-table select.atype:focus{border-color:var(--accent);}
+.sku-name{font-weight:600;color:var(--text);}
+.items-empty{padding:26px;text-align:center;color:var(--muted);font-size:13px;}
+
+.footbar{position:sticky;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px 8px;margin-top:6px;}
+.footbar .summary{font-size:12.5px;color:var(--subtext);} .footbar .summary b{color:var(--text);}
+.footbar .acts{display:flex;gap:10px;}
+
+/* 详情 */
+.banner{background:linear-gradient(120deg,#ffffff,#f3fbf9);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;display:flex;align-items:center;gap:18px;box-shadow:var(--shadow-soft);}
+.banner .big-thumb{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#e9f7f4,#d3ede7);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.banner .meta{flex:1;} .banner .name{font-size:20px;font-weight:700;}
+.banner .sub{font-size:12.5px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.copy{cursor:pointer;color:var(--accent);}
+.tag{display:inline-flex;font-size:11.5px;padding:3px 9px;border-radius:7px;} .tag.atomic{color:var(--info);background:var(--info-soft);}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 24px;}
+.info .k{font-size:12px;color:var(--muted);} .info .v{font-size:14px;font-weight:600;margin-top:4px;}
+table.detail-tb{width:100%;border-collapse:collapse;font-size:13px;}
+table.detail-tb th{font-size:12px;color:var(--subtext);font-weight:600;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap;}
+table.detail-tb td{padding:10px;border-bottom:1px solid var(--line);color:var(--subtext);}
+table.detail-tb tfoot td{font-weight:600;background:var(--surface-2);}
+.gift-badge{font-size:11px;color:var(--warn);background:var(--warn-soft);padding:2px 7px;border-radius:6px;margin-left:6px;}
+.shelf-on{color:var(--accent);font-weight:600;} .shelf-off{color:var(--danger);font-weight:600;}
+.cust-yes{color:var(--info);} .cust-no{color:var(--muted);}
+.note{font-size:12px;color:var(--muted);margin-top:10px;}
+
+/* 分发弹窗 */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:.2s;z-index:40;}
+.mask.show{opacity:1;pointer-events:auto;}
+.dist-modal{position:fixed;top:24px;left:50%;transform:translateX(-50%) scale(.98);opacity:0;pointer-events:none;width:min(1180px,94vw);max-height:calc(100vh - 48px);background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 30px 80px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden;z-index:41;transition:.2s;}
+.dist-modal.show{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);}
+.modal-title{font-size:17px;font-weight:700;} .modal-title .s{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:10px;}
+.modal-close{border:0;background:none;font-size:20px;color:var(--muted);cursor:pointer;}
+.modal-body{padding:16px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px;}
+.modal-foot{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--line);}
+.foot-note{font-size:12px;color:var(--danger);}
+/* 选择 SKU 弹框 */
+.sku-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+.sku-filters .fi{display:flex;flex-direction:column;gap:4px;}
+.sku-filters .lbl{font-size:11.5px;color:var(--muted);}
+.sku-filters .inp{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:13px;min-width:200px;outline:none;}
+.sku-filters .inp:focus{border-color:var(--accent);}
+.catwrap{position:relative;}
+.catbtn{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:var(--surface);font-size:13px;cursor:pointer;color:var(--subtext);min-width:140px;text-align:left;}
+.catbtn.on{border-color:var(--accent);color:var(--accent);}
+.catpanel{position:absolute;top:38px;left:0;z-index:6;width:260px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.16);padding:8px;max-height:300px;overflow:auto;display:none;}
+.catpanel.show{display:block;}
+.catg{padding:3px 0;border-bottom:1px solid var(--surface-2);}
+.catg:last-child{border-bottom:0;}
+.catl{display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 4px;cursor:pointer;border-radius:6px;}
+.catl:hover{background:var(--surface-2);}
+.catl.l1 b{font-weight:700;}
+.catkids{padding-left:18px;}
+.sku-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sku-table th,.sku-table td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);}
+.sku-table th{font-size:12px;color:var(--muted);font-weight:600;background:var(--surface-2);position:sticky;top:0;}
+.sku-table tbody tr{cursor:pointer;}
+.sku-table tbody tr:hover{background:var(--surface-2);}
+.sku-table tr.picked{background:var(--accent-soft);}
+.sku-table tr.picked:hover{background:var(--accent-soft);}
+.sku-table .nm b{font-weight:600;}
+.sku-table .nm .s{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;}
+.sku-cat-tag{font-size:11px;color:var(--subtext);background:var(--surface-2);border-radius:5px;padding:2px 8px;white-space:nowrap;}
+.sku-scroll{border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:46vh;}
+.sku-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px;}
+.sku-pager{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--subtext);}
+.sku-pager .total{margin-right:auto;}
+.sku-pager .psize{height:30px;border:1px solid var(--line);border-radius:7px;padding:0 6px;font-size:12.5px;color:var(--subtext);background:var(--surface);}
+.sku-pager .pbtns{display:flex;align-items:center;gap:4px;}
+.sku-pager .pg{min-width:30px;height:30px;border:1px solid var(--line);background:var(--surface);border-radius:7px;font-size:12.5px;color:var(--subtext);cursor:pointer;padding:0 8px;}
+.sku-pager .pg:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.sku-pager .pg.cur{background:var(--accent);border-color:var(--accent);color:#fff;}
+.sku-pager .pg:disabled{opacity:.45;cursor:not-allowed;}
+.sku-pager .pdots{padding:0 2px;color:var(--muted);}
+.basebar{display:flex;flex-wrap:wrap;gap:18px;align-items:center;background:var(--accent-soft);border:1px solid var(--accent-soft);border-radius:var(--radius-md);padding:10px 16px;font-size:12.5px;color:#0a7d6e;}
+.basebar b{font-size:14px;color:#0a7d6e;font-variant-numeric:tabular-nums;}
+.store{border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;}
+.store-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface-2);padding:12px 16px;border-bottom:1px solid var(--line);}
+.store-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;} .store-name .wh{font-size:11.5px;color:var(--muted);font-weight:400;}
+.ctrl{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--subtext);}
+.ctrl input[type=text]{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12.5px;width:110px;outline:none;}
+.ctrl .sortin{width:70px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12.5px;outline:none;}
+.store-body{padding:12px 16px;display:flex;flex-direction:column;gap:12px;}
+.price-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;}
+.pcell label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;}
+.pcell input{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;font-variant-numeric:tabular-nums;}
+.pcell input:focus{border-color:var(--accent);background:#fff;}
+.pcell input:disabled{background:#f0f0f2;color:var(--muted);cursor:not-allowed;}
+.ro-hint{font-size:11px;color:var(--muted);margin-top:3px;}
+.detail-box{border:1px dashed var(--line-strong);border-radius:var(--radius-sm);padding:10px 12px;background:#fcfcfd;}
+.detail-box .t{font-size:12px;color:var(--subtext);font-weight:600;margin-bottom:8px;}
+table.cmp{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.cmp th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;padding:5px 8px;border-bottom:1px solid var(--line);}
+table.cmp td{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--subtext);}
+.bottleneck{color:var(--danger);font-weight:600;}
+.sellable{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;}
+.sellable .big{font-size:15px;font-weight:700;} .sellable .ok{color:var(--accent);} .sellable .bad{color:var(--danger);}
+.badge{font-size:11px;padding:2px 8px;border-radius:6px;} .badge.out{background:var(--danger-soft);color:var(--danger);}
+
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#1d1d1f;color:#fff;font-size:13px;padding:10px 18px;border-radius:var(--radius-pill);opacity:0;pointer-events:none;transition:.25s;z-index:99;}
+.toast.show{opacity:1;}
+@media(max-width:1180px){.metrics,.filters{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.grid2,.grid3,.info-grid,.price-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div style="background:#eef4ff;border-bottom:1px solid #cdddff;color:#2456c8;font-size:12.5px;font-weight:600;padding:7px 16px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;">📦 电商系统页面 · 组合商品管理（组合的创建/配方/分摊/定价/分发归电商系统；WMS 仅接收拆解后的 SKU 履约）</div>
+<!-- ============ 列表 COMBO-01 ============ -->
+<div class="wrap" id="view-list">
+  <div class="page-title-row">
+    <div>
+      <div class="page-title">组合商品</div>
+      <div class="page-sub">组合是营销售卖单元（买二送一、加价购、打包折扣）。组合设基础价格，按店铺分发定价/上架；库存按组件 SKU 推算可售份数，不新增组合库存。</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn" onclick="toast('导出（占位）')">导出</button>
+      <button class="btn btn-primary" onclick="goEdit(null)">＋ 添加组合商品</button>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-kicker">组合总数</div><div class="metric-value">12</div><div class="metric-note">含关闭 2</div></div>
+    <div class="metric"><div class="metric-kicker">开启中</div><div class="metric-value">8</div><div class="metric-note up">▲ 本月新增 3</div></div>
+    <div class="metric"><div class="metric-kicker">缺货下架</div><div class="metric-value">2</div><div class="metric-note warn">部分仓 1 · 全部 1</div></div>
+    <div class="metric"><div class="metric-kicker">本月组合销量</div><div class="metric-value">486</div><div class="metric-note">单位：份</div></div>
+  </div>
+  <div class="panel panel-pad">
+    <div class="filters">
+      <div class="field"><label>商品名称</label><input id="fName" placeholder="输入组合名称/编码" /></div>
+      <div class="field"><label>商品分类</label><select id="fCat"><option value="">请选择商品分类</option><option>休闲零食</option><option>方便速食</option><option>清选好物</option><option>日用清洁</option></select></div>
+      <div class="field"><label>状态</label><select id="fStatus"><option value="">请选择状态</option><option value="开启">开启</option><option value="关闭">关闭</option><option value="缺货下架">缺货下架</option></select></div>
+      <div class="filters-actions"><button class="btn" onclick="resetFilters()">重置</button><button class="btn btn-primary" onclick="applyFilters()">查询</button></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="toolbar"><div></div><div class="toolbar-right">共 <b id="cnt">8</b> 个组合</div></div>
+    <div class="table-wrap">
+      <table class="list">
+        <thead><tr>
+          <th>ID</th><th>商品图片</th><th>商品名称</th><th>商品分类</th><th>价格（当地币）</th>
+          <th>实际销量</th><th>虚拟销量</th><th>库存</th><th>状态</th><th>排序</th><th>操作</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pager"><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">›</span><span style="margin-left:10px;color:var(--muted);">共 12 条 · 10 条/页</span></div>
+  </div>
+  <div class="hint">库存=可售份数（各组件 ⌊供货仓库可用库存/单份数量⌋ 取最小，多仓合计；乐观估算）。状态为组合维度聚合态：开启 / 部分仓缺货下架 / 全部缺货下架 / 关闭。按店铺明细见「分发」「详情」。</div>
+</div>
+
+<!-- ============ 新建/编辑 COMBO-02 ============ -->
+<div class="wrap edit-wrap hidden" id="view-edit">
+  <div class="page-title-row"><div class="page-title" id="editTitle">新建组合</div><div class="back" onclick="goList()">← 返回列表</div></div>
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="idx">1</span>基本信息</div><div class="card-sub">基础价格在此设；分发到店铺时再决定是否自定义</div></div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;">
+      <div class="field" style="flex:0 0 96px;"><label>主图 <span class="req">*</span></label><div class="imgup" onclick="toast('上传/选择主图（占位）')"><div style="font-size:22px;">＋</div><div>上传主图</div></div></div>
+      <div style="flex:1;min-width:320px;">
+        <div class="grid2">
+          <div class="field"><label>组合名称 <span class="req">*</span></label><input id="cName" placeholder="如：【买1送1】矿泉水套装" /></div>
+          <div class="field"><label>商品分类 <span class="req">*</span></label><select><option value="">请选择商品分类</option><option>休闲零食</option><option>方便速食</option><option>清选好物</option><option>日用清洁</option></select></div>
+        </div>
+        <div class="grid3" style="margin-top:14px;">
+          <div class="field"><label>基础售价 <span class="req">*</span></label><div class="suffix"><input id="cPrice" type="number" min="0" step="0.01" value="24.00" /><span>RM</span></div></div>
+          <div class="field"><label>基础折扣价</label><div class="suffix"><input type="number" min="0" step="0.01" placeholder="可选" /><span>RM</span></div></div>
+          <div class="field"><label>基础新人价</label><div class="suffix"><input type="number" min="0" step="0.01" placeholder="可选" /><span>RM</span></div></div>
+        </div>
+        <div class="grid3" style="margin-top:14px;">
+          <div class="field"><label>退货策略 <span class="req">*</span></label><div class="seg" id="retSeg"><button class="active" data-v="atomic" onclick="setRet('atomic')">整组退</button><button data-v="split" disabled title="可拆退为下期能力">可拆退（下期）</button></div></div>
+          <div class="field"><label>状态</label><div class="seg"><button class="active" data-v="on" onclick="setSt(this)">开启</button><button data-v="off" onclick="setSt(this)">关闭</button></div></div>
+          <div class="field"><label>排序</label><input type="number" value="10001" /></div>
+        </div>
+        <div class="tagline" id="retHint">本期仅整组退：退货时整单退回；组合含赠品同样强制整组退。可拆退为下期能力。</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="idx">2</span>组件 SKU 明细（配方）</div><button class="btn btn-sm btn-primary" onclick="openSku()">＋ 选择 SKU</button></div>
+    <div class="card-sub" style="margin-bottom:10px;">分摊方式可选「固定/分摊」：固定行售价锁定，其余分摊行按比例分剩余金额，最后一个分摊行兜底吸收尾差；分摊售价(单)与分摊比例可改且联动。双校验：Σ(分摊售价×数量)=基础售价、Σ分摊比例=100%。赠品分摊 0、全免。</div>
+    <div style="overflow:auto;">
+      <table class="items-table">
+        <thead><tr>
+          <th style="width:8%;">SKU 编码</th><th style="width:20%;">商品名称 / SKU名称</th><th style="width:9%;">单份数量</th>
+          <th style="width:9%;">原售价(单)</th><th style="width:10%;">分摊方式</th>
+          <th style="width:13%;">分摊售价(单)</th><th style="width:10%;">分摊金额</th><th style="width:11%;">分摊比例%</th>
+          <th style="width:5%;">赠品</th><th style="width:5%;">操作</th>
+        </tr></thead>
+        <tbody id="itemBody"></tbody><tfoot id="itemFoot"></tfoot>
+      </table>
+    </div>
+    <div class="tagline" id="comboSummary"></div>
+  </div>
+  <div class="footbar">
+    <div class="summary">组件 <b id="fCount">0</b> 个 SKU · 基础售价 <b id="fPrice">RM 24.00</b></div>
+    <div class="acts"><button class="btn" onclick="toast('已保存草稿')">保存草稿</button><button class="btn btn-primary" id="submitBtn" onclick="submitCombo()">提交</button></div>
+  </div>
+</div>
+
+<!-- ============ 详情 COMBO-03 ============ -->
+<div class="wrap hidden" id="view-detail">
+  <div class="back" onclick="goList()">← 返回列表</div>
+  <div class="banner">
+    <div class="big-thumb">🛍️</div>
+    <div class="meta">
+      <div class="name" id="dName">【买1送1】矿泉水套装</div>
+      <div class="sub">
+        <span class="code" id="dCode">CB20260601</span><span class="copy" onclick="toast('已复制')">复制</span>
+        <span class="pill partial"><span class="dot"></span>部分仓缺货下架</span><span>版本 v3</span><span class="tag atomic">整组退 atomic</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" onclick="goEdit(currentDetail)">编辑</button>
+      <button class="btn" onclick="openDist()">分发</button>
+      <button class="btn danger" onclick="toast('关闭组合（占位）')">关闭</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="font-size:15px;margin-bottom:14px;">基本信息</div>
+    <div class="info-grid">
+      <div class="info"><div class="k">组合名称</div><div class="v" id="diName">【买1送1】矿泉水套装</div></div>
+      <div class="info"><div class="k">商品分类</div><div class="v">休闲零食</div></div>
+      <div class="info"><div class="k">运营国家</div><div class="v">马来西亚（当地币 RM）</div></div>
+      <div class="info"><div class="k">基础售价</div><div class="v">RM 24.00</div></div>
+      <div class="info"><div class="k">基础折扣价</div><div class="v">RM 22.00</div></div>
+      <div class="info"><div class="k">基础新人价</div><div class="v">RM 20.00</div></div>
+      <div class="info"><div class="k">退货策略</div><div class="v">整组退（atomic）</div></div>
+      <div class="info"><div class="k">状态</div><div class="v">开启</div></div>
+      <div class="info"><div class="k">当前版本</div><div class="v">v3 · 2026-06-18</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="font-size:15px;margin-bottom:14px;">配方与分摊明细（基于基础售价，用于退款按比例计算）</div>
+    <table class="detail-tb">
+      <thead><tr><th>SKU</th><th>名称/规格</th><th>单份数量</th><th>原售价(单)</th><th>分摊方式</th><th>分摊售价(单)</th><th>分摊金额</th><th>分摊比例</th></tr></thead>
+      <tbody>
+        <tr><td class="code">SKU1</td><td><span class="sku-name">矿泉水 550ml</span> · 瓶/24入箱</td><td class="num">2</td><td class="num">RM 12.00</td><td>分摊</td><td class="num">RM 12.00</td><td class="num">RM 24.00</td><td class="num">100.0%</td></tr>
+        <tr><td class="code">SKU1</td><td><span class="sku-name">矿泉水 550ml</span> · 瓶/24入箱 <span class="gift-badge">赠品</span></td><td class="num">1</td><td class="num">RM 12.00</td><td style="color:var(--warn)">赠品</td><td class="num">RM 0.00</td><td class="num">RM 0.00</td><td class="num">0.0%</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="6" style="text-align:right;">合计</td><td class="num">RM 24.00</td><td class="num">100%</td></tr></tfoot>
+    </table>
+    <div class="note">Σ(分摊售价×数量)=基础售价 RM 24.00、Σ分摊比例=100%（暗扣：组件售价=分摊价、不单独显示优惠）。退款按各 SKU 固化的分摊售价/比例计算；赠品全免。</div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="font-size:15px;margin-bottom:14px;">各店铺分发</div>
+    <table class="detail-tb">
+      <thead><tr><th>店铺</th><th>供货仓库</th><th>是否自定义</th><th>售价</th><th>折扣价</th><th>上架状态</th><th>可售份数</th></tr></thead>
+      <tbody>
+        <tr><td class="sku-name">吉隆坡旗舰店</td><td>Kuchai Lama 仓库</td><td class="cust-no">否（用基础价）</td><td class="num">RM 24.00</td><td class="num">RM 22.00</td><td><span class="shelf-on">上架中</span></td><td class="num">40 份</td></tr>
+        <tr><td class="sku-name">槟城中心店</td><td>Penang 仓库</td><td class="cust-yes">是</td><td class="num">RM 25.50</td><td class="num">RM 23.00</td><td><span class="shelf-on">上架中</span></td><td class="num">12 份</td></tr>
+        <tr><td class="sku-name">新山店</td><td>JB 仓库</td><td class="cust-no">否（用基础价）</td><td class="num">RM 24.00</td><td class="num">RM 22.00</td><td><span class="shelf-off">缺货自动下架</span></td><td class="num" style="color:var(--danger)">0 份</td></tr>
+      </tbody>
+    </table>
+    <div class="note">可售份数=该店铺供货仓库瓶颈组件推算；新山店供货仓 SKU1 不足→缺货自动下架（offshelf_reason=stock），补货后自动恢复；整体聚合"部分仓缺货下架"。</div>
+  </div>
+</div>
+
+<!-- ============ 分发弹窗 COMBO-04 ============ -->
+<div class="mask" id="distMask" onclick="closeDist()"></div>
+<div class="dist-modal" id="distModal">
+  <div class="modal-head">
+    <div class="modal-title">组合分发 <span class="s" id="distName">· 【买1送1】矿泉水套装 · 按店铺设价/上架；库存来自供货仓库</span></div>
+    <button class="modal-close" onclick="closeDist()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="basebar">
+      <span>组合基础价格（店铺未自定义时使用）：</span>
+      <span>基础售价 <b>RM 24.00</b></span><span>基础折扣价 <b>RM 22.00</b></span><span>基础新人价 <b>RM 20.00</b></span>
+      <span style="color:var(--muted);">组件成本汇总 RM 14.00（只读）</span>
+    </div>
+    <div id="stores"></div>
+  </div>
+  <div class="modal-foot">
+    <div class="foot-note">*如若门店没有分类，将自动添加</div>
+    <div class="acts" style="display:flex;gap:10px;"><button class="btn" onclick="closeDist()">取消</button><button class="btn btn-primary" onclick="closeDist();toast('确定分发（占位）')">确定分发</button></div>
+  </div>
+</div>
+
+<div class="mask" id="skuMask" onclick="closeSku()"></div>
+<div class="dist-modal" id="skuModal" style="width:min(900px,94vw);">
+  <div class="modal-head">
+    <div class="modal-title">选择 SKU <span class="s">勾选后「确定」加入配方；同一 SKU 可再次打开添加一行作赠品</span></div>
+    <button class="modal-close" onclick="closeSku()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="sku-filters">
+      <div class="fi"><span class="lbl">商品名称/编码</span><input class="inp" id="skuKwName" oninput="applySkuFilter()" placeholder="输入商品名称或编码"></div>
+      <div class="fi"><span class="lbl">SKU 名称/编码</span><input class="inp" id="skuKwSku" oninput="applySkuFilter()" placeholder="输入 SKU 名称或编码"></div>
+      <div class="fi"><span class="lbl">商品分类（多级·可多选）</span>
+        <div class="catwrap"><button class="catbtn" id="skuCatBtn" onclick="event.stopPropagation();toggleSkuCatPanel()">全部分类 ▾</button><div class="catpanel" id="skuCatPanel" onclick="event.stopPropagation()"></div></div>
+      </div>
+      <div class="fi"><span class="lbl">&nbsp;</span><button class="btn btn-sm" onclick="resetSkuFilter()">重置筛选</button></div>
+    </div>
+    <div class="sku-scroll">
+      <table class="sku-table">
+        <thead><tr>
+          <th style="width:42px;"></th>
+          <th style="width:118px;">SKU 编码</th>
+          <th>商品名称 / SKU 名称</th>
+          <th style="width:150px;">商品分类</th>
+          <th style="width:120px;text-align:right;">原售价(单)</th>
+        </tr></thead>
+        <tbody id="skuPoolBody"></tbody>
+      </table>
+    </div>
+    <div class="sku-pager" id="skuPager"></div>
+  </div>
+  <div class="modal-foot">
+    <div class="foot-note" id="skuFootCount" style="color:var(--subtext);">已选 0 个</div>
+    <div class="acts" style="display:flex;gap:10px;"><button class="btn" onclick="closeSku()">取消</button><button class="btn btn-primary" onclick="confirmSku()">确定</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== 数据 ========== */
+const DATA=[
+  {id:4101,name:'【买1送1】矿泉水套装',cat:'休闲零食',price:'RM 24.00',sales:182,vsales:36,stock:120,status:'开启',sort:13003},
+  {id:4099,name:'早餐组合（牛奶+面包）',cat:'方便速食',price:'RM 18.50 ~ 19.50',sales:96,vsales:12,stock:64,status:'开启',sort:12002},
+  {id:4093,name:'加价购 · 清洁三件套',cat:'日用清洁',price:'RM 39.90',sales:64,vsales:8,stock:18,status:'开启',sort:10001},
+  {id:4088,name:'夏日饮品 4 选装',cat:'休闲零食',price:'RM 32.00',sales:41,vsales:5,stock:0,status:'部分仓缺货下架',sort:10001},
+  {id:4081,name:'零食大礼包',cat:'休闲零食',price:'RM 58.00 ~ 62.00',sales:78,vsales:20,stock:33,status:'开启',sort:10001},
+  {id:4076,name:'母婴组合（尿布+湿巾）',cat:'日用清洁',price:'RM 89.00',sales:25,vsales:2,stock:0,status:'全部缺货下架',sort:10001},
+  {id:4070,name:'办公文具套装',cat:'清选好物',price:'RM 21.00',sales:0,vsales:0,stock:50,status:'开启',sort:10001},
+  {id:4062,name:'节日礼盒',cat:'清选好物',price:'RM 120.00',sales:0,vsales:0,stock:12,status:'关闭',sort:10001},
+];
+const ST={'开启':'on','部分仓缺货下架':'partial','全部缺货下架':'allout','关闭':'off'};
+const SKU_POOL=[
+  {code:'SKU1',name:'矿泉水',skuName:'矿泉水 550ml 瓶装',spec:'瓶 / 24入箱',orig:12.00,cat:['饮料','瓶装水']},{code:'SKU2',name:'纯牛奶',skuName:'纯牛奶 1L 盒装',spec:'盒',orig:8.00,cat:['饮料','乳品']},
+  {code:'SKU3',name:'橙汁',skuName:'橙汁 300ml 瓶装',spec:'瓶',orig:5.00,cat:['饮料','果汁']},{code:'SKU4',name:'气泡水',skuName:'气泡水 330ml 罐装',spec:'罐',orig:4.50,cat:['饮料','瓶装水']},
+  {code:'SKU5',name:'全麦面包',skuName:'全麦面包 整袋',spec:'袋',orig:6.00,cat:['烘焙','面包']},{code:'SKU7',name:'洗洁精',skuName:'洗洁精 500ml 瓶装',spec:'瓶',orig:15.00,cat:['日化','清洁']},
+  {code:'SKU8',name:'苏打饼干',skuName:'苏打饼干 200g 袋装',spec:'袋',orig:7.50,cat:['烘焙','饼干']},{code:'SKU9',name:'即溶咖啡',skuName:'即溶咖啡 30条盒装',spec:'盒',orig:22.00,cat:['饮料','咖啡']},
+  {code:'SKU10',name:'卫生纸',skuName:'卫生纸 10卷装',spec:'提',orig:18.00,cat:['日化','纸品']},{code:'SKU11',name:'酸奶',skuName:'酸奶 100g×4 杯装',spec:'排',orig:9.50,cat:['饮料','乳品']},
+];
+/* 商品分类（多级，用于选择 SKU 弹框的分类筛选） */
+const CAT_TREE=[
+  {name:'饮料',children:['瓶装水','乳品','果汁','咖啡']},
+  {name:'烘焙',children:['面包','饼干']},
+  {name:'日化',children:['清洁','纸品']},
+];
+const RM=n=>'RM '+Number(n||0).toFixed(2);
+
+/* ========== 路由 ========== */
+let currentDetail=null;
+function show(id){['view-list','view-edit','view-detail'].forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));window.scrollTo(0,0);}
+function goList(){show('view-list');renderList(DATA);}
+function goDetail(id){currentDetail=id;const r=DATA.find(x=>x.id===id);if(r){document.getElementById('dName').textContent=r.name;document.getElementById('dCode').textContent='CB'+r.id;document.getElementById('diName').textContent=r.name;}show('view-detail');}
+function goEdit(id){document.getElementById('editTitle').textContent=id?('编辑组合 · '+id):'新建组合';resetEdit(id);show('view-edit');}
+
+/* ========== 列表 ========== */
+function actionsFor(r){
+  return `<button class="btn-link" onclick="goEdit(${r.id})">编辑</button>
+          <button class="btn-link danger" onclick="toast('删除（占位）')">删除</button>
+          <button class="btn-link dist" onclick="openDist(${r.id})">分发</button>
+          <button class="btn-link muted" onclick="goDetail(${r.id})" style="color:var(--subtext)">查看</button>`;
+}
+function statusCell(r){const on=r.status==='开启';
+  return `<span class="pill ${ST[r.status]}"><span class="dot"></span>${r.status}</span>
+          <label class="switch" style="margin-left:6px;"><input type="checkbox" ${on?'checked':''} onchange="toast('切换状态（占位）')"><span class="slider"></span></label>`;}
+function stockCell(r){return r.stock===0?`<div class="stock-cell"><span class="stock-zero">0 份</span><span class="sub">缺货</span></div>`:`<div class="stock-cell"><span class="num">${r.stock} 份</span><span class="sub">可售·多仓合计</span></div>`;}
+function renderList(rows){
+  const tb=document.getElementById('tbody');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">没有匹配的组合商品</td></tr>';document.getElementById('cnt').textContent=0;return;}
+  tb.innerHTML=rows.map(r=>`<tr>
+    <td class="num">${r.id}</td><td><div class="thumb">🛍️</div></td>
+    <td><div class="cell-strong">${r.name}</div></td><td>${r.cat}</td><td class="num">${r.price}</td>
+    <td class="num">${r.sales}</td><td class="num">${r.vsales}</td><td>${stockCell(r)}</td>
+    <td>${statusCell(r)}</td><td class="num">${r.sort}</td>
+    <td><div class="row-actions">${actionsFor(r)}</div></td></tr>`).join('');
+  document.getElementById('cnt').textContent=rows.length;
+}
+function applyFilters(){
+  const n=document.getElementById('fName').value.trim().toLowerCase(),c=document.getElementById('fCat').value,s=document.getElementById('fStatus').value;
+  renderList(DATA.filter(r=>(!n||r.name.toLowerCase().includes(n)||String(r.id).includes(n))&&(!c||r.cat===c)&&(!s||r.status===s||(s==='缺货下架'&&(r.status==='部分仓缺货下架'||r.status==='全部缺货下架')))));
+}
+function resetFilters(){['fName','fCat','fStatus'].forEach(id=>document.getElementById(id).value='');renderList(DATA);}
+
+/* ========== 编辑：配方 + 分摊（固定 + 分摊兜底） ========== */
+let items=[],ret='atomic';
+const getBase=()=>parseFloat(document.getElementById('cPrice').value||0);
+const origSub=it=>it.orig*it.qty;
+const lineAmt=it=>it.gift?0:(+(it.alloc||0));
+function fixedTotal(){return items.reduce((s,it)=>s+((!it.gift&&it.allocType==='fixed')?lineAmt(it):0),0);}
+function ratioIdxs(){return items.map((it,i)=>i).filter(i=>!items[i].gift&&items[i].allocType!=='fixed');}
+function backstopIndex(){const r=ratioIdxs();return r.length?r[r.length-1]:-1;}
+function recomputeBackstop(){const bs=backstopIndex();if(bs<0)return;const base=getBase(),fx=fixedTotal();const other=ratioIdxs().filter(i=>i!==bs).reduce((s,i)=>s+lineAmt(items[i]),0);items[bs].alloc=+(base-fx-other).toFixed(2);}
+function autoDistribute(){const base=getBase(),fx=fixedTotal(),remaining=base-fx,rIdx=ratioIdxs(),bs=backstopIndex();const denom=rIdx.reduce((s,i)=>s+origSub(items[i]),0);items.forEach(it=>{if(it.gift)it.alloc=0;});rIdx.forEach(i=>{if(i===bs)return;items[i].alloc=denom>0?+(remaining*origSub(items[i])/denom).toFixed(2):0;});recomputeBackstop();}
+function editAlloc(i,v){const per=Math.max(0,parseFloat(v||0));items[i].alloc=+(per*items[i].qty).toFixed(2);if(items[i].allocType==='fixed')autoDistribute();else recomputeBackstop();renderItems();}
+function editRatio(i,v){const base=getBase(),r=Math.max(0,parseFloat(v||0));items[i].alloc=+(base*r/100).toFixed(2);if(items[i].allocType==='fixed')autoDistribute();else recomputeBackstop();renderItems();}
+function setAllocType(i,t){items[i].allocType=t;autoDistribute();renderItems();}
+function upd(i,k,v){items[i][k]=(k==='gift')?v:Math.max(1,parseInt(v||1));if(k==='gift')syncGiftLock();autoDistribute();renderItems();}
+function del(i){items.splice(i,1);autoDistribute();renderItems();}
+function resetEdit(id){
+  document.getElementById('cName').value=id?(DATA.find(x=>x.id===id)||{}).name||'':'';
+  document.getElementById('cPrice').value='24.00';
+  items=[{code:'SKU1',name:'矿泉水',skuName:'矿泉水 550ml 瓶装',spec:'瓶 / 24入箱',qty:2,orig:12.00,gift:false,allocType:'ratio'},
+         {code:'SKU1',name:'矿泉水',skuName:'矿泉水 550ml 瓶装',spec:'瓶 / 24入箱',qty:1,orig:12.00,gift:true,allocType:'ratio'}];
+  ret='atomic';document.querySelectorAll('#retSeg button').forEach(b=>b.classList.toggle('active',b.dataset.v==='atomic'));
+  document.querySelector('#retSeg button[data-v="split"]').disabled=true; // 可拆退下期，恒禁用
+  autoDistribute();renderItems();
+}
+function renderItems(){
+  const tb=document.getElementById('itemBody'),ft=document.getElementById('itemFoot');const base=getBase(),bs=backstopIndex();
+  if(!items.length){tb.innerHTML='<tr><td colspan="10"><div class="items-empty">尚未添加组件，点击右上角「选择 SKU」</div></td></tr>';ft.innerHTML='';}
+  else{
+    tb.innerHTML=items.map((it,i)=>{
+      const amt=lineAmt(it),per=it.qty?amt/it.qty:0,ratio=base>0?(amt/base*100):0,isBs=(i===bs),isFixed=it.allocType==='fixed';
+      const typeCell=it.gift?'<span class="muted">赠品</span>':`<select class="atype" onchange="setAllocType(${i},this.value)"><option value="ratio" ${!isFixed?'selected':''}>分摊</option><option value="fixed" ${isFixed?'selected':''}>固定</option></select>`;
+      const priceCell=it.gift?'<span style="color:var(--warn)">RM 0.00 · 全免</span>':isBs?`${RM(per)} <span class="muted" title="自动吸收尾差">🔒兜底</span>`:`<input type="number" min="0" step="0.01" value="${per.toFixed(2)}" oninput="editAlloc(${i},this.value)">`;
+      const ratioCell=it.gift?'<span style="color:var(--warn)">0%</span>':(isBs||isFixed)?`${ratio.toFixed(1)}%`:`<input type="number" min="0" step="0.1" value="${ratio.toFixed(1)}" oninput="editRatio(${i},this.value)">`;
+      return `<tr>
+        <td><span class="code">${it.code}</span>${it.gift?' <span style="color:var(--warn);font-size:11px;">赠</span>':''}</td>
+        <td><div class="sku-name">${it.name}</div><div class="muted" style="font-size:11.5px;">${it.skuName||it.spec}</div></td>
+        <td><input type="number" min="1" value="${it.qty}" oninput="upd(${i},'qty',this.value)"></td>
+        <td class="num">${RM(it.orig)}</td>
+        <td>${typeCell}</td>
+        <td>${priceCell}</td><td class="num">${RM(amt)}</td><td>${ratioCell}</td>
+        <td><label class="switch"><input type="checkbox" ${it.gift?'checked':''} onchange="upd(${i},'gift',this.checked)"><span class="slider"></span></label></td>
+        <td><button class="btn-link danger" onclick="del(${i})">删除</button></td></tr>`;
+    }).join('');
+    const allocSum=+items.reduce((s,it)=>s+lineAmt(it),0).toFixed(2),ratioSum=base>0?+(allocSum/base*100).toFixed(1):0;
+    const neg=items.some(it=>!it.gift&&lineAmt(it)<0);
+    const okAmt=Math.abs(allocSum-base)<0.005,okRatio=Math.abs(ratioSum-100)<0.1,ok=okAmt&&okRatio&&!neg;
+    ft.innerHTML=`<tr style="font-weight:600;background:var(--surface-2);"><td colspan="6" style="text-align:right;">合计</td><td class="num">${RM(allocSum)}</td><td class="num">${ratioSum.toFixed(1)}%</td><td colspan="2"></td></tr>
+      <tr><td colspan="10" style="padding-top:8px;color:${ok?'var(--accent)':'var(--danger)'};">${ok?'✔ 校验通过：Σ(分摊售价×数量) = 基础售价 '+RM(base)+' ｜ Σ分摊比例 = 100%':(neg?'✘ 有行被挤为负数，请下调固定价或其他分摊':(!okAmt?'✘ 分摊金额合计 '+RM(allocSum)+' ≠ 基础售价 '+RM(base):'✘ 分摊比例合计 '+ratioSum.toFixed(1)+'% ≠ 100%'))}</td></tr>`;
+    document.getElementById('submitBtn').disabled=!ok;
+  }
+  document.getElementById('fCount').textContent=items.length;document.getElementById('fPrice').textContent=RM(base);
+  const parts=items.map(it=>it.code+'×'+it.qty+(it.gift?'(赠)':(it.allocType==='fixed'?'(固定)':''))).join(' · ');
+  document.getElementById('comboSummary').textContent=items.length?('配方：'+parts+'　|　固定行售价锁定、分摊行按比例分剩余、最后分摊行兜底；分摊售价(单)与比例可改且联动；双校验 Σ分摊金额=基础售价、Σ比例=100%；赠品全免'):'';
+}
+document.getElementById('cPrice').addEventListener('input',()=>{autoDistribute();renderItems();});
+function setRet(v){if(v==='split'){toast('可拆退为下期能力，本期仅整组退');return;}ret=v;document.querySelectorAll('#retSeg button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));}
+function setSt(btn){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));}
+function hasGift(){return items.some(it=>it.gift);}
+function syncGiftLock(){const sb=document.querySelector('#retSeg button[data-v="split"]');if(hasGift()){ret='atomic';document.querySelectorAll('#retSeg button').forEach(b=>b.classList.toggle('active',b.dataset.v==='atomic'));sb.disabled=true;document.getElementById('retHint').innerHTML='<span style="color:var(--warn)">已含赠品 → 强制整组退（atomic），不可改。</span>';}else{sb.disabled=true;document.getElementById('retHint').textContent='本期仅整组退：退货时整单退回；组合含赠品同样强制整组退。可拆退为下期能力。';}}
+function submitCombo(){if(document.getElementById('submitBtn').disabled)return;if(!document.getElementById('cName').value.trim()){toast('请填写组合名称');return;}toast('提交成功（占位）· 到列表点「分发」按店铺设价上架');goList();}
+
+/* 选 SKU 抽屉（复用编辑页弹层做法，这里用 prompt 简化） */
+let pendSel=new Set();
+/* ========== 选择 SKU 弹框 ========== */
+let skuSel=new Set();      // 弹框内已勾选的 SKU 编码
+let skuCatSel=new Set();   // 已选二级分类
+let skuPage=1;             // 当前页
+let skuPageSize=5;         // 每页条数
+function openSku(){
+  skuSel=new Set();skuCatSel=new Set();skuPage=1;
+  document.getElementById('skuKwName').value='';document.getElementById('skuKwSku').value='';
+  document.getElementById('skuCatPanel').classList.remove('show');
+  renderSkuCat();renderSkuPool();
+  document.getElementById('skuMask').classList.add('show');
+  document.getElementById('skuModal').classList.add('show');
+}
+function closeSku(){
+  document.getElementById('skuMask').classList.remove('show');
+  document.getElementById('skuModal').classList.remove('show');
+  document.getElementById('skuCatPanel').classList.remove('show');
+}
+function resetSkuFilter(){
+  document.getElementById('skuKwName').value='';document.getElementById('skuKwSku').value='';
+  skuCatSel=new Set();renderSkuCat();applySkuFilter();
+}
+function applySkuFilter(){skuPage=1;renderSkuPool();}
+function toggleSkuCatPanel(){document.getElementById('skuCatPanel').classList.toggle('show');}
+function renderSkuCat(){
+  const p=document.getElementById('skuCatPanel');
+  p.innerHTML=CAT_TREE.map(c=>{
+    const all=c.children.every(ch=>skuCatSel.has(ch));
+    const kids=c.children.map(ch=>`<label class="catl"><input type="checkbox" ${skuCatSel.has(ch)?'checked':''} onchange="toggleCat2('${ch}',this.checked)">${ch}</label>`).join('');
+    return `<div class="catg"><label class="catl l1"><input type="checkbox" ${all?'checked':''} onchange="toggleCat1('${c.name}',this.checked)"><b>${c.name}</b></label><div class="catkids">${kids}</div></div>`;
+  }).join('');
+  const btn=document.getElementById('skuCatBtn');
+  btn.textContent=(skuCatSel.size?('已选 '+skuCatSel.size+' 类'):'全部分类')+' ▾';
+  btn.classList.toggle('on',skuCatSel.size>0);
+}
+function toggleCat1(name,chk){const c=CAT_TREE.find(x=>x.name===name);c.children.forEach(ch=>{chk?skuCatSel.add(ch):skuCatSel.delete(ch);});renderSkuCat();applySkuFilter();}
+function toggleCat2(ch,chk){chk?skuCatSel.add(ch):skuCatSel.delete(ch);renderSkuCat();applySkuFilter();}
+function filteredPool(){
+  const kn=(document.getElementById('skuKwName').value||'').trim().toLowerCase();
+  const ks=(document.getElementById('skuKwSku').value||'').trim().toLowerCase();
+  return SKU_POOL.filter(s=>{
+    if(kn&&!((s.name+s.code).toLowerCase().includes(kn)))return false;
+    if(ks&&!((s.skuName+s.code).toLowerCase().includes(ks)))return false;
+    if(skuCatSel.size&&!skuCatSel.has(s.cat[1]))return false;
+    return true;
+  });
+}
+function pickSku(code){skuSel.has(code)?skuSel.delete(code):skuSel.add(code);renderSkuPool();}
+function renderSkuPool(){
+  const rows=filteredPool(),tb=document.getElementById('skuPoolBody');
+  const total=rows.length,pages=Math.max(1,Math.ceil(total/skuPageSize));
+  if(skuPage>pages)skuPage=pages;
+  const start=(skuPage-1)*skuPageSize,pageRows=rows.slice(start,start+skuPageSize);
+  if(!total){tb.innerHTML='<tr><td colspan="5"><div class="sku-empty">无匹配 SKU，请调整筛选条件</div></td></tr>';}
+  else{tb.innerHTML=pageRows.map(s=>{const on=skuSel.has(s.code);
+    return `<tr class="${on?'picked':''}" onclick="pickSku('${s.code}')">
+      <td><input type="checkbox" ${on?'checked':''} style="pointer-events:none"></td>
+      <td>${s.code}</td>
+      <td class="nm"><b>${s.name}</b><span class="s">${s.skuName} · ${s.spec}</span></td>
+      <td><span class="sku-cat-tag">${s.cat.join(' / ')}</span></td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums;">${RM(s.orig)}</td>
+    </tr>`;}).join('');}
+  renderSkuPager(total,pages);
+  document.getElementById('skuFootCount').textContent='已选 '+skuSel.size+' 个';
+}
+function renderSkuPager(total,pages){
+  const el=document.getElementById('skuPager');
+  if(!total){el.innerHTML='';return;}
+  const nums=[];for(let p=1;p<=pages;p++){if(p===1||p===pages||Math.abs(p-skuPage)<=1)nums.push(p);else if(nums[nums.length-1]!=='…')nums.push('…');}
+  const numHtml=nums.map(p=>p==='…'?'<span class="pdots">…</span>':`<button class="pg ${p===skuPage?'cur':''}" onclick="goSkuPage(${p})">${p}</button>`).join('');
+  el.innerHTML=`<span class="total">共 ${total} 条 · 第 ${skuPage}/${pages} 页</span>
+    <select class="psize" onchange="setSkuPageSize(this.value)">
+      ${[5,10,20].map(n=>`<option value="${n}" ${n===skuPageSize?'selected':''}>${n} 条/页</option>`).join('')}
+    </select>
+    <div class="pbtns">
+      <button class="pg" onclick="goSkuPage(${skuPage-1})" ${skuPage<=1?'disabled':''}>‹</button>
+      ${numHtml}
+      <button class="pg" onclick="goSkuPage(${skuPage+1})" ${skuPage>=pages?'disabled':''}>›</button>
+    </div>`;
+}
+function goSkuPage(p){skuPage=p;renderSkuPool();}
+function setSkuPageSize(n){skuPageSize=+n;skuPage=1;renderSkuPool();}
+function confirmSku(){
+  if(!skuSel.size){toast('请先勾选 SKU');return;}
+  let n=0;
+  skuSel.forEach(code=>{const s=SKU_POOL.find(x=>x.code===code);if(s){items.push({code:s.code,name:s.name,skuName:s.skuName,spec:s.spec,qty:1,orig:s.orig,gift:false,allocType:'ratio'});n++;}});
+  autoDistribute();renderItems();closeSku();toast('已添加 '+n+' 个 SKU');
+}
+
+/* ========== 分发弹窗 ========== */
+const BASE={price:24.00,discount:22.00,newcomer:20.00,cost:14.00};
+const RECIPE=[{code:'SKU1',name:'矿泉水 550ml',qty:3}];
+const STORES=[
+  {id:'S01',name:'吉隆坡旗舰店',wh:'Kuchai Lama 仓库',custom:false,onShelf:true,sort:13003,recommend:true,price:24.00,discount:22.00,newcomer:20.00,stock:{SKU1:120}},
+  {id:'S02',name:'槟城中心店',wh:'Penang 仓库',custom:true,onShelf:true,sort:12010,recommend:false,price:25.50,discount:23.00,newcomer:21.00,stock:{SKU1:36}},
+  {id:'S03',name:'新山店',wh:'JB 仓库',custom:false,onShelf:false,sort:11000,recommend:false,price:24.00,discount:22.00,newcomer:20.00,stock:{SKU1:2}},
+];
+function sellableOf(s){let min=Infinity;RECIPE.forEach(r=>{min=Math.min(min,Math.floor((s.stock[r.code]||0)/r.qty));});return min===Infinity?0:min;}
+function bottleneckOf(s){let min=Infinity,bn=null;RECIPE.forEach(r=>{const f=Math.floor((s.stock[r.code]||0)/r.qty);if(f<min){min=f;bn=r.code;}});return bn;}
+function priceCell(s,key,label,baseVal){const dis=!s.custom,val=s.custom?s[key]:baseVal;return `<div class="pcell"><label>${label}（当地币）</label><input type="number" step="0.01" min="0" value="${val.toFixed(2)}" ${dis?'disabled':''} oninput="setPrice('${s.id}','${key}',this.value)">${dis?'<div class="ro-hint">用基础价</div>':'<div class="ro-hint">已自定义</div>'}</div>`;}
+function storeBlock(s){
+  const sell=sellableOf(s),bn=bottleneckOf(s),out=sell===0;
+  const detail=RECIPE.map(r=>{const av=s.stock[r.code]||0,f=Math.floor(av/r.qty),isBn=(r.code===bn);return `<tr><td class="code">${r.code}</td><td>${r.name}</td><td class="num">${r.qty}</td><td class="num">${av}</td><td class="${isBn?'bottleneck':'num'}">${f} 份${isBn?' ◀ 瓶颈':''}</td></tr>`;}).join('');
+  return `<div class="store">
+    <div class="store-head">
+      <div class="store-name">${s.name} <span class="wh">· 供货仓库：${s.wh}</span></div>
+      <div class="ctrl">是否自定义价格 <label class="switch"><input type="checkbox" ${s.custom?'checked':''} onchange="toggleCustom('${s.id}',this.checked)"><span class="slider"></span></label></div>
+      <div class="ctrl">是否上架 <label class="switch ${out?'disabled':''}"><input type="checkbox" ${s.onShelf&&!out?'checked':''} ${out?'disabled':''} onchange="toggleShelf('${s.id}',this.checked)"><span class="slider"></span></label></div>
+      <div class="ctrl">排序 <input class="sortin" type="number" value="${s.sort}"></div>
+      <div class="ctrl">首页推荐 <label class="switch"><input type="checkbox" ${s.recommend?'checked':''}><span class="slider"></span></label></div>
+      <div class="ctrl">标签 <input type="text" placeholder="逗号分隔"></div>
+    </div>
+    <div class="store-body">
+      <div class="price-row">${priceCell(s,'price','售价',BASE.price)}${priceCell(s,'discount','折扣价',BASE.discount)}${priceCell(s,'newcomer','新人价',BASE.newcomer)}<div class="pcell"><label>成本价（当地币）</label><input type="number" value="${BASE.cost.toFixed(2)}" disabled><div class="ro-hint">组件成本汇总</div></div></div>
+      <div class="detail-box"><div class="t">组件明细（只读，库存取自供货仓库）</div>
+        <table class="cmp"><thead><tr><th>SKU</th><th>名称</th><th>单份数量</th><th>供货仓库可用库存</th><th>可售份数</th></tr></thead><tbody>${detail}</tbody></table>
+        <div class="sellable">本店铺可售份数：<span class="big ${out?'bad':'ok'}">${sell} 份</span>${out?'<span class="badge out">缺货 · 不可上架（上架开关已锁）</span>':'<span style="color:var(--muted)">= 瓶颈组件 '+bn+' 决定</span>'}</div>
+      </div>
+    </div></div>`;
+}
+function renderStores(){document.getElementById('stores').innerHTML=STORES.map(storeBlock).join('');}
+function findStore(id){return STORES.find(s=>s.id===id);}
+function toggleCustom(id,c){findStore(id).custom=c;renderStores();toast(c?'已开启自定义：可在基础价上调整':'已关闭：回落基础价');}
+function toggleShelf(id,c){findStore(id).onShelf=c;}
+function setPrice(id,key,v){findStore(id)[key]=Math.max(0,parseFloat(v||0));}
+function openDist(id){const r=id?DATA.find(x=>x.id===id):null;document.getElementById('distName').textContent='· '+(r?r.name:'【买1送1】矿泉水套装')+' · 按店铺设价/上架；库存来自供货仓库';renderStores();document.getElementById('distMask').classList.add('show');document.getElementById('distModal').classList.add('show');}
+function closeDist(){document.getElementById('distMask').classList.remove('show');document.getElementById('distModal').classList.remove('show');}
+
+let _t;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_t);_t=setTimeout(()=>el.classList.remove('show'),1900);}
+renderList(DATA);
+</script>
+</body>
+</html>
